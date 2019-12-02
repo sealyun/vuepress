@@ -4,7 +4,6 @@ module.exports = {
     logo: 'https://sealyun.com/img/logo.png',
     nav: [
       { text: '离线包下载', link: 'http://store.lameleg.com', target:'_self', rel:'' },
-      { text: '博客', link: 'https://sealyun.com/blog', target:'_self', rel:'' },
       { text: '常见问题', link: '/faq/', target:'_self', rel:'' },
       { text: '版本变更', link: '/changelog/', target:'_self', rel:'' },
       { text: '开源项目', link: '/github/', target:'_self' },
