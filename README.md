@@ -60,4 +60,4 @@ version|[资源包](http://store.lameleg.com)对应的版本|v1.16.0
 
 [更多详情](https://github.com/fanux/sealos)
 
-[其它版本资源名](http://store.lameleg.com)
+[其它版本资源包](http://store.lameleg.com)
