@@ -1,0 +1,22 @@
+module.exports = {
+  title: 'sealyun | kubernetes安装',
+  themeConfig: {
+    logo: 'https://sealyun.com/img/logo.png',
+    nav: [
+      { text: '离线包下载', link: 'http://store.lameleg.com', target:'_self', rel:'' },
+      { text: '博客', link: 'https://sealyun.com/blog', target:'_self', rel:'' },
+      { text: '常见问题', link: '/faq/', target:'_self', rel:'' },
+      { text: '版本变更', link: '/changelog/', target:'_self', rel:'' },
+      { text: '开源项目', link: '/github/', target:'_self' },
+      {
+        text: '友情连接',
+        items: [
+          { text: '', items: [{link: 'https://fuckcloudnative.io/#sealyun', text: "云原生实验室"}] },
+          { text: '', items: [{link: 'https://kuboard.cn/#sealyun', text: "kuboard"}] },
+          { text: '', items: [{link: 'https://www.qikqiak.com/?utm_source=sealyun.com', text: "阳明的博客"}] },
+          { text: '', items: [{link: 'https://zhangguanzhang.github.io/#sealyun', text: "张馆长的博客"}] },
+        ]
+      },
+    ]
+  }
+}
