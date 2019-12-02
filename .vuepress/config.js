@@ -1,6 +1,9 @@
 module.exports = {
   head: [
-    'script', {}, `
+    ['meta', { name: 'theme-color', content: '#007af5' }],
+    ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
+    ['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black' }],
+    ['script', {}, `
     var _hmt = _hmt || [];
     (function() {
       var hm = document.createElement("script");
@@ -8,7 +11,7 @@ module.exports = {
       var s = document.getElementsByTagName("script")[0]; 
       s.parentNode.insertBefore(hm, s);
     })();
-  `
+  `]
   ],
   title: 'sealyun | kubernetes安装',
   themeConfig: {
