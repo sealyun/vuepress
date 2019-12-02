@@ -20,6 +20,17 @@ footer: Apache Licensed | Copyright © fanux | email fhtjob@hotmail.com | QQ gro
 [![fanux/sealos - GitHub](https://gh-card.dev/repos/fanux/sealos.svg)](https://github.com/fanux/sealos)
 
 # 快速开始
+> 环境信息
+
+主机名|IP地址
+---|---
+master0|192.168.0.2 
+master1|192.168.0.3 
+master2|192.168.0.4 
+node0|192.168.0.5 
+
+服务器密码：123456
+
 ::: tip kubernetes高可用安装教程
 只需要准备好服务器，然后执行下面命令即可
 :::
@@ -30,7 +41,7 @@ wget https://github.com/fanux/sealos/releases/download/v3.0.1/sealos && \
     chmod +x sealos && mv sealos /usr/bin 
 
 # 安装一个三master的kubernetes集群
-sealos init --passwd YOUR_SERVER_PASSWD \
+sealos init --passwd 123456 \
 	--master 192.168.0.2  --master 192.168.0.3  --master 192.168.0.4  \
 	--node 192.168.0.5 \
 	--pkg-url https://sealyun.oss-cn-beijing.aliyuncs.com/37374d999dbadb788ef0461844a70151-1.16.0/kube1.16.0.tar.gz \
@@ -46,5 +57,6 @@ node|k8s node节点IP地址|192.168.0.3
 pkg-url|离线资源包地址，支持下载到本地，或者一个远程地址|/root/kube1.16.0.tar.gz
 version|[资源包](http://store.lameleg.com)对应的版本|v1.16.0
 
-
 [更多详情](https://github.com/fanux/sealos)
+
+[其它版本资源名](http://store.lameleg.com)
