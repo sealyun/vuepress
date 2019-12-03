@@ -1,3 +1,7 @@
+> join 时卡住
+
+[排查思路](https://github.com/fanux/sealos/issues/134#issuecomment-547217842)
+
 > 重启机器kubelet起不来？
 
 确保selinux swap 已经关闭。     swapoff -a&& setenforce 0&&systemctl start kubelet         执行后会拉起其他服务
