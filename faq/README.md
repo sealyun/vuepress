@@ -1,8 +1,10 @@
-> join 时卡住
+# 常见问题
+
+## join 时卡住
 
 [排查思路](https://github.com/fanux/sealos/issues/134#issuecomment-547217842)
 
-> 重启机器kubelet起不来？
+## 重启机器kubelet起不来？
 
 确保selinux swap 已经关闭。     swapoff -a&& setenforce 0&&systemctl start kubelet         执行后会拉起其他服务
 
@@ -18,7 +20,7 @@
 vim /etc/sysconfig/selinux SELINUX=enforcing 改为 SELINUX=disabled 
 ```
 
-> chrome 浏览器可能访问不了dashboard
+## chrome 浏览器可能访问不了dashboard
 
 是因为新版chrome安全检测太严格，不认自签证书，要解决可以使用火狐，或者自己买证书给dashboard配置上。      访问不了dashboard先检查pod有没有启动成功`kubectl get pod -n kube-system`，再在节点上用curl检查，如果能curl到 那就是浏览器的原因了。注意是https
 
@@ -47,15 +49,15 @@ $ kubectl create secret generic kubernetes-dashboard-certs --from-file=$HOME/cer
 4.创建新的dashboard
 $ kubectl create-f kubernetes-dashboard.yaml
 
-> 修改calico pod地址段?
+## 修改calico pod地址段?
 
 [kubeadm文档](https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/)  要改两个地方1. kubeadm配置：
 
 ```
 networking:
-  dnsDomain: <string>
-  serviceSubnet: <cidr>
-  podSubnet: <cidr>   # 这里
+  dnsDomain: <string##
+  serviceSubnet: <cidr##
+  podSubnet: <cidr##   # 这里
 ```
 2. calico yaml配置:
 
@@ -72,11 +74,11 @@ networking:
       value: "false"
 ```
 
-> kubeadm join命令找不到了？
+## kubeadm join命令找不到了？
 
 用这个 kubeadm token create --print-join-command
 
-> 需要通过外网访问APIserver?
+## 需要通过外网访问APIserver?
 
 典型场景：通过阿里云floatingIP访问APIserver，这时需要把floatingip加入到证书里面，或者如keepalived的虚拟IP， 修改conf/kubeadm.yaml 加入以下字段：
 
@@ -89,7 +91,7 @@ apiServerCertSANs:
 
 最后直接修改kubeconfig文件（~/.kube/config）里的IP即可，把这个文件拷贝到本机，就可以通过外网访问apiserver了
 
-> 获取登录token:
+## 获取登录token:
 
 admin token:
 ```
@@ -102,7 +104,7 @@ kubectl get secret $(kubectl get serviceaccount dashboard -o jsonpath="{.secrets
 
 或者使用[fist auth 模块](https://github.com/fanux/fist)
 
-> 在这一步卡死，且docker ps没有任何容器起来，但是kubelet正常 
+## 在这一步卡死，且docker ps没有任何容器起来，但是kubelet正常 
 
 ```
 [init] this might take a minute or longer if the control plane images have to be pulled 
@@ -122,13 +124,13 @@ yum makecache fast
 yum install docker-ce
 ```
 
-> NodePort无法访问：iptables -P FORWARD ACCEPT
+## NodePort无法访问：iptables -P FORWARD ACCEPT
 
-> failure loading ca certificate: the certificate is not valid yet
+## failure loading ca certificate: the certificate is not valid yet
 
 服务器时间不同步导致
 
-> coredns无法启动
+## coredns无法启动
 
 ```
 .:53
@@ -148,7 +150,7 @@ nameserver 8.8.8.8
 ```
 杀掉DNS pod即可
 
-> calico无法启动
+## calico无法启动
 
 ```
 Readiness probe failed: calico/node is not ready: felix is not ready: Get http://localhost:9099/readiness: dial tcp [::1]:9099: connect: connection refused 
@@ -171,7 +173,7 @@ calico网卡发现 conf/net/calico.yaml文件：
 nameserver 8.8.8.8
 ```
 
-> kubeadm no default route错误
+## kubeadm no default route错误
 
  It picks the interface with the default gateway and listens to that.
 所以配置好主机默认路由即可，就是default：
@@ -180,7 +182,7 @@ Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
 default         169.254.1.1     0.0.0.0         UG    0      0        0 eth1
 ```
 
-> 1.14版本join时需要增加一个--master参数
+## 1.14版本join时需要增加一个--master参数
 
 为了兼容单master与多master的情况：
 ```
@@ -189,7 +191,7 @@ kubeadm join 10.103.97.1:6443 --token 9vr73a.a8uxyaju799qwdjv \
     --discovery-token-ca-cert-hash sha256:7c2e69131a36ae2a042a339b33381c6d0d43887e2de83720eff5359e26aec866
 ```
 
-> 1.14以上版本机器重启node节点notready
+## 1.14以上版本机器重启node节点notready
 
 这与开机没有加载ipvs内核模块有关，首先请确保ipvs已经加载.
 然后确保node kubelet已经正常启动
@@ -203,7 +205,7 @@ modprobe -- ip_vs_wrr
 modprobe -- ip_vs_sh
 modprobe -- nf_conntrack_ipv4
 
-cat <<EOF >  /etc/sysctl.d/k8s.conf
+cat <<EOF ##  /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
@@ -215,7 +217,7 @@ setenforce 0
 ```
 可以直接杀lvscare容器，kubelet会自动拉起
 
-> error execution phase preflight: couldn't validate the identity of the API 
+## error execution phase preflight: couldn't validate the identity of the API 
 
 可能是token过期，需要在master上重新生成token再join:
 ```
@@ -223,7 +225,7 @@ kubeadm token create --print-join-command
 ```
 用[sealos](https://github.com/fanux/sealos)时,join别忘记加 `--master` 参数[参考readme](https://github.com/fanux/sealos)
 
-> kubelet能起来但是安装时卡住
+## kubelet能起来但是安装时卡住
 
 有位朋友centos7.3上安装master时卡住， docker 1.13.1,原因是系统兼容性问题，如果发现安装过程中kubelet已经能起来了，而容器一个没起，可能就是这个原因，
 起容器会报这个错：
@@ -235,7 +237,7 @@ kubeadm token create --print-join-command
 yum update
 ```
 
-> kubelet起不来
+## kubelet起不来
 
 在有些系统下可能会有这个问题：
 ```
@@ -247,7 +249,7 @@ Executable path is not absolute: sh /usr/bin/kubelet-pre-start.sh
 修改 `kube/conf/kubelet.service`
 把 `ExecStartPre=sh` 改成 `ExecStartPre=/bin/bash`
 
-> calico无法启动
+## calico无法启动
 
 ```
 [root@k8s03 ~]# kubectl logs calico-node-v4s8w -n kube-system
@@ -258,11 +260,11 @@ Unable to update cni config: No networks found in /etc/cni/net.d
 ```
 这是由于init container初始化失败， 把正常借点的/etc/cni拷贝到不正常的节点即可.
 
-> prometheus pod都正常就是没监控数据
+## prometheus pod都正常就是没监控数据
 
 可能是服务器时间没同步，同步下时间杀pod即可
 
-> ssh执行失败,no supported methods remain
+## ssh执行失败,no supported methods remain
 
 ```
 Error create ssh session failed ssh: handshake failed: ssh: unable to authenticate, attempted methods [none password], no supported methods remain
@@ -270,7 +272,7 @@ Error create ssh session failed ssh: handshake failed: ssh: unable to authentica
 
 原因找到，master与node机器密码必须一致，如果使用--passwd参数的话，密码不一样请使用免密钥，github.com/fanux/sealos/README.md 上有详细说明
 
-> ubuntu kubelet启动不了
+## ubuntu kubelet启动不了
 
 ```
 /usr/bin/kubelet-pre-start.sh: 行 17: setenforce: 未找到命   

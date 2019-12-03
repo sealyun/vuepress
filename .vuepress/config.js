@@ -15,7 +15,6 @@ module.exports = {
   ],
   title: 'sealyun | kubernetes安装',
   themeConfig: {
-    sidebar: require('./blog-sidebar'),
     logo: 'https://sealyun.com/img/logo.png',
     nav: [
       { text: '离线包下载', link: 'http://store.lameleg.com', target:'_self', rel:'' },
@@ -33,22 +32,4 @@ module.exports = {
       },
     ]
   },
-    plugins: [
-    ['autobar', {setHomepage : 'hide',navPrefix : "blog"}],
-    [
-      '@vuepress/blog',
-      {
-        directories: [
-          {
-            // Unique ID of current classification
-            id: 'post',
-            // Target directory
-            dirname: '/blog/',
-            // Path of the `entry page` (or `list page`)
-            path: '/blogs/',
-          },
-        ],
-      },
-    ],
-  ],
 }
