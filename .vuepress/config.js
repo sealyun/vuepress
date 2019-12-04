@@ -21,6 +21,7 @@ module.exports = {
       { text: '常见问题', link: '/faq/', target:'_self', rel:'' },
       { text: '版本变更', link: '/changelog/', target:'_self', rel:'' },
       { text: '开源项目', link: '/github/', target:'_self' },
+      { text: '联系方式', link: '/contact/', target:'_self' },
       {
         text: '友情连接',
         items: [
