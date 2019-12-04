@@ -12,7 +12,7 @@ features:
   details: 99年证书，再也不用担心生产集群证书过期，ipvs负载多master可用性与稳定性更高，我们有上千用户在生产环境中使用sealos, 我们自身也有超过上千台服务器生产环境中使用sealos
 - title: 服务至上
   details: 您只需要69元年费会员就可获得跪舔式售后服务，任何安装不成功都可远程协助，即便是用的免费版本也可获得群内实时反馈问题服务,特殊情况下客服在撸代码或在和煞笔领导吵架时不能及时回复谅解
-footer: Apache Licensed | Copyright © 皖ICP备14017277号-2 fanux | email fhtjob@hotmail.com | QQ group  98488045 | wechat sealnux
+footer: Apache Licensed | Copyright © 皖ICP备14017277号-2 | wechat sealnux
 ---
 
 # 项目地址
