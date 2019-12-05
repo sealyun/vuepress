@@ -1,3 +1,6 @@
+const getConfig = require("vuepress-bar");
+const barConfig = getConfig('./',["/blog/","/faq/"],{navPrefix:"blog"})
+
 module.exports = {
   head: [
     ['meta', { name: 'theme-color', content: '#007af5' }],
@@ -16,6 +19,7 @@ module.exports = {
   title: 'sealyun | kubernetes安装',
   themeConfig: {
     logo: 'https://sealyun.com/img/logo.png',
+    sidebar: barConfig.sidebar,
     nav: [
       { text: '离线包下载', link: 'http://store.lameleg.com', target:'_self', rel:'' },
       { text: '常见问题', link: '/faq/', target:'_self', rel:'' },

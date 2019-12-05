@@ -17,7 +17,7 @@ module.exports = {
       ]
     }, 
   ],
-  '/faq/': [
+  '/docs/': [
     {
       title: '简介',
       collapsable: false,
