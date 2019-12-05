@@ -8,7 +8,7 @@
 
 ## 安装教程
 多master HA:
-```
+```sh
 sealos init --master 192.168.0.2 \
     --master 192.168.0.3 \
     --master 192.168.0.4 \
@@ -20,7 +20,7 @@ sealos init --master 192.168.0.2 \
 ```
 
 或者单master多node:
-```
+```sh
 sealos init --master 192.168.0.2 \
     --node 192.168.0.5 \
     --user root \
@@ -30,7 +30,7 @@ sealos init --master 192.168.0.2 \
 ```
 
 使用免密钥或者密钥对：
-```
+```sh
 sealos init --master 172.16.198.83 \
     --node 172.16.198.84 \
     --pkg-url https://YOUR_HTTP_SERVER/kube1.15.0.tar.gz \
@@ -39,7 +39,7 @@ sealos init --master 172.16.198.83 \
 ```
 
 自定义ssh端口号,如2022：
-```
+```sh
 sealos init --master 172.16.198.83:2022 \
     --pkg-url https://YOUR_HTTP_SERVER/kube1.15.0.tar.gz \
     --pk /root/kubernetes.pem \
@@ -63,7 +63,7 @@ sealos init --master 172.16.198.83:2022 \
 ```
 
 检查安装是否正常:
-```
+```sh
 [root@iZj6cdqfqw4o4o9tc0q44rZ ~]# kubectl get node
 NAME                      STATUS   ROLES    AGE     VERSION
 izj6cdqfqw4o4o9tc0q44rz   Ready    master   2m25s   v1.14.1
@@ -99,7 +99,7 @@ kube-system   kube-sealyun-lvscare-izj6cdqfqw4o4o9tc0q44uz      1/1     Running 
 ```
 
 ## 清理
-```
+```sh
 sealos clean \
     --master 192.168.0.2 \
     --master 192.168.0.3 \
@@ -117,7 +117,7 @@ kubeadm token create --print-join-command
 ```
 
 可以使用super kubeadm, 但是join时需要增加一个`--master` 参数:
-```
+```sh
 cd kube/shell && init.sh
 echo "10.103.97.2 apiserver.cluster.local" >> /etc/hosts   # using vip
 kubeadm join 10.103.97.2:6443 --token 9vr73a.a8uxyaju799qwdjv \
@@ -128,7 +128,7 @@ kubeadm join 10.103.97.2:6443 --token 9vr73a.a8uxyaju799qwdjv \
 ```
 
 也可以用sealos join命令：
-```
+```sh
 sealos join 
     --master 192.168.0.2 \
     --master 192.168.0.3 \
@@ -144,7 +144,7 @@ sealos join
 增加master节点稍微麻烦一点, 如新加一个master 10.103.97.102, 10.103.97.100是master0：
 
 master2 10.103.97.102 上
-```
+```sh
 echo "10.103.97.100 apiserver.cluster.local" >> /etc/hosts
 kubeadm join 10.103.97.100:6443 --token 9vr73a.a8uxyaju799qwdjv \
     --discovery-token-ca-cert-hash sha256:7c2e69131a36ae2a042a339b33381c6d0d43887e2de83720eff5359e26aec866 \
@@ -155,7 +155,7 @@ sed "s/10.103.97.100/10.103.97.101/g" -i /etc/hosts
 ```
 这时新的master便加进去了，但是node的本地负载也需要加一下这个master,所有节点修改一下lvscare配置即可在node /etc/kubernetes/manifests目录下。
 
-```
+```sh
 vim  /etc/kubernetes/manifests/kube-sealyun-lvscare-xxx
 增加 --rs 10.103.97.102:6443
 ```
@@ -165,11 +165,11 @@ ipvsadm -Ln 就可以在node上看到新的master已经代理上了
 比如我们需要在证书里加入 `sealyun.com`:
 
 先获取配置文件模板：
-```
+```sh
 sealos config -t kubeadm >>  kubeadm-config.yaml.tmpl
 ```
 修改`kubeadm-config.yaml.tmpl`,文件即可， 编辑增加 `sealyun.com`, 注意其它部分不用动，sealos会自动填充模板里面的内容:
-```
+```yaml
 apiVersion: kubeadm.k8s.io/v1beta1
 kind: ClusterConfiguration
 kubernetesVersion: {{.Version}}
@@ -195,7 +195,7 @@ ipvs:
 ```
 
 使用 --kubeadm-config 指定配置文件模板即可:
-```
+```sh
 sealos init --kubeadm-config kubeadm-config.yaml.tmpl \
     --master 192.168.0.2 \
     --master 192.168.0.3 \
