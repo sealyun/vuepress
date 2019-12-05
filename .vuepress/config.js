@@ -1,5 +1,5 @@
 const getConfig = require("vuepress-bar");
-const barConfig = getConfig('./',["/blog/","/faq/"],{navPrefix:"blog"})
+const barConfig = getConfig('./',["/blog/","/faq/","/docs/"],{navPrefix:"blog"})
 
 module.exports = {
   head: [
@@ -21,6 +21,7 @@ module.exports = {
     logo: 'https://sealyun.com/img/logo.png',
     sidebar: barConfig.sidebar,
     nav: [
+      { text: '使用文档', link: '/docs/', target:'_self', rel:'' },
       { text: '离线包下载', link: 'http://store.lameleg.com', target:'_self', rel:'' },
       { text: '常见问题', link: '/faq/', target:'_self', rel:'' },
       { text: '版本变更', link: '/changelog/', target:'_self', rel:'' },

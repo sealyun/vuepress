@@ -4,7 +4,7 @@ home: true
 heroText: sealyun
 tagline: 专注于kubernetes安装
 actionText: 安装文档 →
-actionLink: https://github.com/fanux/sealos/blob/master/README.md
+actionLink: /docs/
 features:
 - title: 大道至简
   details: 一个二进制工具加一个资源包，不依赖haproxy keepalived ansible等重量级工具，一条命令就可实现kubernetes高可用集群构建，无论是单节点还是集群，单master还是多master，生产还是测试都能很好支持！简单不意味着阉割功能，照样能全量支持kubeadm所有配置。
