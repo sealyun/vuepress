@@ -16,6 +16,11 @@ APP名|安装示例
 [prometheus](https://github.com/sealstore/prometheus) | sealos install --pkg-url https://github.com/sealstore/prometheus/releases/download/v0.31.1/prometheus.tar
 [ingress](https://github.com/sealstore/ingress) | sealos install --pkg-url https://github.com/sealstore/ingress/releases/download/v0.15.2/contour.tar
 
+## dashboard访问
+使用上述命令安装完dashboard后日志中会输出token，登录页面时需要使用.
+
+https://你的master地址:32000 chrome访问不了就用火狐
+
 ## APP离线包原理
 ```$xslt
 tar cvf dashboard.tar config dashboard.tar.gz
