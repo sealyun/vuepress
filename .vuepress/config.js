@@ -17,6 +17,7 @@ module.exports = {
   `]
   ],
   title: 'sealyun | kubernetes安装',
+  plugins: [['seo',{siteTitle: (_,$site) => "sealyun 专注于kubernetes安装", title: $page => "sealyun kubernetes安装"}]],
   themeConfig: {
     logo: 'https://sealyun.com/img/logo.png',
     sidebar: barConfig.sidebar,
