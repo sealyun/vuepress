@@ -21,6 +21,13 @@ APP名|安装示例
 
 https://你的master地址:32000 chrome访问不了就用火狐
 
+或者使用此命令获取token
+```sh
+kubectl get secret -nkubernetes-dashboard \
+    $(kubectl get secret -n kubernetes-dashboard|grep dashboard-token |awk '{print $1}') \
+    -o jsonpath='{.data.token}'  | base64 --decode
+```
+
 ## APP离线包原理
 ```$xslt
 tar cvf dashboard.tar config dashboard.tar.gz
