@@ -66,8 +66,8 @@ DELETE | 如删除yaml | kubectl delete -f . | x |✓
 sealos install --pkg-url dashboard.tar --label role=master --cmd "APPLY kubectl apply -k manifests" --cmd "LOAD docker load -i images.tar"
 ```
 * --pkg 支持本地与http
-* --label 过滤出k8s集群中指定节点
-* --cmd 会覆盖config中的指令
+* --label 过滤出k8s集群中指定节点 [开发中]
+* --cmd 会覆盖config中的指令      [开发中]
 
 或者使用kustomize替换包内镜像版本
 ```
