@@ -46,7 +46,7 @@ flagSet.StringSliceVar(
 ```
 这样就可以拿到master地址列表去做ipvs了
 
-如果不是控制节点切不是单master，那么就创建一条ipvs规则,控制节点上不需要创建，连自己的apiserver即可：
+如果不是控制节点且不是单master，那么就创建一条ipvs规则,控制节点上不需要创建，连自己的apiserver即可：
 ```go
 if data.cfg.ControlPlane == nil {
     fmt.Println("This is not a control plan")
