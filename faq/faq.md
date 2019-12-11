@@ -1,5 +1,8 @@
 # 问题列表
 
+## vagrant中多网卡部署不了join时卡住
+是因为默认路由不对，[详细请查看](https://github.com/fanux/sealos/issues/134#issuecomment-564454526)
+
 ## join 时卡住
 
 [排查思路](https://github.com/fanux/sealos/issues/134#issuecomment-547217842)
