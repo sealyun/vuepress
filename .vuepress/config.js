@@ -28,6 +28,7 @@ module.exports = {
       { text: '版本变更', link: '/changelog/', target:'_self', rel:'' },
       { text: '开源项目', link: '/github/', target:'_self' },
       { text: '联系方式', link: '/contact/', target:'_self' },
+      { text: '论坛', link: 'http://store.lameleg.com:8536/'},
       {
         text: '友情连接',
         items: [
