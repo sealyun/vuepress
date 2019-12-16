@@ -177,11 +177,13 @@ master2 10.103.97.102 上
 echo "10.103.97.100 apiserver.cluster.local" >> /etc/hosts
 kubeadm join 10.103.97.100:6443 --token o1mq4r.b9ff55967s737jxm  \
     --discovery-token-ca-cert-hash sha256:5c1a852e612cbaf2921364095e06b3d9e7f52ca67b7397abfa48cd0de7eb4ed1  \
-    --experimental-control-plane \
+    --control-plane \
     --certificate-key 5e091dae31844423d69d585a6f3898356b8d9ff1dfd727c2ffee7244463d0c2d
 
 sed "s/10.103.97.100/10.103.97.101/g" -i /etc/hosts
 ```
+注意：1.15以下用--experimental-control-plane 代替--control-plane
+
 这时新的master便加进去了，但是node的本地负载也需要加一下这个master,所有节点修改一下lvscare配置即可在node /etc/kubernetes/manifests目录下。
 
 ```sh
