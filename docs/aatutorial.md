@@ -151,7 +151,7 @@ sealos join
 获取join master命令：
 
 先用下面命令拿到key，这个安装时日志也会输出，忘记保存就用下面命令获取
-```
+```sh
 kubeadm init phase upload-certs --upload-certs
 W1216 09:06:54.668668   14269 validation.go:28] Cannot validate kube-proxy config - no validator is available
 W1216 09:06:54.668720   14269 validation.go:28] Cannot validate kubelet config - no validator is available
@@ -161,7 +161,7 @@ W1216 09:06:54.668720   14269 validation.go:28] Cannot validate kubelet config -
 ```
 
 然后就下面命令获取join命令：
-```
+```sh
 kubeadm token create --certificate-key 5e091dae31844423d69d585a6f3898356b8d9ff1dfd727c2ffee7244463d0c2d --print-join-command
 W1216 09:08:10.104418   16674 validation.go:28] Cannot validate kube-proxy config - no validator is available
 W1216 09:08:10.104457   16674 validation.go:28] Cannot validate kubelet config - no validator is available
