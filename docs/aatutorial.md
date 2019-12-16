@@ -5,6 +5,7 @@
 * 下载[最新版本sealos](https://github.com/fanux/sealos/releases).
 * 务必同步服务器时间
 * 主机名不可重复
+* master节点CPU必须2C以上
 
 ## 安装教程
 多master HA:
