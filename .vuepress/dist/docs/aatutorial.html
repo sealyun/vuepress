@@ -18,7 +18,7 @@
     })();
   </script>
     <meta property="og:site_name" content="sealyun 专注于kubernetes安装"><meta property="og:title" content="sealyun kubernetes安装"><meta property="og:type" content="website"><meta property="og:url" content="/docs/aatutorial.html"><meta name="twitter:title" content="sealyun kubernetes安装"><meta name="twitter:url" content="/docs/aatutorial.html"><meta name="twitter:card" content="summary_large_image">
-    <link rel="preload" href="/assets/css/0.styles.943dcab2.css" as="style"><link rel="preload" href="/assets/js/app.d08a4031.js" as="script"><link rel="preload" href="/assets/js/2.bc760f0a.js" as="script"><link rel="preload" href="/assets/js/14.db006dd0.js" as="script"><link rel="prefetch" href="/assets/js/10.f32c1b3a.js"><link rel="prefetch" href="/assets/js/11.a77f8aa4.js"><link rel="prefetch" href="/assets/js/12.1db4b221.js"><link rel="prefetch" href="/assets/js/13.f16bc5f5.js"><link rel="prefetch" href="/assets/js/15.3986f3c9.js"><link rel="prefetch" href="/assets/js/16.58d02616.js"><link rel="prefetch" href="/assets/js/17.aff7dc42.js"><link rel="prefetch" href="/assets/js/18.9cd58ace.js"><link rel="prefetch" href="/assets/js/19.24640295.js"><link rel="prefetch" href="/assets/js/20.9160f02f.js"><link rel="prefetch" href="/assets/js/21.7ddd673e.js"><link rel="prefetch" href="/assets/js/22.f5a8315d.js"><link rel="prefetch" href="/assets/js/3.fc1c4673.js"><link rel="prefetch" href="/assets/js/4.1ba98b6c.js"><link rel="prefetch" href="/assets/js/5.c39869f0.js"><link rel="prefetch" href="/assets/js/6.47bb4ed2.js"><link rel="prefetch" href="/assets/js/7.28ae5784.js"><link rel="prefetch" href="/assets/js/8.2c889c5b.js"><link rel="prefetch" href="/assets/js/9.174b7be3.js">
+    <link rel="preload" href="/assets/css/0.styles.943dcab2.css" as="style"><link rel="preload" href="/assets/js/app.a12382a0.js" as="script"><link rel="preload" href="/assets/js/2.bc760f0a.js" as="script"><link rel="preload" href="/assets/js/14.6bd06f8e.js" as="script"><link rel="prefetch" href="/assets/js/10.9fd904f3.js"><link rel="prefetch" href="/assets/js/11.226fcd9c.js"><link rel="prefetch" href="/assets/js/12.e3e6fac3.js"><link rel="prefetch" href="/assets/js/13.f16bc5f5.js"><link rel="prefetch" href="/assets/js/15.e4cd5f26.js"><link rel="prefetch" href="/assets/js/16.059fbfda.js"><link rel="prefetch" href="/assets/js/17.937d7242.js"><link rel="prefetch" href="/assets/js/18.9cd58ace.js"><link rel="prefetch" href="/assets/js/19.ba80802f.js"><link rel="prefetch" href="/assets/js/20.9160f02f.js"><link rel="prefetch" href="/assets/js/21.7ddd673e.js"><link rel="prefetch" href="/assets/js/22.f5a8315d.js"><link rel="prefetch" href="/assets/js/3.fc1c4673.js"><link rel="prefetch" href="/assets/js/4.1ba98b6c.js"><link rel="prefetch" href="/assets/js/5.65dbb7ce.js"><link rel="prefetch" href="/assets/js/6.a2bc888a.js"><link rel="prefetch" href="/assets/js/7.5df889f4.js"><link rel="prefetch" href="/assets/js/8.82c23f91.js"><link rel="prefetch" href="/assets/js/9.78620fae.js">
     <link rel="stylesheet" href="/assets/css/0.styles.943dcab2.css">
   </head>
   <body>
@@ -132,11 +132,21 @@ kubeadm <span class="token function">join</span> <span class="token number">10.1
     --user root <span class="token punctuation">\</span>             
     --passwd your-server-password <span class="token punctuation">\</span>
     --pkg-url /root/kube1.15.0.tar.gz 
-</code></pre></div><h2 id="增加master节点"><a href="#增加master节点" class="header-anchor">#</a> 增加master节点</h2> <p>增加master节点稍微麻烦一点, 如新加一个master 10.103.97.102, 10.103.97.100是master0：</p> <p>master2 10.103.97.102 上</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token builtin class-name">echo</span> <span class="token string">&quot;10.103.97.100 apiserver.cluster.local&quot;</span> <span class="token operator">&gt;&gt;</span> /etc/hosts
-kubeadm <span class="token function">join</span> <span class="token number">10.103</span>.97.100:6443 --token 9vr73a.a8uxyaju799qwdjv <span class="token punctuation">\</span>
-    --discovery-token-ca-cert-hash sha256:7c2e69131a36ae2a042a339b33381c6d0d43887e2de83720eff5359e26aec866 <span class="token punctuation">\</span>
+</code></pre></div><h2 id="增加master节点"><a href="#增加master节点" class="header-anchor">#</a> 增加master节点</h2> <p>获取join master命令：</p> <p>先用下面命令拿到key，这个安装时日志也会输出，忘记保存就用下面命令获取</p> <div class="language- extra-class"><pre class="language-text"><code>kubeadm init phase upload-certs --upload-certs
+W1216 09:06:54.668668   14269 validation.go:28] Cannot validate kube-proxy config - no validator is available
+W1216 09:06:54.668720   14269 validation.go:28] Cannot validate kubelet config - no validator is available
+[upload-certs] Storing the certificates in Secret &quot;kubeadm-certs&quot; in the &quot;kube-system&quot; Namespace
+[upload-certs] Using certificate key:
+5e091dae31844423d69d585a6f3898356b8d9ff1dfd727c2ffee7244463d0c2d
+</code></pre></div><p>然后就下面命令获取join命令：</p> <div class="language- extra-class"><pre class="language-text"><code>kubeadm token create --certificate-key 5e091dae31844423d69d585a6f3898356b8d9ff1dfd727c2ffee7244463d0c2d --print-join-command
+W1216 09:08:10.104418   16674 validation.go:28] Cannot validate kube-proxy config - no validator is available
+W1216 09:08:10.104457   16674 validation.go:28] Cannot validate kubelet config - no validator is available
+kubeadm join apiserver.cluster.local:6443 --token o1mq4r.b9ff55967s737jxm     --discovery-token-ca-cert-hash sha256:5c1a852e612cbaf2921364095e06b3d9e7f52ca67b7397abfa48cd0de7eb4ed1     --control-plane --certificate-key 5e091dae31844423d69d585a6f3898356b8d9ff1dfd727c2ffee7244463d0c2d
+</code></pre></div><p>不要直接执行输出的命令，请往下看：</p> <p>增加master节点稍微麻烦一点, 如新加一个master 10.103.97.102, 10.103.97.100是master0：</p> <p>master2 10.103.97.102 上</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token builtin class-name">echo</span> <span class="token string">&quot;10.103.97.100 apiserver.cluster.local&quot;</span> <span class="token operator">&gt;&gt;</span> /etc/hosts
+kubeadm <span class="token function">join</span> <span class="token number">10.103</span>.97.100:6443 --token o1mq4r.b9ff55967s737jxm  <span class="token punctuation">\</span>
+    --discovery-token-ca-cert-hash sha256:5c1a852e612cbaf2921364095e06b3d9e7f52ca67b7397abfa48cd0de7eb4ed1  <span class="token punctuation">\</span>
     --experimental-control-plane <span class="token punctuation">\</span>
-    --certificate-key f8902e114ef118304e561c3ecd4d0b543adc226b7a07f675f56564185ffe0c07  
+    --certificate-key 5e091dae31844423d69d585a6f3898356b8d9ff1dfd727c2ffee7244463d0c2d
 
 <span class="token function">sed</span> <span class="token string">&quot;s/10.103.97.100/10.103.97.101/g&quot;</span> -i /etc/hosts
 </code></pre></div><p>这时新的master便加进去了，但是node的本地负载也需要加一下这个master,所有节点修改一下lvscare配置即可在node /etc/kubernetes/manifests目录下。</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token function">vim</span>  /etc/kubernetes/manifests/kube-sealyun-lvscare-xxx
@@ -178,6 +188,6 @@ kubeadm <span class="token function">join</span> <span class="token number">10.1
       <a href="/docs/" class="prev router-link-active">快速开始</a></span> <span class="next"><a href="/docs/app.html">应用安装</a>
       →
     </span></p></div> </main></div><div class="global-ui"></div></div>
-    <script src="/assets/js/app.d08a4031.js" defer></script><script src="/assets/js/2.bc760f0a.js" defer></script><script src="/assets/js/14.db006dd0.js" defer></script>
+    <script src="/assets/js/app.a12382a0.js" defer></script><script src="/assets/js/2.bc760f0a.js" defer></script><script src="/assets/js/14.6bd06f8e.js" defer></script>
   </body>
 </html>

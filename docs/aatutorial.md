@@ -148,15 +148,36 @@ sealos join
 ```
 
 ## 增加master节点
+获取join master命令：
+
+先用下面命令拿到key，这个安装时日志也会输出，忘记保存就用下面命令获取
+```
+kubeadm init phase upload-certs --upload-certs
+W1216 09:06:54.668668   14269 validation.go:28] Cannot validate kube-proxy config - no validator is available
+W1216 09:06:54.668720   14269 validation.go:28] Cannot validate kubelet config - no validator is available
+[upload-certs] Storing the certificates in Secret "kubeadm-certs" in the "kube-system" Namespace
+[upload-certs] Using certificate key:
+5e091dae31844423d69d585a6f3898356b8d9ff1dfd727c2ffee7244463d0c2d
+```
+
+然后就下面命令获取join命令：
+```
+kubeadm token create --certificate-key 5e091dae31844423d69d585a6f3898356b8d9ff1dfd727c2ffee7244463d0c2d --print-join-command
+W1216 09:08:10.104418   16674 validation.go:28] Cannot validate kube-proxy config - no validator is available
+W1216 09:08:10.104457   16674 validation.go:28] Cannot validate kubelet config - no validator is available
+kubeadm join apiserver.cluster.local:6443 --token o1mq4r.b9ff55967s737jxm     --discovery-token-ca-cert-hash sha256:5c1a852e612cbaf2921364095e06b3d9e7f52ca67b7397abfa48cd0de7eb4ed1     --control-plane --certificate-key 5e091dae31844423d69d585a6f3898356b8d9ff1dfd727c2ffee7244463d0c2d
+```
+不要直接执行输出的命令，请往下看：
+
 增加master节点稍微麻烦一点, 如新加一个master 10.103.97.102, 10.103.97.100是master0：
 
 master2 10.103.97.102 上
 ```sh
 echo "10.103.97.100 apiserver.cluster.local" >> /etc/hosts
-kubeadm join 10.103.97.100:6443 --token 9vr73a.a8uxyaju799qwdjv \
-    --discovery-token-ca-cert-hash sha256:7c2e69131a36ae2a042a339b33381c6d0d43887e2de83720eff5359e26aec866 \
+kubeadm join 10.103.97.100:6443 --token o1mq4r.b9ff55967s737jxm  \
+    --discovery-token-ca-cert-hash sha256:5c1a852e612cbaf2921364095e06b3d9e7f52ca67b7397abfa48cd0de7eb4ed1  \
     --experimental-control-plane \
-    --certificate-key f8902e114ef118304e561c3ecd4d0b543adc226b7a07f675f56564185ffe0c07  
+    --certificate-key 5e091dae31844423d69d585a6f3898356b8d9ff1dfd727c2ffee7244463d0c2d
 
 sed "s/10.103.97.100/10.103.97.101/g" -i /etc/hosts
 ```
