@@ -23,6 +23,7 @@ module.exports = {
     sidebar: barConfig.sidebar,
     nav: [
       { text: '使用文档', link: '/docs/', target:'_self', rel:'' },
+      { text: '博客', link: 'https://blog.sealyun.com' },
       { text: '离线包下载', link: 'http://store.lameleg.com', target:'_self', rel:'' },
       { text: '常见问题', link: '/faq/', target:'_self', rel:'' },
       { text: '版本变更', link: '/changelog/', target:'_self', rel:'' },
