@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>runc 架构 | sealyun | kubernetes安装</title>
+    <meta name="description" content="">
+    <meta name="theme-color" content="#007af5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2803648cc5852dd3e9e46bbd0bf63366";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+    <meta property="og:site_name" content="sealyun 专注于kubernetes安装"><meta property="og:title" content="sealyun kubernetes安装"><meta property="og:type" content="article"><meta property="og:url" content="/blog/runc.html"><meta name="twitter:title" content="sealyun kubernetes安装"><meta name="twitter:url" content="/blog/runc.html"><meta name="twitter:card" content="summary_large_image">
+    <link rel="preload" href="/assets/css/0.styles.943dcab2.css" as="style"><link rel="preload" href="/assets/js/app.23d3ef84.js" as="script"><link rel="preload" href="/assets/js/2.bc760f0a.js" as="script"><link rel="preload" href="/assets/js/51.30d345fb.js" as="script"><link rel="prefetch" href="/assets/js/10.e86bcb27.js"><link rel="prefetch" href="/assets/js/11.bb9904fc.js"><link rel="prefetch" href="/assets/js/12.ec81ebde.js"><link rel="prefetch" href="/assets/js/13.c482403d.js"><link rel="prefetch" href="/assets/js/14.9bd9e6fd.js"><link rel="prefetch" href="/assets/js/15.bdc6bd19.js"><link rel="prefetch" href="/assets/js/16.9e60a0b4.js"><link rel="prefetch" href="/assets/js/17.5df0c46d.js"><link rel="prefetch" href="/assets/js/18.85294fd2.js"><link rel="prefetch" href="/assets/js/19.f2879a42.js"><link rel="prefetch" href="/assets/js/20.6012d02a.js"><link rel="prefetch" href="/assets/js/21.81b7e1ca.js"><link rel="prefetch" href="/assets/js/22.1c2e71b0.js"><link rel="prefetch" href="/assets/js/23.0748294e.js"><link rel="prefetch" href="/assets/js/24.d63f1e4c.js"><link rel="prefetch" href="/assets/js/25.9dbfb44a.js"><link rel="prefetch" href="/assets/js/26.bfc3e626.js"><link rel="prefetch" href="/assets/js/27.ce51e7d7.js"><link rel="prefetch" href="/assets/js/28.ebb9caaf.js"><link rel="prefetch" href="/assets/js/29.8584027e.js"><link rel="prefetch" href="/assets/js/3.b7a496ec.js"><link rel="prefetch" href="/assets/js/30.158ceb97.js"><link rel="prefetch" href="/assets/js/31.f1024a9d.js"><link rel="prefetch" href="/assets/js/32.44cadfdb.js"><link rel="prefetch" href="/assets/js/33.af1c5cdb.js"><link rel="prefetch" href="/assets/js/34.a9e8095a.js"><link rel="prefetch" href="/assets/js/35.77ea75db.js"><link rel="prefetch" href="/assets/js/36.44da8d60.js"><link rel="prefetch" href="/assets/js/37.5e09e3fe.js"><link rel="prefetch" href="/assets/js/38.02e2aa10.js"><link rel="prefetch" href="/assets/js/39.b4e7f5f0.js"><link rel="prefetch" href="/assets/js/4.1ba98b6c.js"><link rel="prefetch" href="/assets/js/40.c879980c.js"><link rel="prefetch" href="/assets/js/41.0d571f5c.js"><link rel="prefetch" href="/assets/js/42.a7d12c13.js"><link rel="prefetch" href="/assets/js/43.60b5940b.js"><link rel="prefetch" href="/assets/js/44.b5a570c8.js"><link rel="prefetch" href="/assets/js/45.3df35b92.js"><link rel="prefetch" href="/assets/js/46.b47c3836.js"><link rel="prefetch" href="/assets/js/47.fbef4ef0.js"><link rel="prefetch" href="/assets/js/48.ae14afb1.js"><link rel="prefetch" href="/assets/js/49.4e6f30d4.js"><link rel="prefetch" href="/assets/js/5.c39869f0.js"><link rel="prefetch" href="/assets/js/50.c199fe15.js"><link rel="prefetch" href="/assets/js/52.5037db07.js"><link rel="prefetch" href="/assets/js/53.bb29d2bc.js"><link rel="prefetch" href="/assets/js/54.9e4ffa33.js"><link rel="prefetch" href="/assets/js/55.6d311bce.js"><link rel="prefetch" href="/assets/js/56.e6149a7c.js"><link rel="prefetch" href="/assets/js/57.57e2943c.js"><link rel="prefetch" href="/assets/js/58.61ea6212.js"><link rel="prefetch" href="/assets/js/59.95355587.js"><link rel="prefetch" href="/assets/js/6.0032a2d9.js"><link rel="prefetch" href="/assets/js/60.761d9050.js"><link rel="prefetch" href="/assets/js/61.b42700ba.js"><link rel="prefetch" href="/assets/js/62.6b9d864d.js"><link rel="prefetch" href="/assets/js/63.4aff7db2.js"><link rel="prefetch" href="/assets/js/64.34c83536.js"><link rel="prefetch" href="/assets/js/65.a7b0a430.js"><link rel="prefetch" href="/assets/js/66.8ee74e7e.js"><link rel="prefetch" href="/assets/js/67.3009b3ec.js"><link rel="prefetch" href="/assets/js/68.8bb3e997.js"><link rel="prefetch" href="/assets/js/7.5df889f4.js"><link rel="prefetch" href="/assets/js/8.c053b523.js"><link rel="prefetch" href="/assets/js/9.7948f30b.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.943dcab2.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><img src="https://sealyun.com/img/logo.png" alt="sealyun | kubernetes安装" class="logo"> <span class="site-name can-hide">sealyun | kubernetes安装</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav>  <ul class="sidebar-links"><li><a href="/blog/" class="sidebar-link">博客列表</a></li><li><a href="/blog/CI-CD.html" class="sidebar-link">CI 概述</a></li><li><a href="/blog/calico.html" class="sidebar-link">calico 网络原理</a></li><li><a href="/blog/calico-architecture.html" class="sidebar-link">calico架构</a></li><li><a href="/blog/calico-network-policy.html" class="sidebar-link">calico网络策略</a></li><li><a href="/blog/client-go-crd.html" class="sidebar-link">使用client-go包访问Kubernetes CRD</a></li><li><a href="/blog/cni.html" class="sidebar-link">CNI详细介绍</a></li><li><a href="/blog/container-stop-timeout.html" class="sidebar-link">容器信号使用</a></li><li><a href="/blog/containerd.html" class="sidebar-link">containerd与kubernetes集成</a></li><li><a href="/blog/crd.html" class="sidebar-link">使用kubebuilder开发CRD</a></li><li><a href="/blog/csi.html" class="sidebar-link">CSI详解</a></li><li><a href="/blog/dev-k8s-workflow.html" class="sidebar-link">kubernetes开发流程</a></li><li><a href="/blog/docker-architech.html" class="sidebar-link">Docker架构分析</a></li><li><a href="/blog/docker-dev.html" class="sidebar-link">docker开发流程</a></li><li><a href="/blog/docker-network.html" class="sidebar-link">容器网络概述</a></li><li><a href="/blog/docker-oerlay2.html" class="sidebar-link">关于overlay2存储驱动的磁盘配额问题</a></li><li><a href="/blog/docker-ovs.html" class="sidebar-link">ovs对接容器网络</a></li><li><a href="/blog/etcd-manage.html" class="sidebar-link">etcd管南</a></li><li><a href="/blog/fist-terminal.html" class="sidebar-link">属于极客的k8s管理工具fist</a></li><li><a href="/blog/genie.html" class="sidebar-link">CNI 小精灵 genie</a></li><li><a href="/blog/istio-quickstart.html" class="sidebar-link">istio安装使用教程</a></li><li><a href="/blog/k8s-authenticating.html" class="sidebar-link">kubernetes对接第三方认证</a></li><li><a href="/blog/k8s-ha-conf.html" class="sidebar-link">kubernetes高可用相关配置</a></li><li><a href="/blog/k8s-ipvs.html" class="sidebar-link">kubernetes ipvs设置</a></li><li><a href="/blog/k8s-rbac.html" class="sidebar-link">kubernetes RBAC实战</a></li><li><a href="/blog/keepalived.html" class="sidebar-link">keepalived in docker</a></li><li><a href="/blog/kube-admin-control.html" class="sidebar-link">kubernetes Admission Controller原理介绍</a></li><li><a href="/blog/kube-batch.html" class="sidebar-link">kube-scheduler定制，支持深度学习批处理任务调度</a></li><li><a href="/blog/kube-cmd.html" class="sidebar-link">老夫k8s命令行賊6</a></li><li><a href="/blog/kube-dev.html" class="sidebar-link">kubernetes开发指南</a></li><li><a href="/blog/kube-proxy-src.html" class="sidebar-link">kube-proxy源码解析</a></li><li><a href="/blog/kube-scheduler-source-code.html" class="sidebar-link">kubernetes源码分析之kube-scheduler - 从代码看原理</a></li><li><a href="/blog/kubeadm.html" class="sidebar-link">kubeadm杂谈</a></li><li><a href="/blog/kubeadm-dev.html" class="sidebar-link">修改kubeadm证书过期时间</a></li><li><a href="/blog/kubeadm-source.html" class="sidebar-link">kubeadm源码分析</a></li><li><a href="/blog/kubernetes-vm.html" class="sidebar-link">强隔离容器的那些事</a></li><li><a href="/blog/kustomize.html" class="sidebar-link">kustomize 颤抖吧helm!</a></li><li><a href="/blog/libra.html" class="sidebar-link">facebook libra尝鲜，没赶上比特币能不能上这趟车</a></li><li><a href="/blog/macvtap.html" class="sidebar-link">macvtap实践教程</a></li><li><a href="/blog/ovn-vni.html" class="sidebar-link">从CNI到ovn</a></li><li><a href="/blog/prometheus-operator-envoy.html" class="sidebar-link">使用prometheus operator监控envoy</a></li><li><a href="/blog/rook.html" class="sidebar-link">rook使用教程，快速编排ceph</a></li><li><a href="/blog/rpc-protobuf.html" class="sidebar-link">golang基于protobuf的rpc使用</a></li><li><a href="/blog/runc.html" class="active sidebar-link">runc 架构</a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a href="/blog/runc.html#runc-run进程与runc-init进程之间的通信" class="sidebar-link">runc run进程与runc init进程之间的通信</a></li><li class="sidebar-sub-header"><a href="/blog/runc.html#总结" class="sidebar-link">总结</a></li></ul></li><li><a href="/blog/scratch.html" class="sidebar-link">scratch镜像</a></li><li><a href="/blog/tektoncd-pipeline.html" class="sidebar-link">tektoncd pipeline教程 - kubernetes原生pipeline</a></li><li><a href="/blog/user-token.html" class="sidebar-link">kubernetes 用户token教程</a></li><li><a href="/blog/vim.html" class="sidebar-link">是时候表现一下我的vim了</a></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="runc-架构"><a href="#runc-架构" class="header-anchor">#</a> runc 架构</h1> <p>这里的spec.Process就是我们真正要运行的容器中的进程。</p> <div class="language- extra-class"><pre class="language-text"><code>return r.run(&amp;spec.Process)
+</code></pre></div><p>把这个塞到libcontainer.Process里去了：
+</p> <div class="language- extra-class"><pre class="language-text"><code> lp := &amp;libcontainer.Process{
+     Args: p.Args,
+     Env:  p.Env,
+     // TODO: fix libcontainer's API to better support uid/gid in a typesafe way.
+     User:            fmt.Sprintf(&quot;%d:%d&quot;, p.User.UID, p.User.GID),
+     Cwd:             p.Cwd,
+     Label:           p.SelinuxLabel,
+     NoNewPrivileges: &amp;p.NoNewPrivileges,
+     AppArmorProfile: p.ApparmorProfile,
+ }
+</code></pre></div><p>我试了个busybox的容器，把p.Args和p.Env打印出来看一下,正是config.json中的内容：</p> <div class="language- extra-class"><pre class="language-text"><code>fmt.Println(&quot;Args: &quot;, p.Args, &quot;env&quot;, p.Env)
+//Args:  [sh] env [PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin TERM=xterm]
+</code></pre></div><p>这里真正调用的是container的Start 或者Run方法</p> <div class="language- extra-class"><pre class="language-text"><code>    var (
+        startFn = r.container.Start
+    )
+    if !r.create {
+        startFn = r.container.Run
+    }
+    if err = startFn(process); err != nil {
+        return -1, err
+    }
+
+</code></pre></div><p>我们看linux_container的Run实现,在libcontainer/container_linux.go下面：
+相信你能找到这,这个parent到底是何方神圣？：</p> <div class="language- extra-class"><pre class="language-text"><code>parent, err := c.newParentProcess(process, isInit)
+                    |
+                    +---&gt; cmd, err := c.commandTemplate(p, childPipe)
+</code></pre></div><p>这个cmd启动是的啥？我们容器中entrypoint 或者CMD?? 事实证明都不是：</p> <div class="language- extra-class"><pre class="language-text"><code>cmd := exec.Command(c.initArgs[0], c.initArgs[1:]...)
+fmt.Println(&quot;cmd is: &quot;, c.initArgs[0], c.initArgs[1:])
+//cmd is:  /proc/self/exe [init]
+</code></pre></div><p>linux菜鸟表示看不懂了，<code>/proc/self/exe</code>是什么鬼？赶紧百度一下。强(sha)大(bi)百度告诉我们这代表当前进程，所以实际上是想调用<code>runc init</code></p> <div class="language- extra-class"><pre class="language-text"><code>[root@dev-86-206 ~]# ll /proc/self
+lrwxrwxrwx. 1 root root 0 4月  24 19:56 /proc/self -&gt; 108590
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>[root@dev-86-206 ~]# ll /proc/108590
+总用量 0
+lrwxrwxrwx.  1 root root 0 5月  31 15:25 exe -&gt; /go/bin/cattle
+</code></pre></div><p>是不是明白了什么，最终/proc/self/exe链接到自己了</p> <h2 id="runc-run进程与runc-init进程之间的通信"><a href="#runc-run进程与runc-init进程之间的通信" class="header-anchor">#</a> runc run进程与runc init进程之间的通信</h2> <h4 id="runc-run进程"><a href="#runc-run进程" class="header-anchor">#</a> runc run进程</h4> <p>大家记住一点，容器外面的一些设置runc run去做，在init启动时就设置了init的namespace所以容器内需要做什么都由init去实现。
+比较典型的如在实现bridge网桥时，在容器里面创建eth0网卡就由init进程实现</p> <p>run先把bootstrapData发给init，具体是什么回头讨论</p> <div class="language- extra-class"><pre class="language-text"><code>                run            init
+                 |               |
+                 |--------------&gt;| bootstrapData
+setNs            |               |
+createNetwork    |               |
+                 |--------------&gt;| sendConfig
+                 |&lt;--------------| procReady 我准备好啦
+启动程序吧procRun|--------------&gt;| 
+                 |&lt;--------------| procHooks 执行钩子
+继续procResume   |--------------&gt;| 
+                 |               |
+</code></pre></div><p>看看sendConfig发了些什么：</p> <div class="language- extra-class"><pre class="language-text"><code>func (p *initProcess) sendConfig() error {
+    fmt.Println(&quot;sendconfig to init process, config is: &quot;, p.config)
+    //sendconfig to init process, config is:  
+    //&amp;{[sh] [PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin TERM=xterm] / 0xc420018780   true 0:0 [] 0xc4200ec1e0 [0xc420075380] 0 test [{7 1024 1024}] true false}
+    return utils.WriteJSON(p.parentPipe, p.config)
+}
+</code></pre></div><p>就是我们要启动进程的信息, 除了initProcess还有个setnsProcess 两者区别是：
+TODO</p> <h4 id="runc-init进程"><a href="#runc-init进程" class="header-anchor">#</a> runc init进程</h4> <p>我们想在init里面如上面一样打印一些调试信息就会发现不太管用了,因为已经在子进程中了,所以我们把调试信息输出到文件中</p> <div class="language- extra-class"><pre class="language-text"><code>factory, _ := libcontainer.New(&quot;&quot;)
+factory.StartInitialization(); 
+</code></pre></div><p>libcontainer/factory_linux.go里面有实现
+在pipe中获取到config信息</p> <div class="language- extra-class"><pre class="language-text"><code>newContainerInit(t initType, pipe *os.File, consoleSocket *os.File, stateDirFD int) 
+    if err := json.NewDecoder(pipe).Decode(&amp;config); err != nil {
+} 
+
+就是我们需要启动进程的信息
+//{[sh] [PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin TERM=xterm] / 0xc42005e480   true 0:0 [] 0xc4200dc1e0 [0xc420070240] 0 test [{7 1024 1024}] true false}
+</code></pre></div><p>所以我们去看linuxStandardInit的Init方法即可：
+做好一些准备后给run进程发送准备好了的信息，表示可以进行Execv启动进程了</p> <div class="language- extra-class"><pre class="language-text"><code>    // Tell our parent that we're ready to Execv. This must be done before the
+    // Seccomp rules have been applied, because we need to be able to read and
+    // write to a socket.
+    if err := syncParentReady(l.pipe); err != nil {
+        return err
+    }
+</code></pre></div><p>我们要的东西：</p> <div class="language- extra-class"><pre class="language-text"><code>    if err := syscall.Exec(name, l.config.Args[0:], os.Environ()); err != nil {
+        return newSystemErrorWithCause(err, &quot;exec user process&quot;)
+    }
+</code></pre></div><h3 id="切换rootfs"><a href="#切换rootfs" class="header-anchor">#</a> 切换rootfs</h3> <pre><code>这里有个有意思的地方，我们使用dlv调试runc
+</code></pre> <div class="language- extra-class"><pre class="language-text"><code>root@1db95ddcd993:/go/src/pro/ci-sftp# dlv --wd ./ exec runc -- run test
+(dlv) break main.main
+Breakpoint 1 set at 0x6c8a0b for main.main() /go/src/github.com/opencontainers/runc/main.go:51
+(dlv) continue
+&gt; main.main() /go/src/github.com/opencontainers/runc/main.go:51 (hits goroutine(1):1 total:1) (PC: 0x6c8a0b)
+    46: value for &quot;bundle&quot; is the current directory.
+    47: )
+    48:
+    49:
+    50:
+=&gt;  51: func main() {
+    52:     app := cli.NewApp()
+    53:     app.Name = &quot;runc&quot;
+    54:     app.Usage = usage
+    55:
+    56:     var v []string
+(dlv) next
+&gt; main.main() /go/src/github.com/opencontainers/runc/main.go:54 (PC: 0x6c8a50)
+    49:
+    50:
+    51: func main() {
+    52:     app := cli.NewApp()
+    53:     app.Name = &quot;runc&quot;
+=&gt;  54:     app.Usage = usage
+    55:
+    56:     var v []string
+    57:     if version != &quot;&quot; {
+    58:         v = append(v, version)
+    59:     }
+(dlv) p app.Name
+&quot;runc&quot;
+</code></pre></div><p><a href="https://github.com/derekparker/delve/tree/master/Documentation/cli" target="_blank" rel="noopener noreferrer">delve command line<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></p> <h2 id="总结"><a href="#总结" class="header-anchor">#</a> 总结</h2> <p>至此我们容器创建流程大的架构梳理了一遍，为了看清整个架构忽略了很多细节，当然我会在其它文章中介绍别的一些细节内容. 欢迎大家关注<a href="lameleg.com">sealyun</a></p></div> <footer class="page-edit"><!----> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
+      ←
+      <a href="/blog/rpc-protobuf.html" class="prev">golang基于protobuf的rpc使用</a></span> <span class="next"><a href="/blog/scratch.html">scratch镜像</a>
+      →
+    </span></p></div> </main></div><div class="global-ui"></div></div>
+    <script src="/assets/js/app.23d3ef84.js" defer></script><script src="/assets/js/2.bc760f0a.js" defer></script><script src="/assets/js/51.30d345fb.js" defer></script>
+  </body>
+</html>

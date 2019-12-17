@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>使用client-go包访问Kubernetes CRD | sealyun | kubernetes安装</title>
+    <meta name="description" content="">
+    <meta name="theme-color" content="#007af5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2803648cc5852dd3e9e46bbd0bf63366";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+    <meta property="og:site_name" content="sealyun 专注于kubernetes安装"><meta property="og:title" content="sealyun kubernetes安装"><meta property="og:type" content="article"><meta property="og:url" content="/blog/client-go-crd.html"><meta name="twitter:title" content="sealyun kubernetes安装"><meta name="twitter:url" content="/blog/client-go-crd.html"><meta name="twitter:card" content="summary_large_image">
+    <link rel="preload" href="/assets/css/0.styles.943dcab2.css" as="style"><link rel="preload" href="/assets/js/app.23d3ef84.js" as="script"><link rel="preload" href="/assets/js/2.bc760f0a.js" as="script"><link rel="preload" href="/assets/js/13.c482403d.js" as="script"><link rel="prefetch" href="/assets/js/10.e86bcb27.js"><link rel="prefetch" href="/assets/js/11.bb9904fc.js"><link rel="prefetch" href="/assets/js/12.ec81ebde.js"><link rel="prefetch" href="/assets/js/14.9bd9e6fd.js"><link rel="prefetch" href="/assets/js/15.bdc6bd19.js"><link rel="prefetch" href="/assets/js/16.9e60a0b4.js"><link rel="prefetch" href="/assets/js/17.5df0c46d.js"><link rel="prefetch" href="/assets/js/18.85294fd2.js"><link rel="prefetch" href="/assets/js/19.f2879a42.js"><link rel="prefetch" href="/assets/js/20.6012d02a.js"><link rel="prefetch" href="/assets/js/21.81b7e1ca.js"><link rel="prefetch" href="/assets/js/22.1c2e71b0.js"><link rel="prefetch" href="/assets/js/23.0748294e.js"><link rel="prefetch" href="/assets/js/24.d63f1e4c.js"><link rel="prefetch" href="/assets/js/25.9dbfb44a.js"><link rel="prefetch" href="/assets/js/26.bfc3e626.js"><link rel="prefetch" href="/assets/js/27.ce51e7d7.js"><link rel="prefetch" href="/assets/js/28.ebb9caaf.js"><link rel="prefetch" href="/assets/js/29.8584027e.js"><link rel="prefetch" href="/assets/js/3.b7a496ec.js"><link rel="prefetch" href="/assets/js/30.158ceb97.js"><link rel="prefetch" href="/assets/js/31.f1024a9d.js"><link rel="prefetch" href="/assets/js/32.44cadfdb.js"><link rel="prefetch" href="/assets/js/33.af1c5cdb.js"><link rel="prefetch" href="/assets/js/34.a9e8095a.js"><link rel="prefetch" href="/assets/js/35.77ea75db.js"><link rel="prefetch" href="/assets/js/36.44da8d60.js"><link rel="prefetch" href="/assets/js/37.5e09e3fe.js"><link rel="prefetch" href="/assets/js/38.02e2aa10.js"><link rel="prefetch" href="/assets/js/39.b4e7f5f0.js"><link rel="prefetch" href="/assets/js/4.1ba98b6c.js"><link rel="prefetch" href="/assets/js/40.c879980c.js"><link rel="prefetch" href="/assets/js/41.0d571f5c.js"><link rel="prefetch" href="/assets/js/42.a7d12c13.js"><link rel="prefetch" href="/assets/js/43.60b5940b.js"><link rel="prefetch" href="/assets/js/44.b5a570c8.js"><link rel="prefetch" href="/assets/js/45.3df35b92.js"><link rel="prefetch" href="/assets/js/46.b47c3836.js"><link rel="prefetch" href="/assets/js/47.fbef4ef0.js"><link rel="prefetch" href="/assets/js/48.ae14afb1.js"><link rel="prefetch" href="/assets/js/49.4e6f30d4.js"><link rel="prefetch" href="/assets/js/5.c39869f0.js"><link rel="prefetch" href="/assets/js/50.c199fe15.js"><link rel="prefetch" href="/assets/js/51.30d345fb.js"><link rel="prefetch" href="/assets/js/52.5037db07.js"><link rel="prefetch" href="/assets/js/53.bb29d2bc.js"><link rel="prefetch" href="/assets/js/54.9e4ffa33.js"><link rel="prefetch" href="/assets/js/55.6d311bce.js"><link rel="prefetch" href="/assets/js/56.e6149a7c.js"><link rel="prefetch" href="/assets/js/57.57e2943c.js"><link rel="prefetch" href="/assets/js/58.61ea6212.js"><link rel="prefetch" href="/assets/js/59.95355587.js"><link rel="prefetch" href="/assets/js/6.0032a2d9.js"><link rel="prefetch" href="/assets/js/60.761d9050.js"><link rel="prefetch" href="/assets/js/61.b42700ba.js"><link rel="prefetch" href="/assets/js/62.6b9d864d.js"><link rel="prefetch" href="/assets/js/63.4aff7db2.js"><link rel="prefetch" href="/assets/js/64.34c83536.js"><link rel="prefetch" href="/assets/js/65.a7b0a430.js"><link rel="prefetch" href="/assets/js/66.8ee74e7e.js"><link rel="prefetch" href="/assets/js/67.3009b3ec.js"><link rel="prefetch" href="/assets/js/68.8bb3e997.js"><link rel="prefetch" href="/assets/js/7.5df889f4.js"><link rel="prefetch" href="/assets/js/8.c053b523.js"><link rel="prefetch" href="/assets/js/9.7948f30b.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.943dcab2.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><img src="https://sealyun.com/img/logo.png" alt="sealyun | kubernetes安装" class="logo"> <span class="site-name can-hide">sealyun | kubernetes安装</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav>  <ul class="sidebar-links"><li><a href="/blog/" class="sidebar-link">博客列表</a></li><li><a href="/blog/CI-CD.html" class="sidebar-link">CI 概述</a></li><li><a href="/blog/calico.html" class="sidebar-link">calico 网络原理</a></li><li><a href="/blog/calico-architecture.html" class="sidebar-link">calico架构</a></li><li><a href="/blog/calico-network-policy.html" class="sidebar-link">calico网络策略</a></li><li><a href="/blog/client-go-crd.html" class="active sidebar-link">使用client-go包访问Kubernetes CRD</a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a href="/blog/client-go-crd.html#创建crd" class="sidebar-link">创建CRD</a></li></ul></li><li><a href="/blog/cni.html" class="sidebar-link">CNI详细介绍</a></li><li><a href="/blog/container-stop-timeout.html" class="sidebar-link">容器信号使用</a></li><li><a href="/blog/containerd.html" class="sidebar-link">containerd与kubernetes集成</a></li><li><a href="/blog/crd.html" class="sidebar-link">使用kubebuilder开发CRD</a></li><li><a href="/blog/csi.html" class="sidebar-link">CSI详解</a></li><li><a href="/blog/dev-k8s-workflow.html" class="sidebar-link">kubernetes开发流程</a></li><li><a href="/blog/docker-architech.html" class="sidebar-link">Docker架构分析</a></li><li><a href="/blog/docker-dev.html" class="sidebar-link">docker开发流程</a></li><li><a href="/blog/docker-network.html" class="sidebar-link">容器网络概述</a></li><li><a href="/blog/docker-oerlay2.html" class="sidebar-link">关于overlay2存储驱动的磁盘配额问题</a></li><li><a href="/blog/docker-ovs.html" class="sidebar-link">ovs对接容器网络</a></li><li><a href="/blog/etcd-manage.html" class="sidebar-link">etcd管南</a></li><li><a href="/blog/fist-terminal.html" class="sidebar-link">属于极客的k8s管理工具fist</a></li><li><a href="/blog/genie.html" class="sidebar-link">CNI 小精灵 genie</a></li><li><a href="/blog/istio-quickstart.html" class="sidebar-link">istio安装使用教程</a></li><li><a href="/blog/k8s-authenticating.html" class="sidebar-link">kubernetes对接第三方认证</a></li><li><a href="/blog/k8s-ha-conf.html" class="sidebar-link">kubernetes高可用相关配置</a></li><li><a href="/blog/k8s-ipvs.html" class="sidebar-link">kubernetes ipvs设置</a></li><li><a href="/blog/k8s-rbac.html" class="sidebar-link">kubernetes RBAC实战</a></li><li><a href="/blog/keepalived.html" class="sidebar-link">keepalived in docker</a></li><li><a href="/blog/kube-admin-control.html" class="sidebar-link">kubernetes Admission Controller原理介绍</a></li><li><a href="/blog/kube-batch.html" class="sidebar-link">kube-scheduler定制，支持深度学习批处理任务调度</a></li><li><a href="/blog/kube-cmd.html" class="sidebar-link">老夫k8s命令行賊6</a></li><li><a href="/blog/kube-dev.html" class="sidebar-link">kubernetes开发指南</a></li><li><a href="/blog/kube-proxy-src.html" class="sidebar-link">kube-proxy源码解析</a></li><li><a href="/blog/kube-scheduler-source-code.html" class="sidebar-link">kubernetes源码分析之kube-scheduler - 从代码看原理</a></li><li><a href="/blog/kubeadm.html" class="sidebar-link">kubeadm杂谈</a></li><li><a href="/blog/kubeadm-dev.html" class="sidebar-link">修改kubeadm证书过期时间</a></li><li><a href="/blog/kubeadm-source.html" class="sidebar-link">kubeadm源码分析</a></li><li><a href="/blog/kubernetes-vm.html" class="sidebar-link">强隔离容器的那些事</a></li><li><a href="/blog/kustomize.html" class="sidebar-link">kustomize 颤抖吧helm!</a></li><li><a href="/blog/libra.html" class="sidebar-link">facebook libra尝鲜，没赶上比特币能不能上这趟车</a></li><li><a href="/blog/macvtap.html" class="sidebar-link">macvtap实践教程</a></li><li><a href="/blog/ovn-vni.html" class="sidebar-link">从CNI到ovn</a></li><li><a href="/blog/prometheus-operator-envoy.html" class="sidebar-link">使用prometheus operator监控envoy</a></li><li><a href="/blog/rook.html" class="sidebar-link">rook使用教程，快速编排ceph</a></li><li><a href="/blog/rpc-protobuf.html" class="sidebar-link">golang基于protobuf的rpc使用</a></li><li><a href="/blog/runc.html" class="sidebar-link">runc 架构</a></li><li><a href="/blog/scratch.html" class="sidebar-link">scratch镜像</a></li><li><a href="/blog/tektoncd-pipeline.html" class="sidebar-link">tektoncd pipeline教程 - kubernetes原生pipeline</a></li><li><a href="/blog/user-token.html" class="sidebar-link">kubernetes 用户token教程</a></li><li><a href="/blog/vim.html" class="sidebar-link">是时候表现一下我的vim了</a></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="使用client-go包访问kubernetes-crd"><a href="#使用client-go包访问kubernetes-crd" class="header-anchor">#</a> 使用client-go包访问Kubernetes CRD</h1> <p>Kubernetes API服务器可通过自定义资源定义轻松扩展。但是，用client-go库访问这些资源有点麻烦，官方也没有完整的文档。如kubebuilder operator-framework都能很方便的帮助我们去创建实现一个controller，但是封装的过于好导致我们并不清楚内部是怎么调用client-go的，很多场景我们是需要自己去调用接口操作CRD的而不是在controller中去访问CRD。</p> <p>本文非常实用，比较全比较完善的相关文档也比较难找到。</p> <p>举个栗子：</p> <p>我们在实现虚拟机CRD时，节点上agent需要查询虚拟机CRD，这种情况显然我们不会通过controller进行操作，此时我们就需要知道怎么直接用client-go操作CRD。
+</p> <h2 id="创建crd"><a href="#创建crd" class="header-anchor">#</a> 创建CRD</h2> <div class="language- extra-class"><pre class="language-text"><code>apiVersion: &quot;apiextensions.k8s.io/v1beta1&quot;
+kind: &quot;CustomResourceDefinition&quot;
+metadata:
+  name: &quot;projects.example.sealyun.com&quot;
+spec:
+  group: &quot;example.sealyun.com&quot;
+  version: &quot;v1alpha1&quot;
+  scope: &quot;Namespaced&quot;
+  names:
+    plural: &quot;projects&quot;
+    singular: &quot;project&quot;
+    kind: &quot;Project&quot;
+  validation:
+    openAPIV3Schema:
+      required: [&quot;spec&quot;]
+      properties:
+        spec:
+          required: [&quot;replicas&quot;]
+          properties:
+            replicas:
+              type: &quot;integer&quot;
+              minimum: 1
+</code></pre></div><p>这个可以使用kubebuilder或者operator-framework生成, 自己写太累</p> <p>要定义自定义资源定义，您需要考虑API组名称（在本例中example.sealyun.com）。按照惯例，这通常是您控制的域的域名（例如，您组织的域），以防止命名冲突。然后CRD的名称遵循模式<plural-resource-name>.<api-group-name>，因此在这种情况下projects.example.sealyun.com。</api-group-name></plural-resource-name></p> <p>通常，您希望根据特定架构验证用户在自定义资源中存储的数据。这就是spec.validation.openAPIV3Schema它的用途：它包含一个描述资源应具有的格式的JSON模式。</p> <p>使用kubectl创建资源定义, 如果用kubebuilder可以直接make &amp;&amp; make deploy：</p> <div class="language- extra-class"><pre class="language-text"><code>&gt; kubectl apply -f projects-crd.yaml
+customresourcedefinition &quot;projects.example.sealyun.com&quot; created
+</code></pre></div><p>可以创建此新资源类型的实例:</p> <div class="language- extra-class"><pre class="language-text"><code>apiVersion: &quot;example.sealyun.com/v1alpha1&quot;
+kind: &quot;Project&quot;
+metadata:
+  name: &quot;example-project&quot;
+  namespace: &quot;default&quot;
+spec:
+  replicas: 1
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>&gt; kubectl apply -f project.yaml
+project &quot;example-project&quot; created
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>&gt; kubectl get projects
+NAME               AGE
+example-project    2m
+</code></pre></div><h1 id="创建golang客户端"><a href="#创建golang客户端" class="header-anchor">#</a> 创建Golang客户端</h1> <p>接下来，我们将使用client-go包来访问这些自定义资源。</p> <blockquote><p>定义类型</p></blockquote> <p>kubebuilder等都会自动为您生成，我这里为了讲清楚所有的东西也加上这块的相关说明</p> <p>首先定义自定义资源的类型。通过API组版本组织这些类型是一个很好的做法; 例如，api/types/v1alpha1/project.go：</p> <div class="language- extra-class"><pre class="language-text"><code>package v1alpha1
+
+import metav1 &quot;k8s.io/apimachinery/pkg/apis/meta/v1&quot;
+
+type ProjectSpec struct {
+    Replicas int `json:&quot;replicas&quot;`
+}
+
+type Project struct {
+	metav1.TypeMeta   `json:&quot;,inline&quot;`
+	metav1.ObjectMeta `json:&quot;metadata,omitempty&quot;`
+
+    Spec ProjectSpec `json:&quot;spec&quot;`
+}
+
+type ProjectList struct {
+	metav1.TypeMeta `json:&quot;,inline&quot;`
+	metav1.ListMeta `json:&quot;metadata,omitempty&quot;`
+
+	Items []Project `json:&quot;items&quot;`
+}
+</code></pre></div><p>该metav1.ObjectMeta类型包含了典型metadata的属性</p> <blockquote><p>定义DeepCopy方法</p></blockquote> <p>Kubernetes API（在本例中为Project和ProjectList）提供的每种类型都需要实现该k8s.io/apimachinery/pkg/runtime.Object接口。该接口定义了两种方法GetObjectKind()和DeepCopyObject()。第一种方法已经由嵌入式metav1.TypeMeta结构提供; 第二个你必须自己实现。</p> <p>该DeepCopyObject方法旨在生成对象的深层副本。由于这涉及许多样板代码，因此很多工具通常会自动生成这些方法。为了本文的目的，我们将手动完成。继续向deepcopy.go同一个包添加第二个文件：</p> <div class="language- extra-class"><pre class="language-text"><code>package v1alpha1
+
+import &quot;k8s.io/apimachinery/pkg/runtime&quot;
+
+// DeepCopyInto copies all properties of this object into another object of the
+// same type that is provided as a pointer.
+func (in *Project) DeepCopyInto(out *Project) {
+    out.TypeMeta = in.TypeMeta
+    out.ObjectMeta = in.ObjectMeta
+    out.Spec = ProjectSpec{
+        Replicas: in.Spec.Replicas,
+    }
+}
+
+// DeepCopyObject returns a generically typed copy of an object
+func (in *Project) DeepCopyObject() runtime.Object {
+    out := Project{}
+    in.DeepCopyInto(&amp;out)
+
+    return &amp;out
+}
+
+// DeepCopyObject returns a generically typed copy of an object
+func (in *ProjectList) DeepCopyObject() runtime.Object {
+    out := ProjectList{}
+    out.TypeMeta = in.TypeMeta
+    out.ListMeta = in.ListMeta
+
+    if in.Items != nil {
+        out.Items = make([]Project, len(in.Items))
+        for i := range in.Items {
+            in.Items[i].DeepCopyInto(&amp;out.Items[i])
+        }
+    }
+
+    return &amp;out
+}
+</code></pre></div><blockquote><p>注册类型</p></blockquote> <p>接下来，您需要使客户端库知道新类型。允许客户端在与API服务器通信时自动处理新类型。</p> <p>为此，register.go请在包中添加一个新文件：</p> <div class="language- extra-class"><pre class="language-text"><code>package v1alpha1
+
+import (
+    metav1 &quot;k8s.io/apimachinery/pkg/apis/meta/v1&quot;
+    &quot;k8s.io/apimachinery/pkg/runtime&quot;
+    &quot;k8s.io/apimachinery/pkg/runtime/schema&quot;
+)
+
+const GroupName = &quot;example.sealyun.com&quot;
+const GroupVersion = &quot;v1alpha1&quot;
+
+var SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: GroupVersion}
+
+var (
+    SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
+    AddToScheme   = SchemeBuilder.AddToScheme
+)
+
+func addKnownTypes(scheme *runtime.Scheme) error {
+    scheme.AddKnownTypes(SchemeGroupVersion,
+        &amp;Project{},
+        &amp;ProjectList{},
+    )
+
+    metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
+    return nil
+}
+</code></pre></div><p>此代码实际上并没有做任何事情（除了创建新runtime.SchemeBuilder实例）。重要的部分是AddToScheme函数，它是runtime.SchemeBuilder中创建的类型。一旦Kubernetes客户端初始化为注册您的类型，您可以稍后从客户端代码的任何部分调用此函数。</p> <blockquote><p>构建HTTP客户端</p></blockquote> <p>在定义类型并添加方法以在全局方案构建器中注册它们之后，您现在可以创建能够加载自定义资源的HTTP客户端。</p> <p>为此，将以下代码添加到包的main.go文件中：</p> <div class="language- extra-class"><pre class="language-text"><code>package main
+
+import (
+    &quot;flag&quot;
+    &quot;log&quot;
+    &quot;time&quot;
+
+    &quot;k8s.io/apimachinery/pkg/runtime/schema&quot;
+    &quot;k8s.io/apimachinery/pkg/runtime/serializer&quot;
+
+    &quot;github.com/martin-helmich/kubernetes-crd-example/api/types/v1alpha1&quot;
+    &quot;k8s.io/client-go/kubernetes/scheme&quot;
+    &quot;k8s.io/client-go/rest&quot;
+    &quot;k8s.io/client-go/tools/clientcmd&quot;
+)
+
+var kubeconfig string
+
+func init() {
+    flag.StringVar(&amp;kubeconfig, &quot;kubeconfig&quot;, &quot;&quot;, &quot;path to Kubernetes config file&quot;)
+    flag.Parse()
+}
+
+func main() {
+    var config *rest.Config
+    var err error
+
+    if kubeconfig == &quot;&quot; {
+        log.Printf(&quot;using in-cluster configuration&quot;)
+        config, err = rest.InClusterConfig()
+    } else {
+        log.Printf(&quot;using configuration from '%s'&quot;, kubeconfig)
+        config, err = clientcmd.BuildConfigFromFlags(&quot;&quot;, kubeconfig)
+    }
+
+    if err != nil {
+        panic(err)
+    }
+
+    v1alpha1.AddToScheme(scheme.Scheme)
+
+    crdConfig := *config
+    crdConfig.ContentConfig.GroupVersion = &amp;schema.GroupVersion{Group: v1alpha1.GroupName, Version: v1alpha1.GroupVersion}
+    crdConfig.APIPath = &quot;/apis&quot;
+    crdConfig.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
+    crdConfig.UserAgent = rest.DefaultKubernetesUserAgent()
+
+    exampleRestClient, err := rest.UnversionedRESTClientFor(&amp;crdConfig)
+    if err != nil {
+        panic(err)
+    }
+}
+</code></pre></div><p>您现在可以使用第exampleRestClient中创建的内容来查询example.sealyun.com/v1alpha1API组中的所有自定义资源。示例可能如下所示：</p> <div class="language- extra-class"><pre class="language-text"><code>result := v1alpha1.ProjectList{}
+err := exampleRestClient.
+    Get().
+    Resource(&quot;projects&quot;).
+    Do().
+    Into(&amp;result)
+</code></pre></div><p>为了以更加类型安全的方式使用您的API，通常最好将这些操作包装在您自己的客户端集中。为此，创建一个新的子包clientset/v1alpha1。首先，实现一个定义API组类型的接口，并将配置设置从您的main方法移动到该clientset的构造函数中（NewForConfig在下面的示例中）：</p> <div class="language- extra-class"><pre class="language-text"><code>package v1alpha1
+
+import (
+    &quot;github.com/martin-helmich/kubernetes-crd-example/api/types/v1alpha1&quot;
+    &quot;k8s.io/apimachinery/pkg/runtime/schema&quot;
+    &quot;k8s.io/apimachinery/pkg/runtime/serializer&quot;
+    &quot;k8s.io/client-go/kubernetes/scheme&quot;
+    &quot;k8s.io/client-go/rest&quot;
+)
+
+type ExampleV1Alpha1Interface interface {
+    Projects(namespace string) ProjectInterface 
+}
+
+type ExampleV1Alpha1Client struct {
+    restClient rest.Interface
+}
+
+func NewForConfig(c *rest.Config) (*ExampleV1Alpha1Client, error) {
+    config := *c
+    config.ContentConfig.GroupVersion = &amp;schema.GroupVersion{Group: v1alpha1.GroupName, Version: v1alpha1.GroupVersion}
+    config.APIPath = &quot;/apis&quot;
+    config.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
+    config.UserAgent = rest.DefaultKubernetesUserAgent()
+
+    client, err := rest.RESTClientFor(&amp;config)
+    if err != nil {
+        return nil, err
+    }
+
+    return &amp;ExampleV1Alpha1Client{restClient: client}, nil
+}
+
+func (c *ExampleV1Alpha1Client) Projects(namespace string) ProjectInterface {
+    return &amp;projectClient{
+        restClient: c.restClient,
+        ns: namespace,
+    }
+}
+</code></pre></div><p>以上是对client的封装</p> <p>接下来，您需要实现一个特定的Project客户端集来访问自定义资源（请注意，上面的示例已经使用了我们仍需要提供的ProjectInterface和projectClient类型）。projects.go在同一个包中创建第二个文件：</p> <div class="language- extra-class"><pre class="language-text"><code>package v1alpha1
+
+import (
+    &quot;github.com/martin-helmich/kubernetes-crd-example/api/types/v1alpha1&quot;
+    metav1 &quot;k8s.io/apimachinery/pkg/apis/meta/v1&quot;
+    &quot;k8s.io/apimachinery/pkg/watch&quot;
+    &quot;k8s.io/client-go/kubernetes/scheme&quot;
+    &quot;k8s.io/client-go/rest&quot;
+)
+
+type ProjectInterface interface {
+    List(opts metav1.ListOptions) (*v1alpha1.ProjectList, error)
+    Get(name string, options metav1.GetOptions) (*v1alpha1.Project, error)
+    Create(*v1alpha1.Project) (*v1alpha1.Project, error)
+    Watch(opts metav1.ListOptions) (watch.Interface, error)
+    // ...
+}
+
+type projectClient struct {
+    restClient rest.Interface
+    ns         string
+}
+
+func (c *projectClient) List(opts metav1.ListOptions) (*v1alpha1.ProjectList, error) {
+    result := v1alpha1.ProjectList{}
+    err := c.restClient.
+        Get().
+        Namespace(c.ns).
+        Resource(&quot;projects&quot;).
+        VersionedParams(&amp;opts, scheme.ParameterCodec).
+        Do().
+        Into(&amp;result)
+
+    return &amp;result, err
+}
+
+func (c *projectClient) Get(name string, opts metav1.GetOptions) (*v1alpha1.Project, error) {
+    result := v1alpha1.Project{}
+    err := c.restClient.
+        Get().
+        Namespace(c.ns).
+        Resource(&quot;projects&quot;).
+        Name(name).
+        VersionedParams(&amp;opts, scheme.ParameterCodec).
+        Do().
+        Into(&amp;result)
+
+    return &amp;result, err
+}
+
+func (c *projectClient) Create(project *v1alpha1.Project) (*v1alpha1.Project, error) {
+    result := v1alpha1.Project{}
+    err := c.restClient.
+        Post().
+        Namespace(c.ns).
+        Resource(&quot;projects&quot;).
+        Body(project).
+        Do().
+        Into(&amp;result)
+
+    return &amp;result, err
+}
+
+func (c *projectClient) Watch(opts metav1.ListOptions) (watch.Interface, error) {
+    opts.Watch = true
+    return c.restClient.
+        Get().
+        Namespace(c.ns).
+        Resource(&quot;projects&quot;).
+        VersionedParams(&amp;opts, scheme.ParameterCodec).
+        Watch()
+}
+</code></pre></div><p>上面还缺少一些Delete Update方法，照抄就行，或者参考<a href="https://github.com/kubernetes/client-go/blob/master/kubernetes/typed/core/v1/pod.go" target="_blank" rel="noopener noreferrer">pod的实现<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></p> <p>再去使用就变的非常简单了：</p> <div class="language- extra-class"><pre class="language-text"><code>import clientV1alpha1 &quot;github.com/martin-helmich/kubernetes-crd-example/clientset/v1alpha1&quot;
+// ...
+
+func main() {
+    // ...
+
+    clientSet, err := clientV1alpha1.NewForConfig(config)
+    if err != nil {
+        panic(err)
+    }
+
+    projects, err := clientSet.Projects(&quot;default&quot;).List(metav1.ListOptions{})
+    if err != nil {
+        panic(err)
+    }
+
+    fmt.Printf(&quot;projects found: %+v\n&quot;, projects)
+}
+</code></pre></div><blockquote><p>创建informer</p></blockquote> <p>构建Kubernetes operator时，通常希望能够对新创建或更新的事件进行监听。理论上，可以定期调用该List()方法并检查是否添加了新资源。</p> <p>大多数情况通过使用初始List()初始加载资源的所有相关实例，然后使用Watch()订阅相关事件进行处理。然后，使用从informer接收的初始对象列表和更新来构建本地缓存，该缓存允许快速访问任何自定义资源，而无需每次都访问API服务器。</p> <p>这种模式非常普遍，以至于client-go库为此提供了一个cache包：来自包的Informerk8s.io/client-go/tools/cache。您可以为自定义资源构建新的Informer，如下所示：</p> <div class="language- extra-class"><pre class="language-text"><code>package main
+
+import (
+    &quot;time&quot;
+
+    &quot;github.com/martin-helmich/kubernetes-crd-example/api/types/v1alpha1&quot;
+    client_v1alpha1 &quot;github.com/martin-helmich/kubernetes-crd-example/clientset/v1alpha1&quot;
+    metav1 &quot;k8s.io/apimachinery/pkg/apis/meta/v1&quot;
+    &quot;k8s.io/apimachinery/pkg/runtime&quot;
+    &quot;k8s.io/apimachinery/pkg/util/wait&quot;
+    &quot;k8s.io/apimachinery/pkg/watch&quot;
+    &quot;k8s.io/client-go/tools/cache&quot;
+)
+
+func WatchResources(clientSet client_v1alpha1.ExampleV1Alpha1Interface) cache.Store {
+    projectStore, projectController := cache.NewInformer(
+        &amp;cache.ListWatch{
+            ListFunc: func(lo metav1.ListOptions) (result runtime.Object, err error) {
+                return clientSet.Projects(&quot;some-namespace&quot;).List(lo)
+            },
+            WatchFunc: func(lo metav1.ListOptions) (watch.Interface, error) {
+                return clientSet.Projects(&quot;some-namespace&quot;).Watch(lo)
+            },
+        },
+        &amp;v1alpha1.Project{},
+        1*time.Minute,
+        cache.ResourceEventHandlerFuncs{},
+    )
+
+    go projectController.Run(wait.NeverStop)
+    return projectStore
+}
+</code></pre></div><p>该NewInformer方法返回两个对象：第二个返回值，控制器控制List()和Watch()调用并填充第一个返回值，Store缓存监听到的一些信息。
+您现在可以使用store轻松访问CRD，列出所有CRD或通过名称访问它们。store函数返回interface{}类型，因此您必须将它们强制转换回CRD类型：</p> <div class="language- extra-class"><pre class="language-text"><code>store := WatchResource(clientSet)
+project := store.GetByKey(&quot;some-namespace/some-project&quot;).(*v1alpha1.Project)
+</code></pre></div><p>如此很多情况下就不需要再去调用apiserver了，给apiserver减轻压力.</p> <h1 id="在kubebuilder中进行访问"><a href="#在kubebuilder中进行访问" class="header-anchor">#</a> 在kubebuilder中进行访问</h1> <p>通过获取manager中的reader, 但是这里只能读不能写，写的话需要mgr.GetClient() 但是这个就必须是长时间运行的</p> <p><a href="https://github.com/kubernetes-sigs/kubebuilder/issues/947" target="_blank" rel="noopener noreferrer">更多详情<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a> <a href="https://github.com/kubernetes-sigs/controller-runtime/pull/609" target="_blank" rel="noopener noreferrer">想加入apiclient功能PR<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></p> <div class="language- extra-class"><pre class="language-text"><code>package main
+
+import (
+	&quot;context&quot;
+	&quot;fmt&quot;
+	&quot;os&quot;
+
+	&quot;k8s.io/apimachinery/pkg/types&quot;
+
+	v1 &quot;github.com/fanux/sealvm/api/v1&quot;
+	&quot;github.com/prometheus/common/log&quot;
+	&quot;k8s.io/apimachinery/pkg/runtime&quot;
+	ctrl &quot;sigs.k8s.io/controller-runtime&quot;
+	clientgoscheme &quot;k8s.io/client-go/kubernetes/scheme&quot;
+)
+
+var scheme = runtime.NewScheme()
+
+func init() {
+	v1.AddToScheme(scheme)
+	clientgoscheme.AddToScheme(scheme)
+}
+
+func main() {
+	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+		Scheme: scheme,
+	})
+	if err != nil {
+		os.Exit(1)
+	}
+	client := mgr.GetAPIReader() // 如果是长时间运行用mgr.GetClient()
+	ctx := context.Background()
+	name := types.NamespacedName{Namespace: &quot;default&quot;, Name: &quot;virtulmachine-sample&quot;}
+
+	vm := &amp;v1.VirtulMachine{}
+	if err := client.Get(ctx, name, vm); err != nil {
+		log.Error(err, &quot;unable to fetch vm&quot;)
+	} else {
+		fmt.Println(vm.Spec.CPU, vm.Spec.Memory, vm)
+	}
+}
+</code></pre></div><p>推荐做法，直接调用client:</p> <div class="language- extra-class"><pre class="language-text"><code>package main
+
+import (
+	&quot;context&quot;
+	&quot;fmt&quot;
+	&quot;sigs.k8s.io/controller-runtime/pkg/client&quot;
+
+	&quot;k8s.io/apimachinery/pkg/types&quot;
+
+	v1 &quot;github.com/fanux/sealvm/api/v1&quot;
+	&quot;github.com/prometheus/common/log&quot;
+	&quot;k8s.io/apimachinery/pkg/runtime&quot;
+	ctrl &quot;sigs.k8s.io/controller-runtime&quot;
+
+	clientgoscheme &quot;k8s.io/client-go/kubernetes/scheme&quot;
+)
+
+var scheme = runtime.NewScheme()
+
+func init() {
+	v1.AddToScheme(scheme)
+	clientgoscheme.AddToScheme(scheme)
+}
+
+func getClient() (client.Client, error){
+	config := ctrl.GetConfigOrDie()
+	if config == nil {
+		return nil, fmt.Errorf(&quot;config is nil&quot;)
+	}
+	options := ctrl.Options{Scheme:scheme}
+	// Set default values for options fields
+	//options = setOptionsDefaults(options)
+	//mapper, err := options.MapperProvider(config)
+	//if err != nil {
+	//	log.Error(err, &quot;Failed to get API Group-Resources&quot;)
+	//	return nil, err
+	//}
+
+	client, err := client.New(config, client.Options{Scheme: options.Scheme})
+	if err !=nil {
+		return nil, err
+	}
+	return client,nil
+}
+
+func main() {
+	client,err := getClient()
+	if err != nil {
+		fmt.Println(&quot;client is nil&quot;,err)
+		return
+	}
+
+	ctx := context.Background()
+	name := types.NamespacedName{Namespace: &quot;default&quot;, Name: &quot;virtulmachine-sample&quot;}
+
+	vm := &amp;v1.VirtulMachine{}
+	if err = client.Get(ctx, name, vm); err != nil {
+		log.Error(err, &quot;unable to fetch vm&quot;)
+	} else {
+		fmt.Println(vm.Spec.CPU, vm.Spec.Memory, vm)
+	}
+}
+</code></pre></div><h1 id="总结"><a href="#总结" class="header-anchor">#</a> 总结</h1> <p>虽然现在很多工具给我们写CRD controller带来了极大的便捷，但是对于client-go这些基本的使用还是非常必要的，而官方client-go的开发文档和事例真的是少之又少，基本仅包含非常基本的操作。</p> <p>还有一个dynamic client的方式也可以用来访问自定义CRD，但是文中的方式会更优雅更清晰更适合工程化。</p></div> <footer class="page-edit"><!----> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
+      ←
+      <a href="/blog/calico-network-policy.html" class="prev">calico网络策略</a></span> <span class="next"><a href="/blog/cni.html">CNI详细介绍</a>
+      →
+    </span></p></div> </main></div><div class="global-ui"></div></div>
+    <script src="/assets/js/app.23d3ef84.js" defer></script><script src="/assets/js/2.bc760f0a.js" defer></script><script src="/assets/js/13.c482403d.js" defer></script>
+  </body>
+</html>

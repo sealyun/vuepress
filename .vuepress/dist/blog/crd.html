@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>使用kubebuilder开发CRD | sealyun | kubernetes安装</title>
+    <meta name="description" content="">
+    <meta name="theme-color" content="#007af5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2803648cc5852dd3e9e46bbd0bf63366";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+    <meta property="og:site_name" content="sealyun 专注于kubernetes安装"><meta property="og:title" content="sealyun kubernetes安装"><meta property="og:type" content="article"><meta property="og:url" content="/blog/crd.html"><meta name="twitter:title" content="sealyun kubernetes安装"><meta name="twitter:url" content="/blog/crd.html"><meta name="twitter:card" content="summary_large_image">
+    <link rel="preload" href="/assets/css/0.styles.943dcab2.css" as="style"><link rel="preload" href="/assets/js/app.23d3ef84.js" as="script"><link rel="preload" href="/assets/js/2.bc760f0a.js" as="script"><link rel="preload" href="/assets/js/17.5df0c46d.js" as="script"><link rel="prefetch" href="/assets/js/10.e86bcb27.js"><link rel="prefetch" href="/assets/js/11.bb9904fc.js"><link rel="prefetch" href="/assets/js/12.ec81ebde.js"><link rel="prefetch" href="/assets/js/13.c482403d.js"><link rel="prefetch" href="/assets/js/14.9bd9e6fd.js"><link rel="prefetch" href="/assets/js/15.bdc6bd19.js"><link rel="prefetch" href="/assets/js/16.9e60a0b4.js"><link rel="prefetch" href="/assets/js/18.85294fd2.js"><link rel="prefetch" href="/assets/js/19.f2879a42.js"><link rel="prefetch" href="/assets/js/20.6012d02a.js"><link rel="prefetch" href="/assets/js/21.81b7e1ca.js"><link rel="prefetch" href="/assets/js/22.1c2e71b0.js"><link rel="prefetch" href="/assets/js/23.0748294e.js"><link rel="prefetch" href="/assets/js/24.d63f1e4c.js"><link rel="prefetch" href="/assets/js/25.9dbfb44a.js"><link rel="prefetch" href="/assets/js/26.bfc3e626.js"><link rel="prefetch" href="/assets/js/27.ce51e7d7.js"><link rel="prefetch" href="/assets/js/28.ebb9caaf.js"><link rel="prefetch" href="/assets/js/29.8584027e.js"><link rel="prefetch" href="/assets/js/3.b7a496ec.js"><link rel="prefetch" href="/assets/js/30.158ceb97.js"><link rel="prefetch" href="/assets/js/31.f1024a9d.js"><link rel="prefetch" href="/assets/js/32.44cadfdb.js"><link rel="prefetch" href="/assets/js/33.af1c5cdb.js"><link rel="prefetch" href="/assets/js/34.a9e8095a.js"><link rel="prefetch" href="/assets/js/35.77ea75db.js"><link rel="prefetch" href="/assets/js/36.44da8d60.js"><link rel="prefetch" href="/assets/js/37.5e09e3fe.js"><link rel="prefetch" href="/assets/js/38.02e2aa10.js"><link rel="prefetch" href="/assets/js/39.b4e7f5f0.js"><link rel="prefetch" href="/assets/js/4.1ba98b6c.js"><link rel="prefetch" href="/assets/js/40.c879980c.js"><link rel="prefetch" href="/assets/js/41.0d571f5c.js"><link rel="prefetch" href="/assets/js/42.a7d12c13.js"><link rel="prefetch" href="/assets/js/43.60b5940b.js"><link rel="prefetch" href="/assets/js/44.b5a570c8.js"><link rel="prefetch" href="/assets/js/45.3df35b92.js"><link rel="prefetch" href="/assets/js/46.b47c3836.js"><link rel="prefetch" href="/assets/js/47.fbef4ef0.js"><link rel="prefetch" href="/assets/js/48.ae14afb1.js"><link rel="prefetch" href="/assets/js/49.4e6f30d4.js"><link rel="prefetch" href="/assets/js/5.c39869f0.js"><link rel="prefetch" href="/assets/js/50.c199fe15.js"><link rel="prefetch" href="/assets/js/51.30d345fb.js"><link rel="prefetch" href="/assets/js/52.5037db07.js"><link rel="prefetch" href="/assets/js/53.bb29d2bc.js"><link rel="prefetch" href="/assets/js/54.9e4ffa33.js"><link rel="prefetch" href="/assets/js/55.6d311bce.js"><link rel="prefetch" href="/assets/js/56.e6149a7c.js"><link rel="prefetch" href="/assets/js/57.57e2943c.js"><link rel="prefetch" href="/assets/js/58.61ea6212.js"><link rel="prefetch" href="/assets/js/59.95355587.js"><link rel="prefetch" href="/assets/js/6.0032a2d9.js"><link rel="prefetch" href="/assets/js/60.761d9050.js"><link rel="prefetch" href="/assets/js/61.b42700ba.js"><link rel="prefetch" href="/assets/js/62.6b9d864d.js"><link rel="prefetch" href="/assets/js/63.4aff7db2.js"><link rel="prefetch" href="/assets/js/64.34c83536.js"><link rel="prefetch" href="/assets/js/65.a7b0a430.js"><link rel="prefetch" href="/assets/js/66.8ee74e7e.js"><link rel="prefetch" href="/assets/js/67.3009b3ec.js"><link rel="prefetch" href="/assets/js/68.8bb3e997.js"><link rel="prefetch" href="/assets/js/7.5df889f4.js"><link rel="prefetch" href="/assets/js/8.c053b523.js"><link rel="prefetch" href="/assets/js/9.7948f30b.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.943dcab2.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><img src="https://sealyun.com/img/logo.png" alt="sealyun | kubernetes安装" class="logo"> <span class="site-name can-hide">sealyun | kubernetes安装</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav>  <ul class="sidebar-links"><li><a href="/blog/" class="sidebar-link">博客列表</a></li><li><a href="/blog/CI-CD.html" class="sidebar-link">CI 概述</a></li><li><a href="/blog/calico.html" class="sidebar-link">calico 网络原理</a></li><li><a href="/blog/calico-architecture.html" class="sidebar-link">calico架构</a></li><li><a href="/blog/calico-network-policy.html" class="sidebar-link">calico网络策略</a></li><li><a href="/blog/client-go-crd.html" class="sidebar-link">使用client-go包访问Kubernetes CRD</a></li><li><a href="/blog/cni.html" class="sidebar-link">CNI详细介绍</a></li><li><a href="/blog/container-stop-timeout.html" class="sidebar-link">容器信号使用</a></li><li><a href="/blog/containerd.html" class="sidebar-link">containerd与kubernetes集成</a></li><li><a href="/blog/crd.html" class="active sidebar-link">使用kubebuilder开发CRD</a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a href="/blog/crd.html#安装" class="sidebar-link">安装</a></li><li class="sidebar-sub-header"><a href="/blog/crd.html#使用" class="sidebar-link">使用</a></li><li class="sidebar-sub-header"><a href="/blog/crd.html#开发" class="sidebar-link">开发</a></li></ul></li><li><a href="/blog/csi.html" class="sidebar-link">CSI详解</a></li><li><a href="/blog/dev-k8s-workflow.html" class="sidebar-link">kubernetes开发流程</a></li><li><a href="/blog/docker-architech.html" class="sidebar-link">Docker架构分析</a></li><li><a href="/blog/docker-dev.html" class="sidebar-link">docker开发流程</a></li><li><a href="/blog/docker-network.html" class="sidebar-link">容器网络概述</a></li><li><a href="/blog/docker-oerlay2.html" class="sidebar-link">关于overlay2存储驱动的磁盘配额问题</a></li><li><a href="/blog/docker-ovs.html" class="sidebar-link">ovs对接容器网络</a></li><li><a href="/blog/etcd-manage.html" class="sidebar-link">etcd管南</a></li><li><a href="/blog/fist-terminal.html" class="sidebar-link">属于极客的k8s管理工具fist</a></li><li><a href="/blog/genie.html" class="sidebar-link">CNI 小精灵 genie</a></li><li><a href="/blog/istio-quickstart.html" class="sidebar-link">istio安装使用教程</a></li><li><a href="/blog/k8s-authenticating.html" class="sidebar-link">kubernetes对接第三方认证</a></li><li><a href="/blog/k8s-ha-conf.html" class="sidebar-link">kubernetes高可用相关配置</a></li><li><a href="/blog/k8s-ipvs.html" class="sidebar-link">kubernetes ipvs设置</a></li><li><a href="/blog/k8s-rbac.html" class="sidebar-link">kubernetes RBAC实战</a></li><li><a href="/blog/keepalived.html" class="sidebar-link">keepalived in docker</a></li><li><a href="/blog/kube-admin-control.html" class="sidebar-link">kubernetes Admission Controller原理介绍</a></li><li><a href="/blog/kube-batch.html" class="sidebar-link">kube-scheduler定制，支持深度学习批处理任务调度</a></li><li><a href="/blog/kube-cmd.html" class="sidebar-link">老夫k8s命令行賊6</a></li><li><a href="/blog/kube-dev.html" class="sidebar-link">kubernetes开发指南</a></li><li><a href="/blog/kube-proxy-src.html" class="sidebar-link">kube-proxy源码解析</a></li><li><a href="/blog/kube-scheduler-source-code.html" class="sidebar-link">kubernetes源码分析之kube-scheduler - 从代码看原理</a></li><li><a href="/blog/kubeadm.html" class="sidebar-link">kubeadm杂谈</a></li><li><a href="/blog/kubeadm-dev.html" class="sidebar-link">修改kubeadm证书过期时间</a></li><li><a href="/blog/kubeadm-source.html" class="sidebar-link">kubeadm源码分析</a></li><li><a href="/blog/kubernetes-vm.html" class="sidebar-link">强隔离容器的那些事</a></li><li><a href="/blog/kustomize.html" class="sidebar-link">kustomize 颤抖吧helm!</a></li><li><a href="/blog/libra.html" class="sidebar-link">facebook libra尝鲜，没赶上比特币能不能上这趟车</a></li><li><a href="/blog/macvtap.html" class="sidebar-link">macvtap实践教程</a></li><li><a href="/blog/ovn-vni.html" class="sidebar-link">从CNI到ovn</a></li><li><a href="/blog/prometheus-operator-envoy.html" class="sidebar-link">使用prometheus operator监控envoy</a></li><li><a href="/blog/rook.html" class="sidebar-link">rook使用教程，快速编排ceph</a></li><li><a href="/blog/rpc-protobuf.html" class="sidebar-link">golang基于protobuf的rpc使用</a></li><li><a href="/blog/runc.html" class="sidebar-link">runc 架构</a></li><li><a href="/blog/scratch.html" class="sidebar-link">scratch镜像</a></li><li><a href="/blog/tektoncd-pipeline.html" class="sidebar-link">tektoncd pipeline教程 - kubernetes原生pipeline</a></li><li><a href="/blog/user-token.html" class="sidebar-link">kubernetes 用户token教程</a></li><li><a href="/blog/vim.html" class="sidebar-link">是时候表现一下我的vim了</a></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="使用kubebuilder开发crd"><a href="#使用kubebuilder开发crd" class="header-anchor">#</a> 使用kubebuilder开发CRD</h1> <p>扩展kubernetes两个最常用最需要掌握的东西：自定义资源CRD 和 adminsion webhook, 本文教你如何十分钟掌握CRD开发.</p> <p>kubernetes允许用户自定义自己的资源对象，就如同deployment statefulset一样，这个应用非常广泛，比如prometheus opterator就自定义Prometheus对象，再加上一个自定义的controller监听到kubectl create Prometheus时就去创建Pod组成一个pormetheus集群。rook等等同理。</p> <p>我需要用kubernetes调度虚拟机，所以这里自定义一个 VirtualMachine 类型
+</p> <p><img src="/img/CRD.png" alt=""></p> <h1 id="kubebuilder"><a href="#kubebuilder" class="header-anchor">#</a> <a href="https://github.com/kubernetes-sigs/kubebuilder" target="_blank" rel="noopener noreferrer">kubebuilder<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></h1> <p>kubebuilder能帮我们节省大量工作，让开发CRD和adminsion webhook变得异常简单。</p> <h2 id="安装"><a href="#安装" class="header-anchor">#</a> 安装</h2> <p>通过源码安装：</p> <div class="language- extra-class"><pre class="language-text"><code>git clone https://github.com/kubernetes-sigs/kubebuilder
+cd kubebuilder
+make build
+cp bin/kubebuilder $GOPATH/bin
+</code></pre></div><p>或者下载二进制：</p> <div class="language- extra-class"><pre class="language-text"><code>os=$(go env GOOS)
+arch=$(go env GOARCH)
+
+# download kubebuilder and extract it to tmp
+curl -sL https://go.kubebuilder.io/dl/2.0.0-beta.0/${os}/${arch} | tar -xz -C /tmp/
+
+# move to a long-term location and put it on your path
+# (you'll need to set the KUBEBUILDER_ASSETS env var if you put it somewhere else)
+sudo mv /tmp/kubebuilder_2.0.0-beta.0_${os}_${arch} /usr/local/kubebuilder
+export PATH=$PATH:/usr/local/kubebuilder/bin
+</code></pre></div><p>还需要装下<a href="https://github.com/kubernetes-sigs/kustomize" target="_blank" rel="noopener noreferrer">kustomize<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a> 这可是个渲染yaml的神器，让helm颤抖。</p> <div class="language- extra-class"><pre class="language-text"><code>go install sigs.k8s.io/kustomize/v3/cmd/kustomize
+</code></pre></div><h2 id="使用"><a href="#使用" class="header-anchor">#</a> 使用</h2> <p>注意你得先有个kubernetes集群，<a href="https://github.com/fanux/sealos" target="_blank" rel="noopener noreferrer">一步安装走你<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></p> <blockquote><p>创建CRD</p></blockquote> <div class="language- extra-class"><pre class="language-text"><code>kubebuilder init --domain sealyun.com --license apache2 --owner &quot;fanux&quot;
+kubebuilder create api --group infra --version v1 --kind VirtulMachine
+</code></pre></div><blockquote><p>安装CRD并启动controller</p></blockquote> <div class="language- extra-class"><pre class="language-text"><code>make install # 安装CRD
+make run # 启动controller
+</code></pre></div><p>然后我们就可以看到创建的CRD了</p> <div class="language- extra-class"><pre class="language-text"><code># kubectl get crd
+NAME                                           AGE
+virtulmachines.infra.sealyun.com                  52m
+</code></pre></div><p>来创建一个虚拟机：</p> <div class="language- extra-class"><pre class="language-text"><code># kubectl apply -f config/samples/
+# kubectl get virtulmachines.infra.sealyun.com 
+NAME                   AGE
+virtulmachine-sample   49m
+</code></pre></div><p>看一眼yaml文件：</p> <div class="language- extra-class"><pre class="language-text"><code># cat config/samples/infra_v1_virtulmachine.yaml 
+apiVersion: infra.sealyun.com/v1
+kind: VirtulMachine
+metadata:
+  name: virtulmachine-sample
+spec:
+  # Add fields here
+  foo: bar
+</code></pre></div><p>这里仅仅是把yaml存到etcd里了，我们controller监听到创建事件时啥事也没干。</p> <blockquote><p>把controller部署到集群中</p></blockquote> <div class="language- extra-class"><pre class="language-text"><code>make docker-build docker-push IMG=fanux/infra-controller
+make deploy
+</code></pre></div><p>我是连的远端的kubenetes, make docker-build时test过不去，没有etcd的bin文件，所以先把test关了。</p> <p>修改Makefile:</p> <div class="language- extra-class"><pre class="language-text"><code># docker-build: test
+docker-build: 
+</code></pre></div><p>Dockerfile里的<code>gcr.io/distroless/static:latest</code> 这个镜像你也可能拉不下来，随意改改就行，我改成了<code>golang:1.12.7</code></p> <p>也有可能构建时有些代码拉不下来，启用一下go mod vendor 把依赖打包进去</p> <div class="language- extra-class"><pre class="language-text"><code>go mod vendor
+如果你本地有些代码拉不下来，可以用proxy:
+</code></pre></div><p>export GOPROXY=https://goproxy.io</p> <div class="language- extra-class"><pre class="language-text"><code></code></pre></div><p>再改下Dockerfile, 注释掉download：</p> <p>修改后：</p> <div class="language- extra-class"><pre class="language-text"><code># Build the manager binary
+FROM golang:1.12.7 as builder
+
+WORKDIR /go/src/github.com/fanux/sealvm
+# Copy the Go Modules manifests
+COPY . . 
+
+# Build
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o manager main.go
+
+# Use distroless as minimal base image to package the manager binary
+# Refer to https://github.com/GoogleContainerTools/distroless for more details
+# FROM gcr.io/distroless/static:latest
+FROM golang:1.12.7
+WORKDIR /
+COPY --from=builder /go/src/github.com/fanux/sealvm/manager .
+ENTRYPOINT [&quot;/manager&quot;]
+</code></pre></div><p><code>make deploy</code> 时报错： <code>Error: json: cannot unmarshal string into Go struct field Kustomization.patches of type types.Patch</code></p> <p>把 <code>config/default/kustomization.yaml</code> 中的 <code>patches:</code> 改成 <code>patchesStrategicMerge:</code> 即可</p> <p><code>kustomize build config/default</code> 这个命令就渲染出了controller的yaml文件，可以体验下</p> <p>看 你的controller已经跑起来了：</p> <div class="language- extra-class"><pre class="language-text"><code>kubectl get deploy -n sealvm-system
+NAME                        DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+sealvm-controller-manager   1         1         1            0           3m
+kubectl get svc -n sealvm-system
+NAME                                        TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+sealvm-controller-manager-metrics-service   ClusterIP   10.98.71.199   &lt;none&gt;        8443/TCP   4m
+</code></pre></div><h2 id="开发"><a href="#开发" class="header-anchor">#</a> 开发</h2> <h3 id="增加对象数据参数"><a href="#增加对象数据参数" class="header-anchor">#</a> 增加对象数据参数</h3> <p>看下config/samples下面的yaml文件：</p> <div class="language- extra-class"><pre class="language-text"><code>apiVersion: infra.sealyun.com/v1
+kind: VirtulMachine
+metadata:
+  name: virtulmachine-sample
+spec:
+  # Add fields here
+  foo: bar
+</code></pre></div><p>这里参数里有<code>foo:bar</code>， 那我们来加个虚拟CPU，内存信息：</p> <p>直接<code>api/v1/virtulmachine_types.go</code>即可</p> <div class="language- extra-class"><pre class="language-text"><code>// VirtulMachineSpec defines the desired state of VirtulMachine
+// 在这里加信息
+type VirtulMachineSpec struct {
+	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+	// Important: Run &quot;make&quot; to regenerate code after modifying this file
+	CPU    string `json:&quot;cpu&quot;`   // 这是我增加的
+	Memory string `json:&quot;memory&quot;`
+}
+
+// VirtulMachineStatus defines the observed state of VirtulMachine
+// 在这里加状态信息，比如虚拟机是启动状态，停止状态啥的
+type VirtulMachineStatus struct {
+	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
+	// Important: Run &quot;make&quot; to regenerate code after modifying this file
+}
+</code></pre></div><p>然后make一下：</p> <div class="language- extra-class"><pre class="language-text"><code>make &amp;&amp; make install &amp;&amp; make run
+</code></pre></div><p>这时再去渲染一下controller的yaml就会发现CRD中已经带上CPU和内存信息了：</p> <p><code>kustomize build config/default</code></p> <div class="language- extra-class"><pre class="language-text"><code>properties:
+  cpu:
+    description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+      Important: Run &quot;make&quot; to regenerate code after modifying this file'
+    type: string
+  memory:
+    type: string
+</code></pre></div><p>修改一下yaml:</p> <div class="language- extra-class"><pre class="language-text"><code>apiVersion: infra.sealyun.com/v1
+kind: VirtulMachine
+metadata:
+  name: virtulmachine-sample
+spec:
+  cpu: &quot;1&quot;
+  memory: &quot;2G&quot;
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code># kubectl apply -f config/samples 
+virtulmachine.infra.sealyun.com &quot;virtulmachine-sample&quot; configured
+# kubectl get virtulmachines.infra.sealyun.com virtulmachine-sample -o yaml 
+apiVersion: infra.sealyun.com/v1
+kind: VirtulMachine
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {&quot;apiVersion&quot;:&quot;infra.sealyun.com/v1&quot;,&quot;kind&quot;:&quot;VirtulMachine&quot;,&quot;metadata&quot;:{&quot;annotations&quot;:{},&quot;name&quot;:&quot;virtulmachine-sample&quot;,&quot;namespace&quot;:&quot;default&quot;},&quot;spec&quot;:{&quot;cpu&quot;:&quot;1&quot;,&quot;memory&quot;:&quot;2G&quot;}}
+  creationTimestamp: 2019-07-26T08:47:34Z
+  generation: 2
+  name: virtulmachine-sample
+  namespace: default
+  resourceVersion: &quot;14811698&quot;
+  selfLink: /apis/infra.sealyun.com/v1/namespaces/default/virtulmachines/virtulmachine-sample
+  uid: 030e2b9a-af82-11e9-b63e-5254bc16e436
+spec:      # 新的CRD已生效
+  cpu: &quot;1&quot;
+  memory: 2G 
+</code></pre></div><p>Status 同理，就不再赘述了，比如我把status里加一个Create, 表示controller要去创建虚拟机了(主要一些控制层面的逻辑)，创建完了把状态改成Running</p> <h3 id="reconcile-唯一需要实现的接口"><a href="#reconcile-唯一需要实现的接口" class="header-anchor">#</a> Reconcile 唯一需要实现的接口</h3> <p>controller把轮训与事件监听都封装在这一个接口里了.你不需要关心怎么事件监听的.</p> <h4 id="获取虚拟机信息"><a href="#获取虚拟机信息" class="header-anchor">#</a> 获取虚拟机信息</h4> <div class="language- extra-class"><pre class="language-text"><code>func (r *VirtulMachineReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+	ctx = context.Background()
+	_ = r.Log.WithValues(&quot;virtulmachine&quot;, req.NamespacedName)
+
+	vm := &amp;v1.VirtulMachine{}
+	if err := r.Get(ctx, req.NamespacedName, vm); err != nil { # 获取VM信息
+		log.Error(err, &quot;unable to fetch vm&quot;)
+	} else {
+        fmt.Println(vm.Spec.CPU, vm.Spec.Memory) # 打印CPU内存信息
+	}
+
+	return ctrl.Result{}, nil
+}
+</code></pre></div><p><code>make &amp;&amp; make install &amp;&amp; make run</code>这个时候去创建一个虚拟机<code>kubectl apply -f config/samples</code>,日志里就会输出CPU内存了. List接口同理，我就不赘述了</p> <div class="language- extra-class"><pre class="language-text"><code>r.List(ctx, &amp;vms, client.InNamespace(req.Namespace), client.MatchingField(vmkey, req.Name))
+</code></pre></div><h4 id="更新状态"><a href="#更新状态" class="header-anchor">#</a> 更新状态</h4> <p>在status结构体中加入状态字段：</p> <div class="language- extra-class"><pre class="language-text"><code>type VirtulMachineStatus struct {
+	Status string `json:&quot;status&quot;`
+}
+</code></pre></div><p>controller里去更新状态：</p> <div class="language- extra-class"><pre class="language-text"><code>vm.Status.Status = &quot;Running&quot;
+if err := r.Status().Update(ctx, vm); err != nil {
+	log.Error(err, &quot;unable to update vm status&quot;)
+}
+</code></pre></div><p>如果出现:<code>the server could not find the requested resource</code> 这个错误，那么在CRD结构体上需要加个注释 <code>// +kubebuilder:subresource:status</code>：</p> <div class="language- extra-class"><pre class="language-text"><code>// +kubebuilder:subresource:status
+// +kubebuilder:object:root=true
+
+type VirtulMachine struct {
+	metav1.TypeMeta   `json:&quot;,inline&quot;`
+	metav1.ObjectMeta `json:&quot;metadata,omitempty&quot;`
+
+	Spec   VirtulMachineSpec   `json:&quot;spec,omitempty&quot;`
+	Status VirtulMachineStatus `json:&quot;status,omitempty&quot;`
+}
+</code></pre></div><p>这样就好了</p> <p>编译启动后再去apply发现状态已经变成running：</p> <div class="language- extra-class"><pre class="language-text"><code># kubectl get virtulmachines.infra.sealyun.com virtulmachine-sample -o yaml
+...
+status:
+  status: Running 
+</code></pre></div><h4 id="删除"><a href="#删除" class="header-anchor">#</a> 删除</h4> <div class="language- extra-class"><pre class="language-text"><code>time.Sleep(time.Second * 10)
+if err := r.Delete(ctx, vm); err != nil {
+	log.Error(err, &quot;unable to delete vm &quot;, &quot;vm&quot;, vm)
+}
+</code></pre></div><p>10s之后我们将GET不到</p> <h3 id="删除回收器-finalizers"><a href="#删除回收器-finalizers" class="header-anchor">#</a> 删除回收器 Finalizers</h3> <p>如果不使用Finalizers，kubectl delete 时直接就删了etcd数据，controller再想去拿CRD时已经拿不到了：</p> <div class="language- extra-class"><pre class="language-text"><code>ERRO[0029] VirtulMachine.infra.sealyun.com &quot;virtulmachine-sample&quot; not foundunable to fetch vm  source=&quot;virtulmachine_controller.go:48&quot;
+</code></pre></div><p>所以在创建时我们需要给CRD加上Finalizer:</p> <div class="language- extra-class"><pre class="language-text"><code>vm.ObjectMeta.Finalizers = append(vm.ObjectMeta.Finalizers, &quot;virtulmachine.infra.sealyun.com&quot;)
+</code></pre></div><p>然后删除时就只会给CRD打上一个删除时间戳，供我们做后续处理, 处理完了我们删除掉Finalizers：</p> <div class="language- extra-class"><pre class="language-text"><code>如果 DeleteionTimestamp不存在
+    如果没有Finalizers
+        加上Finalizers,并更新CRD
+要不然，说明是要被删除的
+    如果存在Finalizers，删除Finalizers,并更新CRD
+</code></pre></div><p>看个完整的代码示例：</p> <div class="language- extra-class"><pre class="language-text"><code>if cronJob.ObjectMeta.DeletionTimestamp.IsZero() {
+        if !containsString(cronJob.ObjectMeta.Finalizers, myFinalizerName) {
+            cronJob.ObjectMeta.Finalizers = append(cronJob.ObjectMeta.Finalizers, myFinalizerName)
+            if err := r.Update(context.Background(), cronJob); err != nil {
+                return ctrl.Result{}, err
+            }
+        }
+    } else {
+        if containsString(cronJob.ObjectMeta.Finalizers, myFinalizerName) {
+            if err := r.deleteExternalResources(cronJob); err != nil {
+                return ctrl.Result{}, err
+            }
+
+            cronJob.ObjectMeta.Finalizers = removeString(cronJob.ObjectMeta.Finalizers, myFinalizerName)
+            if err := r.Update(context.Background(), cronJob); err != nil {
+                return ctrl.Result{}, err
+            }
+        }
+    }
+</code></pre></div><h3 id="失败重试"><a href="#失败重试" class="header-anchor">#</a> 失败重试</h3> <p>假设我们A依赖B而B又后创建，那么在处理A CRD时直接返回失败即可，这样很快会重试</p> <h3 id="webhook"><a href="#webhook" class="header-anchor">#</a> webhook</h3> <p>kuberentes有三种webhook,admission webhook, authorization webhook and CRD conversion webhook.</p> <p>这里比如我们要给CRD设置一些默认值，又或者是用户创建时少填了一些参数，那么我们得禁止创建等等这些事。</p> <p>使用webhook也非常的简单，只需给定义的结构体实现 <code>Defaulter</code> 和 <code>Validator</code>接口即可.</p> <h4 id="其它接口"><a href="#其它接口" class="header-anchor">#</a> 其它接口</h4> <p>Reconcile结构体聚合了Client接口，所以client的所有方法都是可以直接调用，大部分是对CRD object的相关操作</p> <div class="language- extra-class"><pre class="language-text"><code>type Client interface {
+	Reader
+	Writer
+	StatusClient
+}
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>// Reader knows how to read and list Kubernetes objects.
+type Reader interface {
+	// Get retrieves an obj for the given object key from the Kubernetes Cluster.
+	// obj must be a struct pointer so that obj can be updated with the response
+	// returned by the Server.
+	Get(ctx context.Context, key ObjectKey, obj runtime.Object) error
+
+	// List retrieves list of objects for a given namespace and list options. On a
+	// successful call, Items field in the list will be populated with the
+	// result returned from the server.
+	List(ctx context.Context, list runtime.Object, opts ...ListOptionFunc) error
+}
+
+// Writer knows how to create, delete, and update Kubernetes objects.
+type Writer interface {
+	// Create saves the object obj in the Kubernetes cluster.
+	Create(ctx context.Context, obj runtime.Object, opts ...CreateOptionFunc) error
+
+	// Delete deletes the given obj from Kubernetes cluster.
+	Delete(ctx context.Context, obj runtime.Object, opts ...DeleteOptionFunc) error
+
+	// Update updates the given obj in the Kubernetes cluster. obj must be a
+	// struct pointer so that obj can be updated with the content returned by the Server.
+	Update(ctx context.Context, obj runtime.Object, opts ...UpdateOptionFunc) error
+
+	// Patch patches the given obj in the Kubernetes cluster. obj must be a
+	// struct pointer so that obj can be updated with the content returned by the Server.
+	Patch(ctx context.Context, obj runtime.Object, patch Patch, opts ...PatchOptionFunc) error
+}
+
+// StatusClient knows how to create a client which can update status subresource
+// for kubernetes objects.
+type StatusClient interface {
+	Status() StatusWriter
+}
+</code></pre></div><p>探讨可加QQ群：98488045</p></div> <footer class="page-edit"><!----> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
+      ←
+      <a href="/blog/containerd.html" class="prev">containerd与kubernetes集成</a></span> <span class="next"><a href="/blog/csi.html">CSI详解</a>
+      →
+    </span></p></div> </main></div><div class="global-ui"></div></div>
+    <script src="/assets/js/app.23d3ef84.js" defer></script><script src="/assets/js/2.bc760f0a.js" defer></script><script src="/assets/js/17.5df0c46d.js" defer></script>
+  </body>
+</html>

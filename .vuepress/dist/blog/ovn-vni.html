@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>从CNI到ovn | sealyun | kubernetes安装</title>
+    <meta name="description" content="">
+    <meta name="theme-color" content="#007af5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2803648cc5852dd3e9e46bbd0bf63366";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+    <meta property="og:site_name" content="sealyun 专注于kubernetes安装"><meta property="og:title" content="sealyun kubernetes安装"><meta property="og:type" content="article"><meta property="og:url" content="/blog/ovn-vni.html"><meta name="twitter:title" content="sealyun kubernetes安装"><meta name="twitter:url" content="/blog/ovn-vni.html"><meta name="twitter:card" content="summary_large_image">
+    <link rel="preload" href="/assets/css/0.styles.943dcab2.css" as="style"><link rel="preload" href="/assets/js/app.23d3ef84.js" as="script"><link rel="preload" href="/assets/js/2.bc760f0a.js" as="script"><link rel="preload" href="/assets/js/47.fbef4ef0.js" as="script"><link rel="prefetch" href="/assets/js/10.e86bcb27.js"><link rel="prefetch" href="/assets/js/11.bb9904fc.js"><link rel="prefetch" href="/assets/js/12.ec81ebde.js"><link rel="prefetch" href="/assets/js/13.c482403d.js"><link rel="prefetch" href="/assets/js/14.9bd9e6fd.js"><link rel="prefetch" href="/assets/js/15.bdc6bd19.js"><link rel="prefetch" href="/assets/js/16.9e60a0b4.js"><link rel="prefetch" href="/assets/js/17.5df0c46d.js"><link rel="prefetch" href="/assets/js/18.85294fd2.js"><link rel="prefetch" href="/assets/js/19.f2879a42.js"><link rel="prefetch" href="/assets/js/20.6012d02a.js"><link rel="prefetch" href="/assets/js/21.81b7e1ca.js"><link rel="prefetch" href="/assets/js/22.1c2e71b0.js"><link rel="prefetch" href="/assets/js/23.0748294e.js"><link rel="prefetch" href="/assets/js/24.d63f1e4c.js"><link rel="prefetch" href="/assets/js/25.9dbfb44a.js"><link rel="prefetch" href="/assets/js/26.bfc3e626.js"><link rel="prefetch" href="/assets/js/27.ce51e7d7.js"><link rel="prefetch" href="/assets/js/28.ebb9caaf.js"><link rel="prefetch" href="/assets/js/29.8584027e.js"><link rel="prefetch" href="/assets/js/3.b7a496ec.js"><link rel="prefetch" href="/assets/js/30.158ceb97.js"><link rel="prefetch" href="/assets/js/31.f1024a9d.js"><link rel="prefetch" href="/assets/js/32.44cadfdb.js"><link rel="prefetch" href="/assets/js/33.af1c5cdb.js"><link rel="prefetch" href="/assets/js/34.a9e8095a.js"><link rel="prefetch" href="/assets/js/35.77ea75db.js"><link rel="prefetch" href="/assets/js/36.44da8d60.js"><link rel="prefetch" href="/assets/js/37.5e09e3fe.js"><link rel="prefetch" href="/assets/js/38.02e2aa10.js"><link rel="prefetch" href="/assets/js/39.b4e7f5f0.js"><link rel="prefetch" href="/assets/js/4.1ba98b6c.js"><link rel="prefetch" href="/assets/js/40.c879980c.js"><link rel="prefetch" href="/assets/js/41.0d571f5c.js"><link rel="prefetch" href="/assets/js/42.a7d12c13.js"><link rel="prefetch" href="/assets/js/43.60b5940b.js"><link rel="prefetch" href="/assets/js/44.b5a570c8.js"><link rel="prefetch" href="/assets/js/45.3df35b92.js"><link rel="prefetch" href="/assets/js/46.b47c3836.js"><link rel="prefetch" href="/assets/js/48.ae14afb1.js"><link rel="prefetch" href="/assets/js/49.4e6f30d4.js"><link rel="prefetch" href="/assets/js/5.c39869f0.js"><link rel="prefetch" href="/assets/js/50.c199fe15.js"><link rel="prefetch" href="/assets/js/51.30d345fb.js"><link rel="prefetch" href="/assets/js/52.5037db07.js"><link rel="prefetch" href="/assets/js/53.bb29d2bc.js"><link rel="prefetch" href="/assets/js/54.9e4ffa33.js"><link rel="prefetch" href="/assets/js/55.6d311bce.js"><link rel="prefetch" href="/assets/js/56.e6149a7c.js"><link rel="prefetch" href="/assets/js/57.57e2943c.js"><link rel="prefetch" href="/assets/js/58.61ea6212.js"><link rel="prefetch" href="/assets/js/59.95355587.js"><link rel="prefetch" href="/assets/js/6.0032a2d9.js"><link rel="prefetch" href="/assets/js/60.761d9050.js"><link rel="prefetch" href="/assets/js/61.b42700ba.js"><link rel="prefetch" href="/assets/js/62.6b9d864d.js"><link rel="prefetch" href="/assets/js/63.4aff7db2.js"><link rel="prefetch" href="/assets/js/64.34c83536.js"><link rel="prefetch" href="/assets/js/65.a7b0a430.js"><link rel="prefetch" href="/assets/js/66.8ee74e7e.js"><link rel="prefetch" href="/assets/js/67.3009b3ec.js"><link rel="prefetch" href="/assets/js/68.8bb3e997.js"><link rel="prefetch" href="/assets/js/7.5df889f4.js"><link rel="prefetch" href="/assets/js/8.c053b523.js"><link rel="prefetch" href="/assets/js/9.7948f30b.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.943dcab2.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><img src="https://sealyun.com/img/logo.png" alt="sealyun | kubernetes安装" class="logo"> <span class="site-name can-hide">sealyun | kubernetes安装</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav>  <ul class="sidebar-links"><li><a href="/blog/" class="sidebar-link">博客列表</a></li><li><a href="/blog/CI-CD.html" class="sidebar-link">CI 概述</a></li><li><a href="/blog/calico.html" class="sidebar-link">calico 网络原理</a></li><li><a href="/blog/calico-architecture.html" class="sidebar-link">calico架构</a></li><li><a href="/blog/calico-network-policy.html" class="sidebar-link">calico网络策略</a></li><li><a href="/blog/client-go-crd.html" class="sidebar-link">使用client-go包访问Kubernetes CRD</a></li><li><a href="/blog/cni.html" class="sidebar-link">CNI详细介绍</a></li><li><a href="/blog/container-stop-timeout.html" class="sidebar-link">容器信号使用</a></li><li><a href="/blog/containerd.html" class="sidebar-link">containerd与kubernetes集成</a></li><li><a href="/blog/crd.html" class="sidebar-link">使用kubebuilder开发CRD</a></li><li><a href="/blog/csi.html" class="sidebar-link">CSI详解</a></li><li><a href="/blog/dev-k8s-workflow.html" class="sidebar-link">kubernetes开发流程</a></li><li><a href="/blog/docker-architech.html" class="sidebar-link">Docker架构分析</a></li><li><a href="/blog/docker-dev.html" class="sidebar-link">docker开发流程</a></li><li><a href="/blog/docker-network.html" class="sidebar-link">容器网络概述</a></li><li><a href="/blog/docker-oerlay2.html" class="sidebar-link">关于overlay2存储驱动的磁盘配额问题</a></li><li><a href="/blog/docker-ovs.html" class="sidebar-link">ovs对接容器网络</a></li><li><a href="/blog/etcd-manage.html" class="sidebar-link">etcd管南</a></li><li><a href="/blog/fist-terminal.html" class="sidebar-link">属于极客的k8s管理工具fist</a></li><li><a href="/blog/genie.html" class="sidebar-link">CNI 小精灵 genie</a></li><li><a href="/blog/istio-quickstart.html" class="sidebar-link">istio安装使用教程</a></li><li><a href="/blog/k8s-authenticating.html" class="sidebar-link">kubernetes对接第三方认证</a></li><li><a href="/blog/k8s-ha-conf.html" class="sidebar-link">kubernetes高可用相关配置</a></li><li><a href="/blog/k8s-ipvs.html" class="sidebar-link">kubernetes ipvs设置</a></li><li><a href="/blog/k8s-rbac.html" class="sidebar-link">kubernetes RBAC实战</a></li><li><a href="/blog/keepalived.html" class="sidebar-link">keepalived in docker</a></li><li><a href="/blog/kube-admin-control.html" class="sidebar-link">kubernetes Admission Controller原理介绍</a></li><li><a href="/blog/kube-batch.html" class="sidebar-link">kube-scheduler定制，支持深度学习批处理任务调度</a></li><li><a href="/blog/kube-cmd.html" class="sidebar-link">老夫k8s命令行賊6</a></li><li><a href="/blog/kube-dev.html" class="sidebar-link">kubernetes开发指南</a></li><li><a href="/blog/kube-proxy-src.html" class="sidebar-link">kube-proxy源码解析</a></li><li><a href="/blog/kube-scheduler-source-code.html" class="sidebar-link">kubernetes源码分析之kube-scheduler - 从代码看原理</a></li><li><a href="/blog/kubeadm.html" class="sidebar-link">kubeadm杂谈</a></li><li><a href="/blog/kubeadm-dev.html" class="sidebar-link">修改kubeadm证书过期时间</a></li><li><a href="/blog/kubeadm-source.html" class="sidebar-link">kubeadm源码分析</a></li><li><a href="/blog/kubernetes-vm.html" class="sidebar-link">强隔离容器的那些事</a></li><li><a href="/blog/kustomize.html" class="sidebar-link">kustomize 颤抖吧helm!</a></li><li><a href="/blog/libra.html" class="sidebar-link">facebook libra尝鲜，没赶上比特币能不能上这趟车</a></li><li><a href="/blog/macvtap.html" class="sidebar-link">macvtap实践教程</a></li><li><a href="/blog/ovn-vni.html" class="active sidebar-link">从CNI到ovn</a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a href="/blog/ovn-vni.html#编译安装" class="sidebar-link">编译安装</a></li><li class="sidebar-sub-header"><a href="/blog/ovn-vni.html#启动ovs" class="sidebar-link">启动ovs</a></li><li class="sidebar-sub-header"><a href="/blog/ovn-vni.html#验证ovs" class="sidebar-link">验证ovs</a></li><li class="sidebar-sub-header"><a href="/blog/ovn-vni.html#启动ovn" class="sidebar-link">启动ovn</a></li><li class="sidebar-sub-header"><a href="/blog/ovn-vni.html#配置ovs与ovn相连接" class="sidebar-link">配置ovs与ovn相连接</a></li><li class="sidebar-sub-header"><a href="/blog/ovn-vni.html#配置ovs" class="sidebar-link">配置ovs</a></li><li class="sidebar-sub-header"><a href="/blog/ovn-vni.html#ovs单机连通性" class="sidebar-link">ovs单机连通性</a></li><li class="sidebar-sub-header"><a href="/blog/ovn-vni.html#跨主机连通性" class="sidebar-link">跨主机连通性</a></li><li class="sidebar-sub-header"><a href="/blog/ovn-vni.html#基本使用" class="sidebar-link">基本使用</a></li><li class="sidebar-sub-header"><a href="/blog/ovn-vni.html#逻辑子网" class="sidebar-link">逻辑子网</a></li><li class="sidebar-sub-header"><a href="/blog/ovn-vni.html#ip管理（dhcp）" class="sidebar-link">IP管理（DHCP）</a></li><li class="sidebar-sub-header"><a href="/blog/ovn-vni.html#静态ip配置" class="sidebar-link">静态IP配置</a></li><li class="sidebar-sub-header"><a href="/blog/ovn-vni.html#动态获取ip地址" class="sidebar-link">动态获取IP地址</a></li><li class="sidebar-sub-header"><a href="/blog/ovn-vni.html#经典网络实现" class="sidebar-link">经典网络实现</a></li><li class="sidebar-sub-header"><a href="/blog/ovn-vni.html#fip实现" class="sidebar-link">FIP实现</a></li></ul></li><li><a href="/blog/prometheus-operator-envoy.html" class="sidebar-link">使用prometheus operator监控envoy</a></li><li><a href="/blog/rook.html" class="sidebar-link">rook使用教程，快速编排ceph</a></li><li><a href="/blog/rpc-protobuf.html" class="sidebar-link">golang基于protobuf的rpc使用</a></li><li><a href="/blog/runc.html" class="sidebar-link">runc 架构</a></li><li><a href="/blog/scratch.html" class="sidebar-link">scratch镜像</a></li><li><a href="/blog/tektoncd-pipeline.html" class="sidebar-link">tektoncd pipeline教程 - kubernetes原生pipeline</a></li><li><a href="/blog/user-token.html" class="sidebar-link">kubernetes 用户token教程</a></li><li><a href="/blog/vim.html" class="sidebar-link">是时候表现一下我的vim了</a></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="从cni到ovn"><a href="#从cni到ovn" class="header-anchor">#</a> 从CNI到ovn</h1> <p>诸如calico flannel等CNI实现，通过牺牲一些功能让网络复杂度得以大幅度降低是我极其推崇的，在云原生时代应用不再关心基础设施的场景下是一个明智之举，给网络调错带来了极大方便。</p> <p>openstack与k8s放一起比较意义不大，openstack还是着重与基础设施，所以对上接口还是机器设施，网络设施，存储设施等，着重与资源的抽象。</p> <p>然鹅k8s不仅需要资源抽象，还需要关心应用的管理，其基于容器的设计理念已经改变了传统三层的云计算架构，而更像一个云内核，对上不再关心基础设施的接口了，反正把用户应用管好了就行。</p> <p>对比早起的操作系统很发现历史是惊人的相似，早期分层式操作系统到现代的宏内核与微内核操作系统，系统设计更为内聚了。目测云操作系统也会朝着这个路子发展吧（openstack粉太多，亡openstack之心不死不敢直说）</p> <p>但是！</p> <p>openstack底层一些技术还是非常值得学习与应用的，如qemu kvm ovs ovn ceph DPDK等。。。</p> <p>本文重点讲网络这块,ovn ovs怎么与kubernetes擦出火花
+</p> <h1 id="cni原理简述"><a href="#cni原理简述" class="header-anchor">#</a> CNI原理简述</h1> <p>CNI不是本文的重点，这里仅做一下简单的介绍<a href="https://github.com/containernetworking/cni/blob/master/SPEC.md" target="_blank" rel="noopener noreferrer">更多详情<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></p> <p>CNI很简单，本质就是你实现一个命令行工具，kubelet初始化网络时会去调用这个工具，传入一些环境变量，然后根据环境变量工具去做网络配置：</p> <p>配置完成后标准输出一个CNI规定的json格式，告诉k8s你的IP地址啥的</p> <p>命令包含三个部分</p> <ul><li>ADD 创建网络</li> <li>DEL 删除网络</li> <li>CHECK 检查网络</li></ul> <p>这里对ADD做一个介绍：</p> <div class="language- extra-class"><pre class="language-text"><code>EnvCNIPath        = &quot;CNI_PATH&quot;
+EnvNetDir         = &quot;NETCONFPATH&quot;
+EnvCapabilityArgs = &quot;CAP_ARGS&quot;
+EnvCNIArgs        = &quot;CNI_ARGS&quot;
+EnvCNIIfname      = &quot;CNI_IFNAME&quot; # 网卡名
+
+DefaultNetDir = &quot;/etc/cni/net.d&quot;
+
+CmdAdd   = &quot;add&quot;
+CmdCheck = &quot;check&quot;
+CmdDel   = &quot;del&quot;
+</code></pre></div><p>入参：</p> <div class="language- extra-class"><pre class="language-text"><code>容器ID
+网络namespace目录
+网络配置 - 定义哪些容器可以join到此网络
+容器内网卡名
+额外参数
+</code></pre></div><p>标准输出类似这样一个json：</p> <div class="language- extra-class"><pre class="language-text"><code>{
+  &quot;cniVersion&quot;: &quot;0.4.0&quot;,
+  &quot;interfaces&quot;: [                                            (this key omitted by IPAM plugins)
+      {
+          &quot;name&quot;: &quot;&lt;name&gt;&quot;,
+          &quot;mac&quot;: &quot;&lt;MAC address&gt;&quot;,                            (required if L2 addresses are meaningful)
+          &quot;sandbox&quot;: &quot;&lt;netns path or hypervisor identifier&gt;&quot; (required for container/hypervisor interfaces, empty/omitted for host interfaces)
+      }
+  ],
+  &quot;ips&quot;: [
+      {
+          &quot;version&quot;: &quot;&lt;4-or-6&gt;&quot;,
+          &quot;address&quot;: &quot;&lt;ip-and-prefix-in-CIDR&gt;&quot;,
+          &quot;gateway&quot;: &quot;&lt;ip-address-of-the-gateway&gt;&quot;,          (optional)
+          &quot;interface&quot;: &lt;numeric index into 'interfaces' list&gt;
+      }
+...
+</code></pre></div><p>那比如想拿到pod的一些元数据怎么办，典型场景是比如pod yaml里定义了属于哪个子网啥的，对不起CNI不传给你，你得拿着podid去apiserver里查，这是一个非常不爽的地方，所以现在ovn的CNI都有一个CNI server的东西去和apiserver交互。</p> <p>我去实现的话会考虑把信息写到容器的label里，这样CNI工具直接去容器元数据里查找一些信息,少用一个server</p> <h1 id="ovs与ovn安装与配置"><a href="#ovs与ovn安装与配置" class="header-anchor">#</a> OVS与OVN安装与配置</h1> <h2 id="编译安装"><a href="#编译安装" class="header-anchor">#</a> 编译安装</h2> <p>(吐槽一下ovn写的shit一般的文档)</p> <p>推荐用源码安装<a href="http://www.openvswitch.org//download/" target="_blank" rel="noopener noreferrer">地址<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></p> <div class="language- extra-class"><pre class="language-text"><code>wget https://www.openvswitch.org/releases/openvswitch-2.11.1.tar.gz
+tar zxvf openvswitch-2.11.1.tar.gz
+cd openvswitch-2.11.1
+./boot.sh &amp;&amp; ./configure &amp;&amp; make &amp;&amp; make install
+</code></pre></div><p>有个ovn的<a href="http://docs.openvswitch.org/en/latest/tutorials/ovn-sandbox/" target="_blank" rel="noopener noreferrer">sandbox<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a> 可以这样make : <code>make sandbox SANDBOXFLAGS=&quot;--ovn&quot;</code> 太低级咱不玩</p> <p>如果编译内核模块：</p> <div class="language- extra-class"><pre class="language-text"><code>$ make modules_install
+$ config_file=&quot;/etc/depmod.d/openvswitch.conf&quot;
+$ for module in datapath/linux/*.ko; do
+  modname=&quot;$(basename ${module})&quot;
+  echo &quot;override ${modname%.ko} * extra&quot; &gt;&gt; &quot;$config_file&quot;
+  echo &quot;override ${modname%.ko} * weak-updates&quot; &gt;&gt; &quot;$config_file&quot;
+  done
+$ depmod -a
+$ /sbin/modprobe openvswitch
+$ /sbin/lsmod | grep openvswitch
+</code></pre></div><h2 id="启动ovs"><a href="#启动ovs" class="header-anchor">#</a> 启动ovs</h2> <div class="language- extra-class"><pre class="language-text"><code>$ export PATH=$PATH:/usr/local/share/openvswitch/scripts
+$ ovs-ctl start --system-id=&quot;random&quot;
+$ ovs-appctl -t ovsdb-server ovsdb-server/add-remote ptcp:6640:IP_ADDRESS # 开启远程数据库
+</code></pre></div><p>IP_ADDRESS 是控制节点管理网地址</p> <h2 id="验证ovs"><a href="#验证ovs" class="header-anchor">#</a> 验证ovs</h2> <div class="language- extra-class"><pre class="language-text"><code>$ ovs-vsctl add-br br0
+$ ovs-vsctl add-port br0 eth0
+$ ovs-vsctl add-port br0 vif1.0
+$ ovs-vsctl show
+</code></pre></div><h2 id="启动ovn"><a href="#启动ovn" class="header-anchor">#</a> 启动ovn</h2> <div class="language- extra-class"><pre class="language-text"><code>$ /usr/share/openvswitch/scripts/ovn-ctl start_northd # 启动北向数据库
+$ /usr/share/openvswitch/scripts/ovn-ctl start_controller # 启动ovn controller
+$ ovn-sbctl show # 验证
+$ ovn-nbctl show # 验证
+</code></pre></div><h2 id="配置ovs与ovn相连接"><a href="#配置ovs与ovn相连接" class="header-anchor">#</a> 配置ovs与ovn相连接</h2> <div class="language- extra-class"><pre class="language-text"><code># ovn-nbctl set-connection ptcp:6641:0.0.0.0 -- \
+            set connection . inactivity_probe=60000
+# ovn-sbctl set-connection ptcp:6642:0.0.0.0 -- \
+            set connection . inactivity_probe=60000
+# if using the VTEP functionality:
+#   ovs-appctl -t ovsdb-server ovsdb-server/add-remote ptcp:6640:0.0.0.0
+</code></pre></div><p>配置ovsdb-server模块，默认ovsdb-server只允许本地访问，ovn服务需要这个权限。</p> <h2 id="配置ovs"><a href="#配置ovs" class="header-anchor">#</a> 配置ovs</h2> <p>controller节点使用ovs databases</p> <div class="language- extra-class"><pre class="language-text"><code>ovs-vsctl set open . external-ids:ovn-remote=tcp:IP_ADDRESS:6642
+ovs-vsctl set open . external-ids:ovn-encap-type=geneve,vxlan # 配置封装类型，geneve比较吊
+ovs-vsctl set open . external-ids:ovn-encap-ip=IP_ADDRESS # 配置overlay endpoint地址
+</code></pre></div><h1 id="ovs与容器"><a href="#ovs与容器" class="header-anchor">#</a> OVS与容器</h1> <p><img src="/ovn-cni.png" alt=""></p> <h2 id="ovs单机连通性"><a href="#ovs单机连通性" class="header-anchor">#</a> ovs单机连通性</h2> <p>创建容器, 设置net=none可以防止docker0默认网桥影响连通性测试</p> <div class="language-sh extra-class"><pre class="language-sh"><code>docker run -itd --name con6 --net<span class="token operator">=</span>none ubuntu:14.04 /bin/bash
+docker run -itd --name con7 --net<span class="token operator">=</span>none ubuntu:14.04 /bin/bash
+docker run -itd --name con8 --net<span class="token operator">=</span>none ubuntu:14.04 /bin/bash
+</code></pre></div><p>创建网桥</p> <div class="language-sh extra-class"><pre class="language-sh"><code>ovs-vsctl add-br ovs0
+</code></pre></div><p>使用ovs-docker给容器添加网卡，并挂到ovs0网桥上</p> <div class="language-sh extra-class"><pre class="language-sh"><code>ovs-docker add-port ovs0 eth0 con6 --ipaddress<span class="token operator">=</span><span class="token number">192.168</span>.1.2/24
+ovs-docker add-port ovs0 eth0 con7 --ipaddress<span class="token operator">=</span><span class="token number">192.168</span>.1.3/24
+ovs-docker add-port ovs0 eth0 con8 --ipaddress<span class="token operator">=</span><span class="token number">192.168</span>.1.4/24
+</code></pre></div><p>查看网桥</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># ovs-vsctl show</span>
+21e4d4c5-cadd-4dac-b025-c20b8108ad09
+    Bridge <span class="token string">&quot;ovs0&quot;</span>
+        Port <span class="token string">&quot;b167e3dcf8db4_l&quot;</span>
+            Interface <span class="token string">&quot;b167e3dcf8db4_l&quot;</span>
+        Port <span class="token string">&quot;f1c0a9d0994d4_l&quot;</span>
+            Interface <span class="token string">&quot;f1c0a9d0994d4_l&quot;</span>
+        Port <span class="token string">&quot;121c6b2f221c4_l&quot;</span>
+            Interface <span class="token string">&quot;121c6b2f221c4_l&quot;</span>
+        Port <span class="token string">&quot;ovs0&quot;</span>
+            Interface <span class="token string">&quot;ovs0&quot;</span>
+                type: internal
+    ovs_version: <span class="token string">&quot;2.8.2&quot;</span>
+</code></pre></div><p>测试连通性</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># docker exec -it con8 sh</span>
+<span class="token comment"># ping 192.168.1.2      </span>
+PING <span class="token number">192.168</span>.1.2 <span class="token punctuation">(</span><span class="token number">192.168</span>.1.2<span class="token punctuation">)</span> <span class="token number">56</span><span class="token punctuation">(</span><span class="token number">84</span><span class="token punctuation">)</span> bytes of data.
+<span class="token number">64</span> bytes from <span class="token number">192.168</span>.1.2: <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">0.886</span> ms
+^C
+--- <span class="token number">192.168</span>.1.2 <span class="token function">ping</span> statistics ---
+<span class="token number">1</span> packets transmitted, <span class="token number">1</span> received, <span class="token number">0</span>% packet loss, <span class="token function">time</span> 0ms
+rtt min/avg/max/mdev <span class="token operator">=</span> <span class="token number">0.886</span>/0.886/0.886/0.000 ms
+<span class="token comment"># </span>
+<span class="token comment"># ping 192.168.1.3  </span>
+PING <span class="token number">192.168</span>.1.3 <span class="token punctuation">(</span><span class="token number">192.168</span>.1.3<span class="token punctuation">)</span> <span class="token number">56</span><span class="token punctuation">(</span><span class="token number">84</span><span class="token punctuation">)</span> bytes of data.
+<span class="token number">64</span> bytes from <span class="token number">192.168</span>.1.3: <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">0.712</span> ms
+^C
+--- <span class="token number">192.168</span>.1.3 <span class="token function">ping</span> statistics ---
+<span class="token number">1</span> packets transmitted, <span class="token number">1</span> received, <span class="token number">0</span>% packet loss, <span class="token function">time</span> 0ms
+rtt min/avg/max/mdev <span class="token operator">=</span> <span class="token number">0.712</span>/0.712/0.712/0.000 ms
+<span class="token comment"># </span>
+</code></pre></div><h3 id="设置vlan-tag"><a href="#设置vlan-tag" class="header-anchor">#</a> 设置VLAN tag</h3> <p>查看网桥</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># ovs-vsctl show</span>
+21e4d4c5-cadd-4dac-b025-c20b8108ad09
+    Bridge <span class="token string">&quot;ovs0&quot;</span>
+        Port <span class="token string">&quot;b167e3dcf8db4_l&quot;</span>
+            Interface <span class="token string">&quot;b167e3dcf8db4_l&quot;</span>
+        Port <span class="token string">&quot;f1c0a9d0994d4_l&quot;</span>
+            Interface <span class="token string">&quot;f1c0a9d0994d4_l&quot;</span>
+        Port <span class="token string">&quot;121c6b2f221c4_l&quot;</span>
+            Interface <span class="token string">&quot;121c6b2f221c4_l&quot;</span>
+        Port <span class="token string">&quot;ovs0&quot;</span>
+            Interface <span class="token string">&quot;ovs0&quot;</span>
+                type: internal
+    ovs_version: <span class="token string">&quot;2.8.2&quot;</span>
+</code></pre></div><p>Interface是openvswitch核心概念之一，对应模拟的是交换机中插入port的网卡设备。一个Port通常只能有一个interface，但也可以有多个interfaces(Bond).</p> <p>interface type</p> <ul><li>system(如eth0),比如想把系统上的网卡挂在网桥上</li> <li>internal(模拟网络设备，名字如果是和bridge的名字一样则叫local interface)</li> <li>tap(一个tun/tap设备)</li> <li>patch(一对虚拟设备，用来模拟插线电缆) 容器场景用的多</li> <li>geneve(以太网通过geneve隧道)</li> <li>gre(RFC2890)，ipsec_gre(RFC2890 over ipsec tunnel)</li> <li>vxlan(基于以UDP为基础的VXLAN协议上的以太网隧道)</li> <li>lisp(一个3层的隧道，还在实验阶段)</li> <li>stt（Stateless TCP Tunnel，）</li></ul> <p>查看interface</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># ovs-vsctl list interface f1c0a9d0994d4_l</span>
+_uuid               <span class="token builtin class-name">:</span> cf400e7c-d2d6-4e0a-ad02-663dd63d1751
+admin_state         <span class="token builtin class-name">:</span> up
+duplex              <span class="token builtin class-name">:</span> full
+error               <span class="token builtin class-name">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+external_ids        <span class="token builtin class-name">:</span> <span class="token punctuation">{</span>container_id<span class="token operator">=</span><span class="token string">&quot;con6&quot;</span>, <span class="token assign-left variable">container_iface</span><span class="token operator">=</span><span class="token string">&quot;eth0&quot;</span><span class="token punctuation">}</span>
+ifindex             <span class="token builtin class-name">:</span> <span class="token number">239</span>
+ingress_policing_burst: <span class="token number">0</span>
+ingress_policing_rate: <span class="token number">0</span>
+lacp_current        <span class="token builtin class-name">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+link_resets         <span class="token builtin class-name">:</span> <span class="token number">1</span>
+link_speed          <span class="token builtin class-name">:</span> <span class="token number">10000000000</span>
+link_state          <span class="token builtin class-name">:</span> up
+mac_in_use          <span class="token builtin class-name">:</span> <span class="token string">&quot;96:91:0a:c9:02:d6&quot;</span>
+mtu                 <span class="token builtin class-name">:</span> <span class="token number">1500</span>
+mtu_request         <span class="token builtin class-name">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+name                <span class="token builtin class-name">:</span> <span class="token string">&quot;f1c0a9d0994d4_l&quot;</span>
+ofport              <span class="token builtin class-name">:</span> <span class="token number">3</span>
+other_config        <span class="token builtin class-name">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+statistics          <span class="token builtin class-name">:</span> <span class="token punctuation">{</span>collisions<span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">rx_bytes</span><span class="token operator">=</span><span class="token number">1328</span>, <span class="token assign-left variable">rx_crc_err</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">rx_dropped</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">rx_errors</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">rx_frame_err</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">rx_over_err</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">rx_packets</span><span class="token operator">=</span><span class="token number">18</span>, <span class="token assign-left variable">tx_bytes</span><span class="token operator">=</span><span class="token number">3032</span>, <span class="token assign-left variable">tx_dropped</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">tx_errors</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">tx_packets</span><span class="token operator">=</span><span class="token number">40</span><span class="token punctuation">}</span>
+status              <span class="token builtin class-name">:</span> <span class="token punctuation">{</span>driver_name<span class="token operator">=</span>veth, <span class="token assign-left variable">driver_version</span><span class="token operator">=</span><span class="token string">&quot;1.0&quot;</span>, <span class="token assign-left variable">firmware_version</span><span class="token operator">=</span><span class="token string">&quot;&quot;</span><span class="token punctuation">}</span>
+<span class="token builtin class-name">type</span>                <span class="token builtin class-name">:</span> <span class="token string">&quot;&quot;</span>
+</code></pre></div><p>设置vlan tag</p> <div class="language-sh extra-class"><pre class="language-sh"><code>ovs-vsctl <span class="token builtin class-name">set</span> port   f1c0a9d0994d4_l <span class="token assign-left variable">tag</span><span class="token operator">=</span><span class="token number">100</span>  //con6
+ovs-vsctl <span class="token builtin class-name">set</span> port   b167e3dcf8db4_l <span class="token assign-left variable">tag</span><span class="token operator">=</span><span class="token number">100</span>  //con8
+ovs-vsctl <span class="token builtin class-name">set</span> port   121c6b2f221c4_l <span class="token assign-left variable">tag</span><span class="token operator">=</span><span class="token number">200</span>  //con7
+</code></pre></div><p>测试连通性</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># docker exec -it con8 sh</span>
+<span class="token comment"># </span>
+<span class="token comment"># ping 192.168.1.2 -c 3</span>
+PING <span class="token number">192.168</span>.1.2 <span class="token punctuation">(</span><span class="token number">192.168</span>.1.2<span class="token punctuation">)</span> <span class="token number">56</span><span class="token punctuation">(</span><span class="token number">84</span><span class="token punctuation">)</span> bytes of data.
+<span class="token number">64</span> bytes from <span class="token number">192.168</span>.1.2: <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">0.413</span> ms
+<span class="token number">64</span> bytes from <span class="token number">192.168</span>.1.2: <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">2</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">0.061</span> ms
+<span class="token number">64</span> bytes from <span class="token number">192.168</span>.1.2: <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">3</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">0.057</span> ms
+--- <span class="token number">192.168</span>.1.2 <span class="token function">ping</span> statistics ---
+<span class="token number">3</span> packets transmitted, <span class="token number">3</span> received, <span class="token number">0</span>% packet loss, <span class="token function">time</span> 2044ms
+rtt min/avg/max/mdev <span class="token operator">=</span> <span class="token number">0.057</span>/0.177/0.413/0.166 ms
+<span class="token comment"># </span>
+<span class="token comment"># ping 192.168.1.3 -c 3</span>
+PING <span class="token number">192.168</span>.1.3 <span class="token punctuation">(</span><span class="token number">192.168</span>.1.3<span class="token punctuation">)</span> <span class="token number">56</span><span class="token punctuation">(</span><span class="token number">84</span><span class="token punctuation">)</span> bytes of data.
+From <span class="token number">192.168</span>.1.4 <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">1</span> Destination Host Unreachable
+From <span class="token number">192.168</span>.1.4 <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">2</span> Destination Host Unreachable
+--- <span class="token number">192.168</span>.1.3 <span class="token function">ping</span> statistics ---
+<span class="token number">3</span> packets transmitted, <span class="token number">0</span> received, +3 errors, <span class="token number">100</span>% packet loss, <span class="token function">time</span> 2068ms
+pipe <span class="token number">3</span>
+<span class="token comment"># </span>
+</code></pre></div><h2 id="跨主机连通性"><a href="#跨主机连通性" class="header-anchor">#</a> 跨主机连通性</h2> <h3 id="环境"><a href="#环境" class="header-anchor">#</a> 环境</h3> <h5 id="host1-172-29-101-123"><a href="#host1-172-29-101-123" class="header-anchor">#</a> host1 172.29.101.123</h5> <div class="language- extra-class"><pre class="language-text"><code>网桥:  ovs0      
+
+容器:    
+con6  192.168.1.2   
+con7  192.168.1.3   
+con8  192.168.1.4   
+</code></pre></div><p>创建方式依上</p> <h5 id="host2-172-29-101-82"><a href="#host2-172-29-101-82" class="header-anchor">#</a> host2 172.29.101.82</h5> <div class="language- extra-class"><pre class="language-text"><code>网桥: ovs1
+
+容器: con11
+</code></pre></div><p>准备环境</p> <div class="language-sh extra-class"><pre class="language-sh"><code>创建网桥
+ovs-vsctl add-br ovs1
+
+创建容器
+docker run -itd --name con11 --net<span class="token operator">=</span>none ubuntu:14.04 /bin/bash
+
+挂到ovs0网桥
+ovs-docker add-port ovs1 eth0 con11 --ipaddress<span class="token operator">=</span><span class="token number">192.168</span>.1.6/24
+</code></pre></div><p>查看网桥ovs1</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@compute82 /<span class="token punctuation">]</span><span class="token comment"># ovs-vsctl show</span>
+380ce027-8edf-4844-8e89-a6b9c1adaff3
+    Bridge <span class="token string">&quot;ovs1&quot;</span>
+        Port <span class="token string">&quot;0384251973e64_l&quot;</span>
+            Interface <span class="token string">&quot;0384251973e64_l&quot;</span>
+        Port <span class="token string">&quot;ovs1&quot;</span>
+            Interface <span class="token string">&quot;ovs1&quot;</span>
+                type: internal
+    ovs_version: <span class="token string">&quot;2.8.2&quot;</span>
+</code></pre></div><h3 id="设置vxlan"><a href="#设置vxlan" class="header-anchor">#</a> 设置vxlan</h3> <p>在host1上</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># ovs-vsctl add-port ovs0 vxlan1 -- set interface vxlan1 type=vxlan options:remote_ip=172.29.101.82 options:key=flow</span>
+<span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># </span>
+<span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># ovs-vsctl show</span>
+21e4d4c5-cadd-4dac-b025-c20b8108ad09
+    Bridge <span class="token string">&quot;ovs0&quot;</span>
+        Port <span class="token string">&quot;b167e3dcf8db4_l&quot;</span>
+            tag: <span class="token number">100</span>
+            Interface <span class="token string">&quot;b167e3dcf8db4_l&quot;</span>
+        Port <span class="token string">&quot;f1c0a9d0994d4_l&quot;</span>
+            tag: <span class="token number">100</span>
+            Interface <span class="token string">&quot;f1c0a9d0994d4_l&quot;</span>
+        Port <span class="token string">&quot;121c6b2f221c4_l&quot;</span>
+            tag: <span class="token number">200</span>
+            Interface <span class="token string">&quot;121c6b2f221c4_l&quot;</span>
+        Port <span class="token string">&quot;ovs0&quot;</span>
+            Interface <span class="token string">&quot;ovs0&quot;</span>
+                type: internal
+        Port <span class="token string">&quot;vxlan1&quot;</span>
+            Interface <span class="token string">&quot;vxlan1&quot;</span>
+                type: vxlan
+                options: <span class="token punctuation">{</span>key<span class="token operator">=</span>flow, <span class="token assign-left variable">remote_ip</span><span class="token operator">=</span><span class="token string">&quot;172.29.101.82&quot;</span><span class="token punctuation">}</span>
+    ovs_version: <span class="token string">&quot;2.8.2&quot;</span>
+</code></pre></div><p>在host2上</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@compute82 /<span class="token punctuation">]</span><span class="token comment"># ovs-vsctl add-port ovs1 vxlan1 -- set interface vxlan1 type=vxlan options:remote_ip=172.29.101.123 options:key=flow</span>
+<span class="token punctuation">[</span>root@compute82 /<span class="token punctuation">]</span><span class="token comment"># </span>
+<span class="token punctuation">[</span>root@compute82 /<span class="token punctuation">]</span><span class="token comment"># ovs-vsctl show</span>
+380ce027-8edf-4844-8e89-a6b9c1adaff3
+    Bridge <span class="token string">&quot;ovs1&quot;</span>
+        Port <span class="token string">&quot;0384251973e64_l&quot;</span>
+            Interface <span class="token string">&quot;0384251973e64_l&quot;</span>
+        Port <span class="token string">&quot;vxlan1&quot;</span>
+            Interface <span class="token string">&quot;vxlan1&quot;</span>
+                type: vxlan
+                options: <span class="token punctuation">{</span>key<span class="token operator">=</span>flow, <span class="token assign-left variable">remote_ip</span><span class="token operator">=</span><span class="token string">&quot;172.29.101.123&quot;</span><span class="token punctuation">}</span>
+        Port <span class="token string">&quot;ovs1&quot;</span>
+            Interface <span class="token string">&quot;ovs1&quot;</span>
+                type: internal
+    ovs_version: <span class="token string">&quot;2.8.2&quot;</span>
+</code></pre></div><h3 id="设置vlan-tag-2"><a href="#设置vlan-tag-2" class="header-anchor">#</a> 设置vlan tag</h3> <div class="language-sh extra-class"><pre class="language-sh"><code>ovs-vsctl <span class="token builtin class-name">set</span> port 0384251973e64_l <span class="token assign-left variable">tag</span><span class="token operator">=</span><span class="token number">100</span>
+</code></pre></div><h3 id="连通性测试"><a href="#连通性测试" class="header-anchor">#</a> 连通性测试</h3> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@compute82 /<span class="token punctuation">]</span><span class="token comment"># docker exec -ti con11 bash</span>
+root@c82da61bf925:/<span class="token comment"># ping 192.168.1.2</span>
+PING <span class="token number">192.168</span>.1.2 <span class="token punctuation">(</span><span class="token number">192.168</span>.1.2<span class="token punctuation">)</span> <span class="token number">56</span><span class="token punctuation">(</span><span class="token number">84</span><span class="token punctuation">)</span> bytes of data.
+<span class="token number">64</span> bytes from <span class="token number">192.168</span>.1.2: <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">0.161</span> ms
+<span class="token number">64</span> bytes from <span class="token number">192.168</span>.1.2: <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">2</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">0.206</span> ms
+^C
+--- <span class="token number">192.168</span>.1.2 <span class="token function">ping</span> statistics ---
+<span class="token number">2</span> packets transmitted, <span class="token number">2</span> received, <span class="token number">0</span>% packet loss, <span class="token function">time</span> 1000ms
+root@c82da61bf925:/<span class="token comment"># </span>
+root@c82da61bf925:/<span class="token comment"># ping 192.168.1.3</span>
+PING <span class="token number">192.168</span>.1.3 <span class="token punctuation">(</span><span class="token number">192.168</span>.1.3<span class="token punctuation">)</span> <span class="token number">56</span><span class="token punctuation">(</span><span class="token number">84</span><span class="token punctuation">)</span> bytes of data.
+^C
+--- <span class="token number">192.168</span>.1.3 <span class="token function">ping</span> statistics ---
+<span class="token number">3</span> packets transmitted, <span class="token number">0</span> received, <span class="token number">100</span>% packet loss, <span class="token function">time</span> 2027ms
+root@c82da61bf925:/<span class="token comment"># </span>
+root@c82da61bf925:/<span class="token comment"># exit</span>
+</code></pre></div><h3 id="结论"><a href="#结论" class="header-anchor">#</a> 结论</h3> <p>vxlan只能连通两台机器的ovs上同一个网段的容器，无法连通ovs上不同网段的容器。如果需要连通不同网段的容器，接下来我们尝试通过ovs的流表来解决这个问题。</p> <h1 id="openflow"><a href="#openflow" class="header-anchor">#</a> OpenFlow</h1> <h3 id="flow-table"><a href="#flow-table" class="header-anchor">#</a> flow table</h3> <p>支持openflow的交换机中可能包含多个flow table。每个flow table包含多条规则，每条规则包含匹配条件和执行动作。flow table中的每条规则有优先级，优先级高的优先匹配，匹配到规则以后，执行action，如果匹配失败，按优先级高低，继续匹配下一条。如果都不匹配，每张表会有默认的动作，一般为drop或者转给下一张流表。</p> <h3 id="实践"><a href="#实践" class="header-anchor">#</a> 实践</h3> <h4 id="环境-2"><a href="#环境-2" class="header-anchor">#</a> 环境</h4> <p>host1 172.29.101.123</p> <div class="language-sh extra-class"><pre class="language-sh"><code>网桥:  ovs0      
+
+容器:    
+con6  <span class="token number">192.168</span>.1.2     <span class="token assign-left variable">tag</span><span class="token operator">=</span><span class="token number">100</span>
+con7  <span class="token number">192.168</span>.1.3     <span class="token assign-left variable">tag</span><span class="token operator">=</span><span class="token number">100</span>
+</code></pre></div><p>host2 172.29.101.82</p> <div class="language-sh extra-class"><pre class="language-sh"><code>网桥: ovs1
+
+容器:  
+con9:  <span class="token number">192.168</span>.2.2    <span class="token assign-left variable">tag</span><span class="token operator">=</span><span class="token number">100</span>
+con10：192.168.2.3    <span class="token assign-left variable">tag</span><span class="token operator">=</span><span class="token number">100</span>
+con11: <span class="token number">192.168</span>.1.5    <span class="token assign-left variable">tag</span><span class="token operator">=</span><span class="token number">100</span>
+</code></pre></div><h3 id="查看默认流表"><a href="#查看默认流表" class="header-anchor">#</a> 查看默认流表</h3> <p>在host1上查看默认流表</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@controller msxu<span class="token punctuation">]</span><span class="token comment"># ovs-ofctl dump-flows ovs0</span>
+ <span class="token assign-left variable">cookie</span><span class="token operator">=</span>0x0, <span class="token assign-left variable">duration</span><span class="token operator">=</span><span class="token number">27858</span>.050s, <span class="token assign-left variable">table</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">n_packets</span><span class="token operator">=</span><span class="token number">5253660876</span>, <span class="token assign-left variable">n_bytes</span><span class="token operator">=</span><span class="token number">371729202788</span>, <span class="token assign-left variable">priority</span><span class="token operator">=</span><span class="token number">0</span> <span class="token assign-left variable">actions</span><span class="token operator">=</span>NORMAL
+</code></pre></div><p>在容器con6中ping con7，网络连通</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># docker exec -ti con6 bash</span>
+root@9ccc5c5664f9:/<span class="token comment"># </span>
+root@9ccc5c5664f9:/<span class="token comment"># ping 192.168.1.3</span>
+PING <span class="token number">192.168</span>.1.3 <span class="token punctuation">(</span><span class="token number">192.168</span>.1.3<span class="token punctuation">)</span> <span class="token number">56</span><span class="token punctuation">(</span><span class="token number">84</span><span class="token punctuation">)</span> bytes of data.
+<span class="token number">64</span> bytes from <span class="token number">192.168</span>.1.3: <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">0.613</span> ms
+<span class="token number">64</span> bytes from <span class="token number">192.168</span>.1.3: <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">2</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">0.066</span> ms
+--- <span class="token number">192.168</span>.1.3 <span class="token function">ping</span> statistics ---
+<span class="token number">2</span> packets transmitted, <span class="token number">2</span> received, <span class="token number">0</span>% packet loss, <span class="token function">time</span> 1058ms
+rtt min/avg/max/mdev <span class="token operator">=</span> <span class="token number">0.066</span>/0.339/0.613/0.274 ms
+root@9ccc5c5664f9:/<span class="token comment"># </span>
+</code></pre></div><p>删除默认流表</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># ovs-ofctl del-flows ovs0</span>
+<span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># </span>
+<span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># ovs-ofctl dump-flows ovs0</span>
+<span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># </span>
+</code></pre></div><p>测试网络连通性，发现网络已经不通</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># docker exec -ti con6 bash</span>
+root@9ccc5c5664f9:/<span class="token comment"># </span>
+root@9ccc5c5664f9:/<span class="token comment"># ping 192.168.1.3</span>
+PING <span class="token number">192.168</span>.1.3 <span class="token punctuation">(</span><span class="token number">192.168</span>.1.3<span class="token punctuation">)</span> <span class="token number">56</span><span class="token punctuation">(</span><span class="token number">84</span><span class="token punctuation">)</span> bytes of data.
+^C
+--- <span class="token number">192.168</span>.1.3 <span class="token function">ping</span> statistics ---
+<span class="token number">2</span> packets transmitted, <span class="token number">0</span> received, <span class="token number">100</span>% packet loss, <span class="token function">time</span> 1025ms
+root@9ccc5c5664f9:/<span class="token comment"># </span>
+</code></pre></div><h3 id="添加流表"><a href="#添加流表" class="header-anchor">#</a> 添加流表</h3> <p>如果要con6和con7能够通信，需要建立规则，让ovs转发对应的数据</p> <p>查看con6和con7在ovs上的网络端口</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># ovs-vsctl show</span>
+21e4d4c5-cadd-4dac-b025-c20b8108ad09
+    Bridge <span class="token string">&quot;ovs0&quot;</span>
+        Port <span class="token string">&quot;f1c0a9d0994d4_l&quot;</span>
+            tag: <span class="token number">100</span>
+            Interface <span class="token string">&quot;f1c0a9d0994d4_l&quot;</span>
+        Port <span class="token string">&quot;121c6b2f221c4_l&quot;</span>
+            tag: <span class="token number">100</span>
+            Interface <span class="token string">&quot;121c6b2f221c4_l&quot;</span>
+        Port <span class="token string">&quot;ovs0&quot;</span>
+            Interface <span class="token string">&quot;ovs0&quot;</span>
+                type: internal
+        Port <span class="token string">&quot;vxlan1&quot;</span>
+            Interface <span class="token string">&quot;vxlan1&quot;</span>
+                type: vxlan
+                options: <span class="token punctuation">{</span>key<span class="token operator">=</span>flow, <span class="token assign-left variable">remote_ip</span><span class="token operator">=</span><span class="token string">&quot;172.29.101.82&quot;</span><span class="token punctuation">}</span>
+    ovs_version: <span class="token string">&quot;2.8.2&quot;</span>
+<span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># ovs-vsctl list interface f1c0a9d0994d4_l |grep ofport</span>
+ofport              <span class="token builtin class-name">:</span> <span class="token number">3</span>
+ofport_request      <span class="token builtin class-name">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+<span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># </span>
+<span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># ovs-vsctl list interface 121c6b2f221c4_l |grep ofport</span>
+ofport              <span class="token builtin class-name">:</span> <span class="token number">4</span>
+ofport_request      <span class="token builtin class-name">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+</code></pre></div><p>添加规则：</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment">#ovs-ofctl add-flow ovs0 &quot;priority=1,in_port=3,actions=output:4&quot;</span>
+<span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment">#ovs-ofctl add-flow ovs0 &quot;priority=2,in_port=4,actions=output:3&quot;</span>
+<span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># ovs-ofctl dump-flows ovs0</span>
+ <span class="token assign-left variable">cookie</span><span class="token operator">=</span>0x0, <span class="token assign-left variable">duration</span><span class="token operator">=</span><span class="token number">60</span>.440s, <span class="token assign-left variable">table</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">n_packets</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">n_bytes</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">priority</span><span class="token operator">=</span><span class="token number">1</span>,in_port<span class="token operator">=</span><span class="token string">&quot;f1c0a9d0994d4_l&quot;</span> <span class="token assign-left variable">actions</span><span class="token operator">=</span>output:<span class="token string">&quot;121c6b2f221c4_l&quot;</span>
+ <span class="token assign-left variable">cookie</span><span class="token operator">=</span>0x0, <span class="token assign-left variable">duration</span><span class="token operator">=</span><span class="token number">50</span>.791s, <span class="token assign-left variable">table</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">n_packets</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">n_bytes</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">priority</span><span class="token operator">=</span><span class="token number">1</span>,in_port<span class="token operator">=</span><span class="token string">&quot;121c6b2f221c4_l&quot;</span> <span class="token assign-left variable">actions</span><span class="token operator">=</span>output:<span class="token string">&quot;f1c0a9d0994d4_l&quot;</span>
+<span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment">#</span>
+</code></pre></div><p>测试连通性：con6和con7已通</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@controller msxu<span class="token punctuation">]</span><span class="token comment"># docker exec -ti con6 bash</span>
+root@9ccc5c5664f9:/<span class="token comment"># ping 192.168.1.3</span>
+PING <span class="token number">192.168</span>.1.3 <span class="token punctuation">(</span><span class="token number">192.168</span>.1.3<span class="token punctuation">)</span> <span class="token number">56</span><span class="token punctuation">(</span><span class="token number">84</span><span class="token punctuation">)</span> bytes of data.
+<span class="token number">64</span> bytes from <span class="token number">192.168</span>.1.3: <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">0.924</span> ms
+<span class="token number">64</span> bytes from <span class="token number">192.168</span>.1.3: <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">2</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">0.058</span> ms
+^C
+--- <span class="token number">192.168</span>.1.3 <span class="token function">ping</span> statistics ---
+<span class="token number">2</span> packets transmitted, <span class="token number">2</span> received, <span class="token number">0</span>% packet loss, <span class="token function">time</span> 1057ms
+rtt min/avg/max/mdev <span class="token operator">=</span> <span class="token number">0.058</span>/0.491/0.924/0.433 ms
+root@9ccc5c5664f9:/<span class="token comment"># </span>
+</code></pre></div><p>设置一条优先级高的规则：</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># ovs-ofctl add-flow ovs0 &quot;priority=2,in_port=4,actions=drop&quot;</span>
+<span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># </span>
+<span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># docker exec -ti con6 bash</span>
+root@9ccc5c5664f9:/<span class="token comment"># </span>
+root@9ccc5c5664f9:/<span class="token comment"># ping  192.168.1.3</span>
+PING <span class="token number">192.168</span>.1.3 <span class="token punctuation">(</span><span class="token number">192.168</span>.1.3<span class="token punctuation">)</span> <span class="token number">56</span><span class="token punctuation">(</span><span class="token number">84</span><span class="token punctuation">)</span> bytes of data.
+^C
+--- <span class="token number">192.168</span>.1.3 <span class="token function">ping</span> statistics ---
+<span class="token number">3</span> packets transmitted, <span class="token number">0</span> received, <span class="token number">100</span>% packet loss, <span class="token function">time</span> 2087ms
+root@9ccc5c5664f9:/<span class="token comment"># </span>
+root@9ccc5c5664f9:/<span class="token comment"># </span>
+</code></pre></div><p>流表中的规则是有优先级的，priority数值越大，优先级越高。流表中，优先级高的优先匹配，并执行匹配规则的actions。如果不匹配，继续匹配优先级低的下一条。</p> <h3 id="跨网段连通"><a href="#跨网段连通" class="header-anchor">#</a> 跨网段连通</h3> <p>在上一个vxlan的实践中，通过设置vxlan可以打通两个机器上的ovs，但我们提到两个机器ovs上的容器得在同一个网段上才能通信。</p> <p>在ip为192.168.2.2的con9上ping另一台机上的con6 192.168.1.2</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@compute82 /<span class="token punctuation">]</span><span class="token comment"># docker exec -ti con9 bash</span>
+root@b55602aad0ac:/<span class="token comment"># </span>
+root@b55602aad0ac:/<span class="token comment"># ping 192.168.1.2</span>
+connect: Network is unreachable
+root@b55602aad0ac:/<span class="token comment"># </span>
+</code></pre></div><h4 id="添加流表规则："><a href="#添加流表规则：" class="header-anchor">#</a> 添加流表规则：</h4> <p>在host1上：</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># ovs-ofctl add-flow ovs0 &quot;priority=4,in_port=6,actions=output:3&quot;</span>
+<span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># </span>
+<span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># ovs-ofctl add-flow ovs0 &quot;priority=4,in_port=3,actions=output:6&quot;</span>
+<span class="token punctuation">[</span>root@controller /<span class="token punctuation">]</span><span class="token comment"># ovs-ofctl dump-flows ovs0</span>
+ <span class="token assign-left variable">cookie</span><span class="token operator">=</span>0x0, <span class="token assign-left variable">duration</span><span class="token operator">=</span><span class="token number">3228</span>.737s, <span class="token assign-left variable">table</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">n_packets</span><span class="token operator">=</span><span class="token number">7</span>, <span class="token assign-left variable">n_bytes</span><span class="token operator">=</span><span class="token number">490</span>, <span class="token assign-left variable">priority</span><span class="token operator">=</span><span class="token number">1</span>,in_port<span class="token operator">=</span><span class="token string">&quot;f1c0a9d0994d4_l&quot;</span> <span class="token assign-left variable">actions</span><span class="token operator">=</span>output:<span class="token string">&quot;121c6b2f221c4_l&quot;</span>
+ <span class="token assign-left variable">cookie</span><span class="token operator">=</span>0x0, <span class="token assign-left variable">duration</span><span class="token operator">=</span><span class="token number">3215</span>.544s, <span class="token assign-left variable">table</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">n_packets</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">n_bytes</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">priority</span><span class="token operator">=</span><span class="token number">1</span>,in_port<span class="token operator">=</span><span class="token string">&quot;121c6b2f221c4_l&quot;</span> <span class="token assign-left variable">actions</span><span class="token operator">=</span>output:<span class="token string">&quot;f1c0a9d0994d4_l&quot;</span>
+ <span class="token assign-left variable">cookie</span><span class="token operator">=</span>0x0, <span class="token assign-left variable">duration</span><span class="token operator">=</span><span class="token number">3168</span>.297s, <span class="token assign-left variable">table</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">n_packets</span><span class="token operator">=</span><span class="token number">9</span>, <span class="token assign-left variable">n_bytes</span><span class="token operator">=</span><span class="token number">546</span>, <span class="token assign-left variable">priority</span><span class="token operator">=</span><span class="token number">2</span>,in_port<span class="token operator">=</span><span class="token string">&quot;121c6b2f221c4_l&quot;</span> <span class="token assign-left variable">actions</span><span class="token operator">=</span>drop
+ <span class="token assign-left variable">cookie</span><span class="token operator">=</span>0x0, <span class="token assign-left variable">duration</span><span class="token operator">=</span><span class="token number">12</span>.024s, <span class="token assign-left variable">table</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">n_packets</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">n_bytes</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">priority</span><span class="token operator">=</span><span class="token number">4</span>,in_port<span class="token operator">=</span>vxlan1 <span class="token assign-left variable">actions</span><span class="token operator">=</span>output:<span class="token string">&quot;f1c0a9d0994d4_l&quot;</span>
+ <span class="token assign-left variable">cookie</span><span class="token operator">=</span>0x0, <span class="token assign-left variable">duration</span><span class="token operator">=</span><span class="token number">3</span>.168s, <span class="token assign-left variable">table</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">n_packets</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">n_bytes</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">priority</span><span class="token operator">=</span><span class="token number">4</span>,in_port<span class="token operator">=</span><span class="token string">&quot;f1c0a9d0994d4_l&quot;</span> <span class="token assign-left variable">actions</span><span class="token operator">=</span>output:vxlan1
+
+</code></pre></div><p>在host2上</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@compute82 /<span class="token punctuation">]</span><span class="token comment"># ovs-ofctl add-flow ovs1 &quot;priority=1,in_port=1,actions=output:6&quot;</span>
+<span class="token punctuation">[</span>root@compute82 /<span class="token punctuation">]</span><span class="token comment"># </span>
+<span class="token punctuation">[</span>root@compute82 /<span class="token punctuation">]</span><span class="token comment"># ovs-ofctl add-flow ovs1 &quot;priority=1,in_port=6,actions=output:1&quot;</span>
+<span class="token punctuation">[</span>root@compute82 /<span class="token punctuation">]</span><span class="token comment"># ovs-ofctl dump-flows ovs1</span>
+ <span class="token assign-left variable">cookie</span><span class="token operator">=</span>0x0, <span class="token assign-left variable">duration</span><span class="token operator">=</span><span class="token number">1076</span>.522s, <span class="token assign-left variable">table</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">n_packets</span><span class="token operator">=</span><span class="token number">27</span>, <span class="token assign-left variable">n_bytes</span><span class="token operator">=</span><span class="token number">1134</span>, <span class="token assign-left variable">priority</span><span class="token operator">=</span><span class="token number">1</span>,in_port<span class="token operator">=</span><span class="token string">&quot;0384251973e64_l&quot;</span> <span class="token assign-left variable">actions</span><span class="token operator">=</span>output:vxlan1
+ <span class="token assign-left variable">cookie</span><span class="token operator">=</span>0x0, <span class="token assign-left variable">duration</span><span class="token operator">=</span><span class="token number">936</span>.403s, <span class="token assign-left variable">table</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">n_packets</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">n_bytes</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">priority</span><span class="token operator">=</span><span class="token number">1</span>,in_port<span class="token operator">=</span>vxlan1 <span class="token assign-left variable">actions</span><span class="token operator">=</span>output:<span class="token string">&quot;0384251973e64_l&quot;</span>
+ <span class="token assign-left variable">cookie</span><span class="token operator">=</span>0x0, <span class="token assign-left variable">duration</span><span class="token operator">=</span><span class="token number">70205</span>.443s, <span class="token assign-left variable">table</span><span class="token operator">=</span><span class="token number">0</span>, <span class="token assign-left variable">n_packets</span><span class="token operator">=</span><span class="token number">7325</span>, <span class="token assign-left variable">n_bytes</span><span class="token operator">=</span><span class="token number">740137</span>, <span class="token assign-left variable">priority</span><span class="token operator">=</span><span class="token number">0</span> <span class="token assign-left variable">actions</span><span class="token operator">=</span>NORMAL
+
+</code></pre></div><h4 id="测试连通性"><a href="#测试连通性" class="header-anchor">#</a> 测试连通性</h4> <p>在host2 con9上ping 192.168.1.2</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@compute82 /<span class="token punctuation">]</span><span class="token comment"># docker exec -ti con9 bash</span>
+root@b55602aad0ac:/<span class="token comment"># </span>
+root@b55602aad0ac:/<span class="token comment"># ping 192.168.1.2</span>
+connect: Network is unreachable
+root@b55602aad0ac:/<span class="token comment"># </span>
+</code></pre></div><p>发现网络并不通，查看发现路由规则有问题，添加默认路由规则，注意这里需要已privileged权限进入容器</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@compute82 /<span class="token punctuation">]</span><span class="token comment"># docker exec --privileged -ti con9 bash</span>
+root@b55602aad0ac:/<span class="token comment"># </span>
+root@b55602aad0ac:/<span class="token comment"># route -n</span>
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+<span class="token number">192.168</span>.2.0     <span class="token number">0.0</span>.0.0         <span class="token number">255.255</span>.255.0   U     <span class="token number">0</span>      <span class="token number">0</span>        <span class="token number">0</span> eth0
+root@b55602aad0ac:/<span class="token comment"># route add default dev eth0</span>
+root@b55602aad0ac:/<span class="token comment"># </span>
+root@b55602aad0ac:/<span class="token comment"># route -n</span>
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+<span class="token number">0.0</span>.0.0         <span class="token number">0.0</span>.0.0         <span class="token number">0.0</span>.0.0         U     <span class="token number">0</span>      <span class="token number">0</span>        <span class="token number">0</span> eth0
+<span class="token number">192.168</span>.2.0     <span class="token number">0.0</span>.0.0         <span class="token number">255.255</span>.255.0   U     <span class="token number">0</span>      <span class="token number">0</span>        <span class="token number">0</span> eth0
+root@b55602aad0ac:/<span class="token comment"># </span>
+</code></pre></div><p>在host1和host2的容器中都添加好路由规则后，测试连通性</p> <div class="language-sh extra-class"><pre class="language-sh"><code><span class="token punctuation">[</span>root@compute82 /<span class="token punctuation">]</span><span class="token comment"># docker exec --privileged -ti con9 bash</span>
+root@b55602aad0ac:/<span class="token comment"># </span>
+root@b55602aad0ac:/<span class="token comment"># ping 192.168.1.2</span>
+PING <span class="token number">192.168</span>.1.2 <span class="token punctuation">(</span><span class="token number">192.168</span>.1.2<span class="token punctuation">)</span> <span class="token number">56</span><span class="token punctuation">(</span><span class="token number">84</span><span class="token punctuation">)</span> bytes of data.
+<span class="token number">64</span> bytes from <span class="token number">192.168</span>.1.2: <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">1.16</span> ms
+<span class="token number">64</span> bytes from <span class="token number">192.168</span>.1.2: <span class="token assign-left variable">icmp_seq</span><span class="token operator">=</span><span class="token number">2</span> <span class="token assign-left variable">ttl</span><span class="token operator">=</span><span class="token number">64</span> <span class="token assign-left variable">time</span><span class="token operator">=</span><span class="token number">0.314</span> ms
+^C
+--- <span class="token number">192.168</span>.1.2 <span class="token function">ping</span> statistics ---
+<span class="token number">2</span> packets transmitted, <span class="token number">2</span> received, <span class="token number">0</span>% packet loss, <span class="token function">time</span> 1002ms
+rtt min/avg/max/mdev <span class="token operator">=</span> <span class="token number">0.314</span>/0.739/1.165/0.426 ms
+</code></pre></div><p>已成功通过ovs，vxlan打通两台机器上不同网段容器</p> <h1 id="ovn实践"><a href="#ovn实践" class="header-anchor">#</a> OVN实践</h1> <p>有了ovs相关的实践，就具备了一定的基础，下面就可以进一步去了解ovn，ovn很重要的一点就是理解逻辑交换机,ovn是管控层面的，比如每台机器上都起了一个ovs交换机（软交换机，或者相对于逻辑交换机称之为物理交换机) 分布在不同机器上的虚拟机想要在一个子网下，那么我们创建一个逻辑交换机，把机器interface与之逻辑上关联在一起即可，最终ovn会下发流表使其在一个子网下。</p> <h2 id="基本使用"><a href="#基本使用" class="header-anchor">#</a> 基本使用</h2> <h3 id="逻辑面（控制面）"><a href="#逻辑面（控制面）" class="header-anchor">#</a> 逻辑面（控制面）</h3> <p>创建俩逻辑交换机</p> <div class="language- extra-class"><pre class="language-text"><code>$ ovn-nbctl ls-add sw0
+$ ovn-nbctl lsp-add sw0 sw0-port1
+$ ovn-nbctl lsp-set-addresses sw0-port1 &quot;50:54:00:00:00:01 192.168.0.2&quot;
+
+$ ovn-nbctl ls-add sw1
+$ ovn-nbctl lsp-add sw1 sw1-port1
+$ ovn-nbctl lsp-set-addresses sw1-port1 &quot;50:54:00:00:00:03 11.0.0.2&quot;
+</code></pre></div><p>创建一个逻辑路由器，并把两个交换机连接到路由器上</p> <div class="language- extra-class"><pre class="language-text"><code>$ ovn-nbctl lr-add lr0
+$ ovn-nbctl lrp-add lr0 lrp0 00:00:00:00:ff:01 192.168.0.1/24
+$ ovn-nbctl lsp-add sw0 lrp0-attachment
+$ ovn-nbctl lsp-set-type lrp0-attachment router
+$ ovn-nbctl lsp-set-addresses lrp0-attachment 00:00:00:00:ff:01
+$ ovn-nbctl lsp-set-options lrp0-attachment router-port=lrp0
+$ ovn-nbctl lrp-add lr0 lrp1 00:00:00:00:ff:02 11.0.0.1/24
+
+$ ovn-nbctl lsp-add sw1 lrp1-attachment
+$ ovn-nbctl lsp-set-type lrp1-attachment router
+$ ovn-nbctl lsp-set-addresses lrp1-attachment 00:00:00:00:ff:02
+$ ovn-nbctl lsp-set-options lrp1-attachment router-port=lrp1
+</code></pre></div><p>查看逻辑配置：</p> <div class="language- extra-class"><pre class="language-text"><code>$ ovn-nbctl show
+    switch 1396cf55-d176-4082-9a55-1c06cef626e4 (sw1)
+        port lrp1-attachment
+            addresses: [&quot;00:00:00:00:ff:02&quot;]
+        port sw1-port1
+            addresses: [&quot;50:54:00:00:00:03 11.0.0.2&quot;]
+    switch 2c9d6d03-09fc-4e32-8da6-305f129b0d53 (sw0)
+        port lrp0-attachment
+            addresses: [&quot;00:00:00:00:ff:01&quot;]
+        port sw0-port1
+            addresses: [&quot;50:54:00:00:00:01 192.168.0.2&quot;]
+    router f8377e8c-f75e-4fc8-8751-f3ea03c6dd98 (lr0)
+        port lrp0
+            mac: &quot;00:00:00:00:ff:01&quot;
+            networks: [&quot;192.168.0.1/24&quot;]
+        port lrp1
+            mac: &quot;00:00:00:00:ff:02&quot;
+            networks: [&quot;11.0.0.1/24&quot;]
+</code></pre></div><p>使用ovn-trace:</p> <div class="language- extra-class"><pre class="language-text"><code>$ ovn-trace --minimal sw0 'inport == &quot;sw0-port1&quot; \
+&gt; &amp;&amp; eth.src == 50:54:00:00:00:01 &amp;&amp; ip4.src == 192.168.0.2 \
+&gt; &amp;&amp; eth.dst == 00:00:00:00:ff:01 &amp;&amp; ip4.dst == 11.0.0.2 \
+&gt; &amp;&amp; ip.ttl == 64'
+
+# ip,reg14=0x1,vlan_tci=0x0000,dl_src=50:54:00:00:00:01,dl_dst=00:00:00:00:ff:01,nw_src=192.168.0.2,nw_dst=11.0.0.2,nw_proto=0,nw_tos=0,nw_ecn=0,nw_ttl=64
+ip.ttl--;
+eth.src = 00:00:00:00:ff:02;
+eth.dst = 50:54:00:00:00:03;
+output(&quot;sw1-port1&quot;);
+</code></pre></div><p>这里我们指定了源地址与源端口，再指定目的ip，最后会输出告诉我们从交换机哪个端口发出去了。</p> <h3 id="重点-把容器挂到逻辑交换机上"><a href="#重点-把容器挂到逻辑交换机上" class="header-anchor">#</a> 重点: 把容器挂到逻辑交换机上</h3> <p>ovs-docker这个工具里有这样一句：</p> <div class="language- extra-class"><pre class="language-text"><code>ip link add &quot;${PORTNAME}_l&quot; type veth peer name &quot;${PORTNAME}_c&quot;
+
+# Add one end of veth to OVS bridge.
+if ovs_vsctl --may-exist add-port &quot;$BRIDGE&quot; &quot;${PORTNAME}_l&quot; \
+       -- set interface &quot;${PORTNAME}_l&quot; \
+</code></pre></div><p>先创建了一个设备对，然后把设备对一端设置成ovs上的一个interface, 这样容器与ovs就关联上了，再把这个ovs上的port与ovn逻辑子网进行关联即可，请看具体例子：</p> <p>启动容器后是先要把容器设备对的一端挂在物理交换机上，然后通过设置iface-id来与逻辑交换机进行关联。</p> <div class="language- extra-class"><pre class="language-text"><code>ovs-vsctl --may-exist add-port sw0 port0 -- set interface port0 # 把docker挂到ovs上
+ovs-vsctl set Interface port0 external_ids:iface-id=lpor0       # 通过iface-id关联到逻辑端口上
+</code></pre></div><p>具体代码可以查看<a href="https://github.com/fanux/ops/blob/master/ovs/ovn/lib/ovn.sh" target="_blank" rel="noopener noreferrer">这里<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a> 这封装了一些基操作</p> <p>一些具体实现：<a href="https://github.com/fanux/ops/blob/master/ovs/ovn/l2_basic.sh" target="_blank" rel="noopener noreferrer">使用教程<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></p> <h2 id="逻辑子网"><a href="#逻辑子网" class="header-anchor">#</a> 逻辑子网</h2> <p>这里创建四个端口，都挂在ovs br-int网桥上，但是分别属于不同的逻辑交换机，这样不同的逻辑交换机没有连接路由器的情况下是不通的，同一个逻辑子网下端口可以互通。</p> <div class="language- extra-class"><pre class="language-text"><code>ls-create sw0
+ls-add-port sw0 sw0-port1 00:00:00:00:00:01 192.168.33.10/24
+ls-add-port sw0 sw0-port2 00:00:00:00:00:02 192.168.33.20/24
+
+ls-create sw1
+ls-add-port sw1 sw1-port1 00:00:00:00:00:03 192.168.33.30/24
+ls-add-port sw1 sw1-port2 00:00:00:00:00:04 192.168.33.40/24
+
+ovs-add-port br-int lport1 sw0-port1 192.168.33.1
+ovs-add-port br-int lport2 sw0-port2 192.168.33.1
+ovs-add-port br-int lport3 sw1-port1 192.168.33.1
+ovs-add-port br-int lport4 sw1-port2 192.168.33.1
+
+ip netns exec lport1-ns ip addr
+ip netns exec lport2-ns ip addr
+ip netns exec lport3-ns ip addr
+ip netns exec lport4-ns ip addr
+
+ip netns exec lport1-ns ping -c3 192.168.33.20
+ofport=$(ovs-vsctl list interface lport1 | awk '/ofport /{print $3}')
+ovs-appctl ofproto/trace br-int in_port=$ofport,dl_src=00:00:00:00:00:01,dl_dst=00:00:00:00:00:02 -generate
+
+ip netns exec lport1-ns ping -c3 192.168.33.30
+ovs-appctl ofproto/trace br-int in_port=$ofport,dl_src=00:00:00:00:00:01,dl_dst=00:00:00:00:00:03 -generate
+</code></pre></div><p>这里ls-create ls-add-port和ovs-add-port是简单封装了一下命令：</p> <p>ls-create ls-add-port:</p> <div class="language- extra-class"><pre class="language-text"><code>ls-create() {
+    ovn-nbctl --may-exist ls-add $switch
+}
+
+ls-add-port() {
+    switch=$1
+    port=$2
+    mac=$3
+    cidr=$4
+
+    # 逻辑交换机上创建逻辑端口
+    ovn-nbctl --may-exist lsp-add $switch $port
+
+    # 给逻辑端口设置mac地址
+    ovn-nbctl lsp-set-addresses $port $mac
+
+    # 仅允许该端口源或目的mac为对应地址
+    ovn-nbctl lsp-set-port-security $port $mac $cidr
+}
+</code></pre></div><p>穿件网络ns，把interface塞到ns中，再与物理端口相关联，然后给interface配置IP</p> <div class="language- extra-class"><pre class="language-text"><code>ovs-add-port() {
+    bridge=$1
+    port=$2
+    lport=$3
+    gateway=$4
+
+    # 创建一个网络ns
+    ip netns add $port-ns
+    # set interface 很重要，要不然就会只有端口没有interface,所以无法把它塞到ns中
+    ovs-vsctl --may-exist add-port $bridge $port -- set interface $port type=internal
+    if [ ! -z &quot;$lport&quot; ]; then
+        # 把逻辑端口与ovs端口进行关联
+        ovs-vsctl set Interface $port external_ids:iface-id=$lport
+    fi
+
+    pscount=$(ovn-nbctl lsp-get-port-security $lport | wc -l)
+    if [ $pscount = 2 ]; then
+        mac=$(ovn-nbctl lsp-get-port-security $lport | head -n 1)
+        cidr=$(ovn-nbctl lsp-get-port-security $lport | tail -n 1)
+        ip link set $port netns $port-ns
+        # ip netns exec $port-ns ip link set dev $port name eth0
+        ip netns exec $port-ns ip link set $port address $mac
+        ip netns exec $port-ns ip addr add $cidr dev $port
+        ip netns exec $port-ns ip link set $port up
+        if [ ! -z &quot;$gateway&quot; ]; then
+            ip netns exec $port-ns ip route add default via $gateway
+        fi
+    fi
+}
+</code></pre></div><p>所以在实现专有网络时只需要创建不同的逻辑交换机即可，不通过路由相连专有网络之间就会相互隔离。</p> <h2 id="ip管理（dhcp）"><a href="#ip管理（dhcp）" class="header-anchor">#</a> IP管理（DHCP）</h2> <h2 id="静态ip配置"><a href="#静态ip配置" class="header-anchor">#</a> 静态IP配置</h2> <p>这里给ovn逻辑端口配置一个静态的IP，然后ovn会模拟DHCP协议给端口响应完成地址配置</p> <div class="language- extra-class"><pre class="language-text"><code>ovn-nbctl lr-add user1
+ovn-nbctl ls-add vpc1
+
+#创建路由连接到vpc1端口，并分配mac 02:ac:10:ff:34:01 IP 172.66.1.10
+ovn-nbctl lrp-add user1 user1-vpc1 02:ac:10:ff:34:01 172.66.1.10/24
+
+ovn-nbctl lsp-add vpc1 vpc1-user1
+ovn-nbctl lsp-set-type vpc1-user1 router
+ovn-nbctl lsp-set-addresses vpc1-user1 02:ac:10:ff:34:01
+ovn-nbctl lsp-set-options vpc1-user1 router-port=user1-vpc1
+
+#创建路由连接到vpc2端口，并分配mac 02:ac:10:ff:34:02 IP 172.77.1.10
+ovn-nbctl lrp-add user1 user1-vpc2 02:ac:10:ff:34:02 172.77.1.10/24
+
+ovn-nbctl lsp-add vpc1 vpc1-vm1
+# 这里给逻辑端口配置IP地址
+ovn-nbctl lsp-set-addresses vpc1-vm1 &quot;02:ac:10:ff:01:30 172.66.1.107&quot; 
+# ovn-nbctl lsp-set-port-security vpc1-vm1 &quot;02:ac:10:ff:01:30 172.66.1.101&quot;
+
+options=$(ovn-nbctl create DHCP_Options cidr=172.66.1.0/24 \
+options=&quot;\&quot;server_id\&quot;=\&quot;172.66.1.10\&quot; \&quot;server_mac\&quot;=\&quot;02:ac:10:ff:34:01\&quot; \
+\&quot;lease_time\&quot;=\&quot;3600\&quot; \&quot;router\&quot;=\&quot;172.66.1.10\&quot;&quot;)
+
+echo &quot;DHCP options is: &quot; $options
+ovn-nbctl lsp-set-dhcpv4-options vpc1-vm1 $options
+ovn-nbctl lsp-get-dhcpv4-options vpc1-vm1
+
+ip netns add vm1
+ovs-vsctl add-port br-int vm1 -- set interface vm1 type=internal
+ip link set vm1 address 02:ac:10:ff:01:30
+ip link set vm1 netns vm1
+ovs-vsctl set Interface vm1 external_ids:iface-id=vpc1-vm1
+# 通过DHCP即可拿到地址
+ip netns exec vm1 dhclient vm1
+ip netns exec vm1 ip addr show vm1
+ip netns exec vm1 ip route show
+
+clean() {
+    ip netns del vm1
+    ovn-nbctl ls-del vpc1
+    ovs-vsctl del-port br-int vm1
+}
+</code></pre></div><h2 id="动态获取ip地址"><a href="#动态获取ip地址" class="header-anchor">#</a> 动态获取IP地址</h2> <p><a href="https://developers.redhat.com/blog/2018/09/03/ovn-dynamic-ip-address-management/" target="_blank" rel="noopener noreferrer">参考文章<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></p> <p>ovn支持管理你的IP地址，只需要指定一个子网，就会给借口分配未被占用的IP地址：</p> <p>大部分操作与静态IP一样，注意下面几个重点注释地方：</p> <div class="language- extra-class"><pre class="language-text"><code>ovn-nbctl lr-add user1
+ovn-nbctl ls-add vpc1
+# [重点] 需要other_config，否则不会分配地址
+ovn-nbctl set Logical_Switch vpc1 other_config:subnet=172.66.1.10/24
+
+#创建路由连接到vpc1端口，并分配mac 02:ac:10:ff:34:01 IP 172.66.1.10
+ovn-nbctl lrp-add user1 user1-vpc1 02:ac:10:ff:34:01 172.66.1.10/24
+
+ovn-nbctl lsp-add vpc1 vpc1-user1
+ovn-nbctl lsp-set-type vpc1-user1 router
+ovn-nbctl lsp-set-addresses vpc1-user1 02:ac:10:ff:34:01
+ovn-nbctl lsp-set-options vpc1-user1 router-port=user1-vpc1
+
+ovn-nbctl lsp-add vpc1 vpc1-vm1
+# 【重点】这里不指定具体地址，而使用dynamic
+ovn-nbctl lsp-set-addresses vpc1-vm1 &quot;02:ac:10:ff:01:30 dynamic&quot;
+# ovn-nbctl lsp-set-addresses vpc1-vm1 &quot;dynamic&quot;
+# ovn-nbctl lsp-set-port-security vpc1-vm1 &quot;02:ac:10:ff:01:30 172.66.1.106&quot;
+
+options=$(ovn-nbctl create DHCP_Options cidr=172.66.1.0/24 \
+options=&quot;\&quot;server_id\&quot;=\&quot;172.66.1.10\&quot; \&quot;server_mac\&quot;=\&quot;02:ac:10:ff:34:01\&quot; \
+\&quot;lease_time\&quot;=\&quot;3600\&quot; \&quot;router\&quot;=\&quot;172.66.1.10\&quot;&quot;)
+
+echo &quot;DHCP options is: &quot; $options
+ovn-nbctl lsp-set-dhcpv4-options vpc1-vm1 $options
+ovn-nbctl lsp-get-dhcpv4-options vpc1-vm1
+# 这里可以看到分配到的地址
+ovn-nbctl list logical_switch_port
+
+ip netns add vm1
+ovs-vsctl add-port br-int vm1 -- set interface vm1 type=internal
+ip link set vm1 address 02:ac:10:ff:01:30
+ip link set vm1 netns vm1
+ovs-vsctl set Interface vm1 external_ids:iface-id=vpc1-vm1
+# 通过dhclient就可以获取到地址了
+ip netns exec vm1 dhclient vm1
+ip netns exec vm1 ip addr show vm1
+ip netns exec vm1 ip route show
+</code></pre></div><p>可以查看到已分配的地址：</p> <div class="language- extra-class"><pre class="language-text"><code>$ ovn-nbctl list logical_switch_port
+_uuid : 2d1fe408-f119-48d6-88c9-dff237c92856
+addresses : [dynamic]
+dhcpv4_options : []
+dhcpv6_options : []
+dynamic_addresses : &quot;0a:00:00:00:00:01 192.168.0.2 fdd6:8cf5:9dc2:c30a:800:ff:fe00:1&quot;
+enabled : []
+external_ids : {}
+name : &quot;port1&quot;
+options : {}
+parent_name : []
+port_security : []
+tag : []
+tag_request : []
+type : &quot;&quot;
+up : false
+
+_uuid : 43867394-8d3b-4e36-a90d-5f635d6a084c
+addresses : [&quot;00:ac:00:ff:01:01 dynamic&quot;]
+dhcpv4_options : []
+dhcpv6_options : []
+dynamic_addresses : &quot;00:ac:00:ff:01:01 192.168.0.3 fdd6:8cf5:9dc2:c30a:2ac:ff:feff:101&quot;
+enabled : []
+external_ids : {}
+name : &quot;port2&quot;
+options : {}
+parent_name : []
+port_security : []
+tag : []
+tag_request : []
+type : &quot;&quot;
+up : false
+</code></pre></div><h2 id="经典网络实现"><a href="#经典网络实现" class="header-anchor">#</a> 经典网络实现</h2> <p><img src="/kube-ovn-classics.jpg" alt=""></p> <div class="language- extra-class"><pre class="language-text"><code>ovn-nbctl lsp-add out outs-wan
+ovn-nbctl lsp-set-addresses outs-wan unknown
+ovn-nbctl lsp-set-type outs-wan localnet # 连接物理网络端口类型
+ovn-nbctl lsp-set-options outs-wan network_name=wanNet # 做bridge mapping时需要
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>ovs-vsctl add-br br-eth
+ovs-vsctl set Open_vSwitch . external-ids:ovn-bridge-mappings=wanNet:br-eth
+ovs-vsctl add-port br-eth eth0
+
+#配置网桥IP
+ip link set br-eth up
+ip addr add 192.168.66.111/23 dev br-eth
+</code></pre></div><p>把虚拟机关联到逻辑网桥上，这样物理网卡与虚拟机就在一个网桥上了</p> <div class="language- extra-class"><pre class="language-text"><code>ovs-vsctl set Interface vm1 external_ids:iface-id=vm1
+</code></pre></div><h2 id="fip实现"><a href="#fip实现" class="header-anchor">#</a> FIP实现</h2> <p><img src="/img/kube-ovn-vpc.png" alt="">
+其它部分的链接参考上文，这里主要是路由相关的操作</p> <p>vm想要出网那么必须要进行源地址转换，就和我们访问google一样，那我们机器的192.168.x.x的地址就会在路由器上被转化</p> <div class="language- extra-class"><pre class="language-text"><code>#对vpc1
+ovn-nbctl -- --id=@nat create nat type=&quot;snat&quot; logical_ip=172.66.1.0/24 \
+external_ip=192.168.66.45 -- add logical_router gateway_route nat @nat
+#会返回uuid
+56ad6c5b-8417-4314-95c4-a0d780b5ef0b
+</code></pre></div><p>这里66.45是我们链接物理网络的一个地址，告诉路由器使用该地址进行转换</p> <p>实现FIP其实就是snat dnat都做：</p> <div class="language- extra-class"><pre class="language-text"><code>#对vm3 172.66.1.103  绑定外网 192.168.66.46 
+ovn-nbctl -- --id=@nat create nat type=&quot;dnat_and_snat&quot; logical_ip=172.66.1.103 \
+external_ip=192.168.66.46 -- add logical_router gateway_route nat @nat
+</code></pre></div><h1 id="ovn-ovs与cni对接"><a href="#ovn-ovs与cni对接" class="header-anchor">#</a> ovn ovs与CNI对接</h1> <p>ovn ovs与CNI对接包含两个部分，CNI插件仅需要把容器的设备对一端挂载到ovs网桥上然后配置好地址,与逻辑端口做好映射. 主要是物理面的功能，逻辑管控层面就可以通过CRD进行创建，所以重点是对ovn ovs CNI本身的掌握。</p></div> <footer class="page-edit"><!----> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
+      ←
+      <a href="/blog/macvtap.html" class="prev">macvtap实践教程</a></span> <span class="next"><a href="/blog/prometheus-operator-envoy.html">使用prometheus operator监控envoy</a>
+      →
+    </span></p></div> </main></div><div class="global-ui"></div></div>
+    <script src="/assets/js/app.23d3ef84.js" defer></script><script src="/assets/js/2.bc760f0a.js" defer></script><script src="/assets/js/47.fbef4ef0.js" defer></script>
+  </body>
+</html>

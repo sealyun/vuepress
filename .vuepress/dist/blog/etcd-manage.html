@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>etcd管南 | sealyun | kubernetes安装</title>
+    <meta name="description" content="">
+    <meta name="theme-color" content="#007af5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2803648cc5852dd3e9e46bbd0bf63366";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+    <meta property="og:site_name" content="sealyun 专注于kubernetes安装"><meta property="og:title" content="sealyun kubernetes安装"><meta property="og:type" content="article"><meta property="og:url" content="/blog/etcd-manage.html"><meta name="twitter:title" content="sealyun kubernetes安装"><meta name="twitter:url" content="/blog/etcd-manage.html"><meta name="twitter:card" content="summary_large_image">
+    <link rel="preload" href="/assets/css/0.styles.943dcab2.css" as="style"><link rel="preload" href="/assets/js/app.23d3ef84.js" as="script"><link rel="preload" href="/assets/js/2.bc760f0a.js" as="script"><link rel="preload" href="/assets/js/25.9dbfb44a.js" as="script"><link rel="prefetch" href="/assets/js/10.e86bcb27.js"><link rel="prefetch" href="/assets/js/11.bb9904fc.js"><link rel="prefetch" href="/assets/js/12.ec81ebde.js"><link rel="prefetch" href="/assets/js/13.c482403d.js"><link rel="prefetch" href="/assets/js/14.9bd9e6fd.js"><link rel="prefetch" href="/assets/js/15.bdc6bd19.js"><link rel="prefetch" href="/assets/js/16.9e60a0b4.js"><link rel="prefetch" href="/assets/js/17.5df0c46d.js"><link rel="prefetch" href="/assets/js/18.85294fd2.js"><link rel="prefetch" href="/assets/js/19.f2879a42.js"><link rel="prefetch" href="/assets/js/20.6012d02a.js"><link rel="prefetch" href="/assets/js/21.81b7e1ca.js"><link rel="prefetch" href="/assets/js/22.1c2e71b0.js"><link rel="prefetch" href="/assets/js/23.0748294e.js"><link rel="prefetch" href="/assets/js/24.d63f1e4c.js"><link rel="prefetch" href="/assets/js/26.bfc3e626.js"><link rel="prefetch" href="/assets/js/27.ce51e7d7.js"><link rel="prefetch" href="/assets/js/28.ebb9caaf.js"><link rel="prefetch" href="/assets/js/29.8584027e.js"><link rel="prefetch" href="/assets/js/3.b7a496ec.js"><link rel="prefetch" href="/assets/js/30.158ceb97.js"><link rel="prefetch" href="/assets/js/31.f1024a9d.js"><link rel="prefetch" href="/assets/js/32.44cadfdb.js"><link rel="prefetch" href="/assets/js/33.af1c5cdb.js"><link rel="prefetch" href="/assets/js/34.a9e8095a.js"><link rel="prefetch" href="/assets/js/35.77ea75db.js"><link rel="prefetch" href="/assets/js/36.44da8d60.js"><link rel="prefetch" href="/assets/js/37.5e09e3fe.js"><link rel="prefetch" href="/assets/js/38.02e2aa10.js"><link rel="prefetch" href="/assets/js/39.b4e7f5f0.js"><link rel="prefetch" href="/assets/js/4.1ba98b6c.js"><link rel="prefetch" href="/assets/js/40.c879980c.js"><link rel="prefetch" href="/assets/js/41.0d571f5c.js"><link rel="prefetch" href="/assets/js/42.a7d12c13.js"><link rel="prefetch" href="/assets/js/43.60b5940b.js"><link rel="prefetch" href="/assets/js/44.b5a570c8.js"><link rel="prefetch" href="/assets/js/45.3df35b92.js"><link rel="prefetch" href="/assets/js/46.b47c3836.js"><link rel="prefetch" href="/assets/js/47.fbef4ef0.js"><link rel="prefetch" href="/assets/js/48.ae14afb1.js"><link rel="prefetch" href="/assets/js/49.4e6f30d4.js"><link rel="prefetch" href="/assets/js/5.c39869f0.js"><link rel="prefetch" href="/assets/js/50.c199fe15.js"><link rel="prefetch" href="/assets/js/51.30d345fb.js"><link rel="prefetch" href="/assets/js/52.5037db07.js"><link rel="prefetch" href="/assets/js/53.bb29d2bc.js"><link rel="prefetch" href="/assets/js/54.9e4ffa33.js"><link rel="prefetch" href="/assets/js/55.6d311bce.js"><link rel="prefetch" href="/assets/js/56.e6149a7c.js"><link rel="prefetch" href="/assets/js/57.57e2943c.js"><link rel="prefetch" href="/assets/js/58.61ea6212.js"><link rel="prefetch" href="/assets/js/59.95355587.js"><link rel="prefetch" href="/assets/js/6.0032a2d9.js"><link rel="prefetch" href="/assets/js/60.761d9050.js"><link rel="prefetch" href="/assets/js/61.b42700ba.js"><link rel="prefetch" href="/assets/js/62.6b9d864d.js"><link rel="prefetch" href="/assets/js/63.4aff7db2.js"><link rel="prefetch" href="/assets/js/64.34c83536.js"><link rel="prefetch" href="/assets/js/65.a7b0a430.js"><link rel="prefetch" href="/assets/js/66.8ee74e7e.js"><link rel="prefetch" href="/assets/js/67.3009b3ec.js"><link rel="prefetch" href="/assets/js/68.8bb3e997.js"><link rel="prefetch" href="/assets/js/7.5df889f4.js"><link rel="prefetch" href="/assets/js/8.c053b523.js"><link rel="prefetch" href="/assets/js/9.7948f30b.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.943dcab2.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><img src="https://sealyun.com/img/logo.png" alt="sealyun | kubernetes安装" class="logo"> <span class="site-name can-hide">sealyun | kubernetes安装</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav>  <ul class="sidebar-links"><li><a href="/blog/" class="sidebar-link">博客列表</a></li><li><a href="/blog/CI-CD.html" class="sidebar-link">CI 概述</a></li><li><a href="/blog/calico.html" class="sidebar-link">calico 网络原理</a></li><li><a href="/blog/calico-architecture.html" class="sidebar-link">calico架构</a></li><li><a href="/blog/calico-network-policy.html" class="sidebar-link">calico网络策略</a></li><li><a href="/blog/client-go-crd.html" class="sidebar-link">使用client-go包访问Kubernetes CRD</a></li><li><a href="/blog/cni.html" class="sidebar-link">CNI详细介绍</a></li><li><a href="/blog/container-stop-timeout.html" class="sidebar-link">容器信号使用</a></li><li><a href="/blog/containerd.html" class="sidebar-link">containerd与kubernetes集成</a></li><li><a href="/blog/crd.html" class="sidebar-link">使用kubebuilder开发CRD</a></li><li><a href="/blog/csi.html" class="sidebar-link">CSI详解</a></li><li><a href="/blog/dev-k8s-workflow.html" class="sidebar-link">kubernetes开发流程</a></li><li><a href="/blog/docker-architech.html" class="sidebar-link">Docker架构分析</a></li><li><a href="/blog/docker-dev.html" class="sidebar-link">docker开发流程</a></li><li><a href="/blog/docker-network.html" class="sidebar-link">容器网络概述</a></li><li><a href="/blog/docker-oerlay2.html" class="sidebar-link">关于overlay2存储驱动的磁盘配额问题</a></li><li><a href="/blog/docker-ovs.html" class="sidebar-link">ovs对接容器网络</a></li><li><a href="/blog/etcd-manage.html" class="active sidebar-link">etcd管南</a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a href="/blog/etcd-manage.html#etcd-证书配置" class="sidebar-link">etcd 证书配置</a></li><li class="sidebar-sub-header"><a href="/blog/etcd-manage.html#证书生成" class="sidebar-link">证书生成</a></li><li class="sidebar-sub-header"><a href="/blog/etcd-manage.html#启动etcd" class="sidebar-link">启动etcd</a></li><li class="sidebar-sub-header"><a href="/blog/etcd-manage.html#增加节点" class="sidebar-link">增加节点</a></li><li class="sidebar-sub-header"><a href="/blog/etcd-manage.html#etcd快照恢复" class="sidebar-link">etcd快照恢复</a></li><li class="sidebar-sub-header"><a href="/blog/etcd-manage.html#etcd节点扩展" class="sidebar-link">etcd节点扩展</a></li><li class="sidebar-sub-header"><a href="/blog/etcd-manage.html#环境介绍" class="sidebar-link">环境介绍</a></li><li class="sidebar-sub-header"><a href="/blog/etcd-manage.html#安装k8s" class="sidebar-link">安装k8s</a></li><li class="sidebar-sub-header"><a href="/blog/etcd-manage.html#修改证书" class="sidebar-link">修改证书</a></li><li class="sidebar-sub-header"><a href="/blog/etcd-manage.html#修改etcd配置：" class="sidebar-link">修改etcd配置：</a></li><li class="sidebar-sub-header"><a href="/blog/etcd-manage.html#etcd1上增加一个etcd节点" class="sidebar-link">etcd1上增加一个etcd节点</a></li></ul></li><li><a href="/blog/fist-terminal.html" class="sidebar-link">属于极客的k8s管理工具fist</a></li><li><a href="/blog/genie.html" class="sidebar-link">CNI 小精灵 genie</a></li><li><a href="/blog/istio-quickstart.html" class="sidebar-link">istio安装使用教程</a></li><li><a href="/blog/k8s-authenticating.html" class="sidebar-link">kubernetes对接第三方认证</a></li><li><a href="/blog/k8s-ha-conf.html" class="sidebar-link">kubernetes高可用相关配置</a></li><li><a href="/blog/k8s-ipvs.html" class="sidebar-link">kubernetes ipvs设置</a></li><li><a href="/blog/k8s-rbac.html" class="sidebar-link">kubernetes RBAC实战</a></li><li><a href="/blog/keepalived.html" class="sidebar-link">keepalived in docker</a></li><li><a href="/blog/kube-admin-control.html" class="sidebar-link">kubernetes Admission Controller原理介绍</a></li><li><a href="/blog/kube-batch.html" class="sidebar-link">kube-scheduler定制，支持深度学习批处理任务调度</a></li><li><a href="/blog/kube-cmd.html" class="sidebar-link">老夫k8s命令行賊6</a></li><li><a href="/blog/kube-dev.html" class="sidebar-link">kubernetes开发指南</a></li><li><a href="/blog/kube-proxy-src.html" class="sidebar-link">kube-proxy源码解析</a></li><li><a href="/blog/kube-scheduler-source-code.html" class="sidebar-link">kubernetes源码分析之kube-scheduler - 从代码看原理</a></li><li><a href="/blog/kubeadm.html" class="sidebar-link">kubeadm杂谈</a></li><li><a href="/blog/kubeadm-dev.html" class="sidebar-link">修改kubeadm证书过期时间</a></li><li><a href="/blog/kubeadm-source.html" class="sidebar-link">kubeadm源码分析</a></li><li><a href="/blog/kubernetes-vm.html" class="sidebar-link">强隔离容器的那些事</a></li><li><a href="/blog/kustomize.html" class="sidebar-link">kustomize 颤抖吧helm!</a></li><li><a href="/blog/libra.html" class="sidebar-link">facebook libra尝鲜，没赶上比特币能不能上这趟车</a></li><li><a href="/blog/macvtap.html" class="sidebar-link">macvtap实践教程</a></li><li><a href="/blog/ovn-vni.html" class="sidebar-link">从CNI到ovn</a></li><li><a href="/blog/prometheus-operator-envoy.html" class="sidebar-link">使用prometheus operator监控envoy</a></li><li><a href="/blog/rook.html" class="sidebar-link">rook使用教程，快速编排ceph</a></li><li><a href="/blog/rpc-protobuf.html" class="sidebar-link">golang基于protobuf的rpc使用</a></li><li><a href="/blog/runc.html" class="sidebar-link">runc 架构</a></li><li><a href="/blog/scratch.html" class="sidebar-link">scratch镜像</a></li><li><a href="/blog/tektoncd-pipeline.html" class="sidebar-link">tektoncd pipeline教程 - kubernetes原生pipeline</a></li><li><a href="/blog/user-token.html" class="sidebar-link">kubernetes 用户token教程</a></li><li><a href="/blog/vim.html" class="sidebar-link">是时候表现一下我的vim了</a></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="etcd管南"><a href="#etcd管南" class="header-anchor">#</a> etcd管南</h1> <h2 id="etcd-证书配置"><a href="#etcd-证书配置" class="header-anchor">#</a> etcd 证书配置</h2> <p>生产环境中给etcd配置证书相当重要，如果没有证书，那么k8s集群很容易被黑客利用而去挖矿什么的。做法非常简单，比如你下了一个不安全的镜像，通过程序扫描到etcd的ip和端口，那么黑客就可以绕开apiserver的认证直接写数据，写一些deployment pod等等，apiserver就会读到这些，从而去部署黑客的程序。 我们就有一个集群这样被利用去挖矿了,安全无小事，如果黑客恶意攻击也可轻松删除你的所有数据，所以证书与定期备份都很重要,即便有多个etcd节点，本文深入探讨etcd管理的重要的几个东西。
+</p> <h2 id="证书生成"><a href="#证书生成" class="header-anchor">#</a> 证书生成</h2> <p>cfssl安装：</p> <div class="language- extra-class"><pre class="language-text"><code>mkdir ~/bin
+curl -s -L -o ~/bin/cfssl https://pkg.cfssl.org/R1.2/cfssl_linux-amd64
+curl -s -L -o ~/bin/cfssljson https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64
+chmod +x ~/bin/{cfssl,cfssljson}
+export PATH=$PATH:~/bin
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>mkdir ~/cfssl
+cd ~/cfssl
+</code></pre></div><p>写入如下json文件，ip替换成自己的</p> <div class="language- extra-class"><pre class="language-text"><code>root@dev-86-201 cfssl]# cat ca-config.json
+{
+    &quot;signing&quot;: {
+        &quot;default&quot;: {
+            &quot;expiry&quot;: &quot;43800h&quot;
+        },
+        &quot;profiles&quot;: {
+            &quot;server&quot;: {
+                &quot;expiry&quot;: &quot;43800h&quot;,
+                &quot;usages&quot;: [
+                    &quot;signing&quot;,
+                    &quot;key encipherment&quot;,
+                    &quot;server auth&quot;
+                ]
+            },
+            &quot;client&quot;: {
+                &quot;expiry&quot;: &quot;43800h&quot;,
+                &quot;usages&quot;: [
+                    &quot;signing&quot;,
+                    &quot;key encipherment&quot;,
+                    &quot;client auth&quot;
+                ]
+            },
+            &quot;peer&quot;: {
+                &quot;expiry&quot;: &quot;43800h&quot;,
+                &quot;usages&quot;: [
+                    &quot;signing&quot;,
+                    &quot;key encipherment&quot;,
+                    &quot;server auth&quot;,
+                    &quot;client auth&quot;
+                ]
+            }
+        }
+    }
+}
+[root@dev-86-201 cfssl]# cat ca-csr.json
+{
+    &quot;CN&quot;: &quot;My own CA&quot;,
+    &quot;key&quot;: {
+        &quot;algo&quot;: &quot;rsa&quot;,
+        &quot;size&quot;: 2048
+    },
+    &quot;names&quot;: [
+        {
+            &quot;C&quot;: &quot;US&quot;,
+            &quot;L&quot;: &quot;CA&quot;,
+            &quot;O&quot;: &quot;My Company Name&quot;,
+            &quot;ST&quot;: &quot;San Francisco&quot;,
+            &quot;OU&quot;: &quot;Org Unit 1&quot;,
+            &quot;OU&quot;: &quot;Org Unit 2&quot;
+        }
+    ]
+}
+[root@dev-86-201 cfssl]# cat server.json
+{
+    &quot;CN&quot;: &quot;etcd0&quot;,
+    &quot;hosts&quot;: [
+        &quot;127.0.0.1&quot;,
+        &quot;0.0.0.0&quot;,
+        &quot;10.1.86.201&quot;,
+        &quot;10.1.86.203&quot;,
+        &quot;10.1.86.202&quot;
+    ],
+    &quot;key&quot;: {
+        &quot;algo&quot;: &quot;ecdsa&quot;,
+        &quot;size&quot;: 256
+    },
+    &quot;names&quot;: [
+        {
+            &quot;C&quot;: &quot;US&quot;,
+            &quot;L&quot;: &quot;CA&quot;,
+            &quot;ST&quot;: &quot;San Francisco&quot;
+        }
+    ]
+}
+
+[root@dev-86-201 cfssl]# cat member1.json  # 填本机IP
+{
+    &quot;CN&quot;: &quot;etcd0&quot;,
+    &quot;hosts&quot;: [
+        &quot;10.1.86.201&quot;
+    ],
+    &quot;key&quot;: {
+        &quot;algo&quot;: &quot;ecdsa&quot;,
+        &quot;size&quot;: 256
+    },
+    &quot;names&quot;: [
+        {
+            &quot;C&quot;: &quot;US&quot;,
+            &quot;L&quot;: &quot;CA&quot;,
+            &quot;ST&quot;: &quot;San Francisco&quot;
+        }
+    ]
+}
+
+[root@dev-86-201 cfssl]# cat client.json
+{
+    &quot;CN&quot;: &quot;client&quot;,
+    &quot;hosts&quot;: [
+       &quot;&quot;
+    ],
+    &quot;key&quot;: {
+        &quot;algo&quot;: &quot;ecdsa&quot;,
+        &quot;size&quot;: 256
+    },
+    &quot;names&quot;: [
+        {
+            &quot;C&quot;: &quot;US&quot;,
+            &quot;L&quot;: &quot;CA&quot;,
+            &quot;ST&quot;: &quot;San Francisco&quot;
+        }
+    ]
+}
+</code></pre></div><p>生成证书：</p> <div class="language- extra-class"><pre class="language-text"><code>cfssl gencert -initca ca-csr.json | cfssljson -bare ca -
+cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=server server.json | cfssljson -bare server
+cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=peer member1.json | cfssljson -bare member1
+cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=client client.json | cfssljson -bare client
+</code></pre></div><h2 id="启动etcd"><a href="#启动etcd" class="header-anchor">#</a> 启动etcd</h2> <p>cfssl目录拷贝到/etc/kubernetes/pki/cfssl 目录</p> <div class="language- extra-class"><pre class="language-text"><code>[root@dev-86-201 manifests]# cat etcd.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    scheduler.alpha.kubernetes.io/critical-pod: &quot;&quot;
+  creationTimestamp: null
+  labels:
+    component: etcd
+    tier: control-plane
+  name: etcd
+  namespace: kube-system
+spec:
+  containers:
+  - command:
+    - etcd
+    - --advertise-client-urls=https://10.1.86.201:2379
+    - --cert-file=/etc/kubernetes/pki/etcd/server.pem
+    - --client-cert-auth=true
+    - --data-dir=/var/lib/etcd
+    - --initial-advertise-peer-urls=https://10.1.86.201:2380
+    - --initial-cluster=etcd0=https://10.1.86.201:2380
+    - --key-file=/etc/kubernetes/pki/etcd/server-key.pem
+    - --listen-client-urls=https://10.1.86.201:2379
+    - --listen-peer-urls=https://10.1.86.201:2380
+    - --name=etcd0
+    - --peer-cert-file=/etc/kubernetes/pki/etcd/member1.pem
+    - --peer-client-cert-auth=true
+    - --peer-key-file=/etc/kubernetes/pki/etcd/member1-key.pem
+    - --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem
+    - --snapshot-count=10000
+    - --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem
+    image: k8s.gcr.io/etcd-amd64:3.2.18
+    imagePullPolicy: IfNotPresent
+   #livenessProbe:
+   #  exec:
+   #    command:
+   #    - /bin/sh
+   #    - -ec
+   #    - ETCDCTL_API=3 etcdctl --endpoints=https://[10.1.86.201]:2379 --cacert=/etc/kubernetes/pki/etcd/ca.pem
+   #      --cert=/etc/kubernetes/pki/etcd/client.pem --key=/etc/kubernetes/pki/etcd/client-key.pem
+   #      get foo
+   #  failureThreshold: 8
+   #  initialDelaySeconds: 15
+   #  timeoutSeconds: 15
+    name: etcd
+    resources: {}
+    volumeMounts:
+    - mountPath: /var/lib/etcd
+      name: etcd-data
+    - mountPath: /etc/kubernetes/pki/etcd
+      name: etcd-certs
+  hostNetwork: true
+  priorityClassName: system-cluster-critical
+  volumes:
+  - hostPath:
+      path: /var/lib/etcd
+      type: DirectoryOrCreate
+    name: etcd-data
+  - hostPath:
+      path: /etc/kubernetes/pki/cfssl
+      type: DirectoryOrCreate
+    name: etcd-certs
+status: {}
+</code></pre></div><p>进入etcd容器执行：</p> <div class="language- extra-class"><pre class="language-text"><code>alias etcdv3=&quot;ETCDCTL_API=3 etcdctl --endpoints=https://[10.1.86.201]:2379 --cacert=/etc/kubernetes/pki/etcd/ca.pem --cert=/etc/kubernetes/pki/etcd/client.pem --key=/etc/kubernetes/pki/etcd/client-key.pem&quot;
+etcdv3 member add etcd1 --peer-urls=&quot;https://10.1.86.202:2380&quot;
+</code></pre></div><h2 id="增加节点"><a href="#增加节点" class="header-anchor">#</a> 增加节点</h2> <p>拷贝etcd0(10.1.86.201)节点上的证书到etcd1(10.1.86.202)节点上
+修改member1.json:</p> <div class="language- extra-class"><pre class="language-text"><code>{
+    &quot;CN&quot;: &quot;etcd1&quot;,
+    &quot;hosts&quot;: [
+        &quot;10.1.86.202&quot;
+    ],
+    &quot;key&quot;: {
+        &quot;algo&quot;: &quot;ecdsa&quot;,
+        &quot;size&quot;: 256
+    },
+    &quot;names&quot;: [
+        {
+            &quot;C&quot;: &quot;US&quot;,
+            &quot;L&quot;: &quot;CA&quot;,
+            &quot;ST&quot;: &quot;San Francisco&quot;
+        }
+    ]
+}
+</code></pre></div><p>重新生成在etcd1上生成member1证书：</p> <div class="language- extra-class"><pre class="language-text"><code>cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=peer member1.json | cfssljson -bare member1
+</code></pre></div><p>启动etcd1：</p> <div class="language- extra-class"><pre class="language-text"><code>[root@dev-86-202 manifests]# cat etcd.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    scheduler.alpha.kubernetes.io/critical-pod: &quot;&quot;
+  creationTimestamp: null
+  labels:
+    component: etcd
+    tier: control-plane
+  name: etcd
+  namespace: kube-system
+spec:
+  containers:
+  - command:
+    - etcd
+    - --advertise-client-urls=https://10.1.86.202:2379
+    - --cert-file=/etc/kubernetes/pki/etcd/server.pem
+    - --data-dir=/var/lib/etcd
+    - --initial-advertise-peer-urls=https://10.1.86.202:2380
+    - --initial-cluster=etcd0=https://10.1.86.201:2380,etcd1=https://10.1.86.202:2380
+    - --key-file=/etc/kubernetes/pki/etcd/server-key.pem
+    - --listen-client-urls=https://10.1.86.202:2379
+    - --listen-peer-urls=https://10.1.86.202:2380
+    - --name=etcd1
+    - --peer-cert-file=/etc/kubernetes/pki/etcd/member1.pem
+    - --peer-client-cert-auth=true
+    - --peer-key-file=/etc/kubernetes/pki/etcd/member1-key.pem
+    - --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem
+    - --snapshot-count=10000
+    - --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem
+    - --initial-cluster-state=existing  # 千万别加双引号，被坑死
+    image: k8s.gcr.io/etcd-amd64:3.2.18
+    imagePullPolicy: IfNotPresent
+  # livenessProbe:
+  #   exec:
+  #     command:
+  #     - /bin/sh
+  #     - -ec
+  #     - ETCDCTL_API=3 etcdctl --endpoints=https://[10.1.86.202]:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt
+  #       --cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt --key=/etc/kubernetes/pki/etcd/healthcheck-client.key
+  #       get foo
+  #   failureThreshold: 8
+  #   initialDelaySeconds: 15
+  #   timeoutSeconds: 15
+    name: etcd
+    resources: {}
+    volumeMounts:
+    - mountPath: /var/lib/etcd
+      name: etcd-data
+    - mountPath: /etc/kubernetes/pki/etcd
+      name: etcd-certs
+  hostNetwork: true
+  priorityClassName: system-cluster-critical
+  volumes:
+  - hostPath:
+      path: /var/lib/etcd
+      type: DirectoryOrCreate
+    name: etcd-data
+  - hostPath:
+      path: /etc/kubernetes/pki/cfssl
+      type: DirectoryOrCreate
+    name: etcd-certs
+status: {}
+</code></pre></div><p>或者用docker起先测试一下：</p> <div class="language- extra-class"><pre class="language-text"><code>docker run --net=host -v /etc/kubernetes/pki/cfssl:/etc/kubernetes/pki/etcd k8s.gcr.io/etcd-amd64:3.2.18 etcd \
+--advertise-client-urls=https://10.1.86.202:2379 \
+--cert-file=/etc/kubernetes/pki/etcd/server.pem \
+--data-dir=/var/lib/etcd \
+--initial-advertise-peer-urls=https://10.1.86.202:2380 \
+--initial-cluster=etcd0=https://10.1.86.201:2380,etcd1=https://10.1.86.202:2380 \
+--key-file=/etc/kubernetes/pki/etcd/server-key.pem  \
+--listen-client-urls=https://10.1.86.202:2379 \
+--listen-peer-urls=https://10.1.86.202:2380 --name=etcd1 \
+--peer-cert-file=/etc/kubernetes/pki/etcd/member1.pem \
+--peer-key-file=/etc/kubernetes/pki/etcd/member1-key.pem \
+--peer-client-cert-auth=true \
+--peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem --snapshot-count=10000 \
+--trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem --initial-cluster-state=&quot;existing&quot;
+</code></pre></div><p>etcd0上检查集群健康:</p> <div class="language- extra-class"><pre class="language-text"><code># etcdctl --endpoints=https://[10.1.86.201]:2379 --ca-file=/etc/kubernetes/pki/etcd/ca.pem --cert-file=/etc/kubernetes/pki/etcd/client.pem --key-file=/etc/kubernetes/pki/etcd/client-key.pem cluster-heal
+th
+member 5856099674401300 is healthy: got healthy result from https://10.1.86.201:2379
+member df99f445ac908d15 is healthy: got healthy result from https://10.1.86.202:2379
+cluster is healthy
+</code></pre></div><p>etcd2增加同理，略</p> <p>apiserver etcd证书 配置：</p> <div class="language- extra-class"><pre class="language-text"><code>- --etcd-cafile=/etc/kubernetes/pki/cfssl/ca.pem
+- --etcd-certfile=/etc/kubernetes/pki/cfssl/client.pem
+- --etcd-keyfile=/etc/kubernetes/pki/cfssl/client-key.pem
+</code></pre></div><h1 id="快照与扩展节点"><a href="#快照与扩展节点" class="header-anchor">#</a> 快照与扩展节点</h1> <h2 id="etcd快照恢复"><a href="#etcd快照恢复" class="header-anchor">#</a> etcd快照恢复</h2> <p>说明：
+有证书集群以下所有命令需带上如下证书参数，否则访问不了</p> <div class="language- extra-class"><pre class="language-text"><code>--cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/peer.crt --key=/etc/kubernetes/pki/etcd/peer.key
+</code></pre></div><p>endpoints默认为<code>127.0.0.1:2379</code>，若需指定远程etcd地址，可通过如下参数指定</p> <div class="language- extra-class"><pre class="language-text"><code>--endpoints 172.16.154.81:2379
+</code></pre></div><p>1、获取数据快照</p> <div class="language- extra-class"><pre class="language-text"><code>ETCDCTL_API=3 etcdctl snapshot save snapshot.db
+</code></pre></div><p>2、从快照恢复数据</p> <div class="language- extra-class"><pre class="language-text"><code>ETCDCTL_API=3 etcdctl snapshot restore snapshot.db --data-dir=/var/lib/etcd/
+</code></pre></div><p>3、启动新etcd节点，指定--data-dir=/var/lib/etcd/</p> <h2 id="etcd节点扩展"><a href="#etcd节点扩展" class="header-anchor">#</a> etcd节点扩展</h2> <table><thead><tr><th>节点名</th> <th>IP</th> <th>备注</th></tr></thead> <tbody><tr><td>infra0</td> <td>172.16.154.81</td> <td>初始节点，k8s的master节点，kubeadm所部署的单节点etcd所在机器</td></tr> <tr><td>infra1</td> <td>172.16.154.82</td> <td>待添加节点，k8s的node节点</td></tr> <tr><td>infra2</td> <td>172.16.154.83</td> <td>待添加节点，k8s的node节点</td></tr></tbody></table> <p>1、从初始etcd节点获取数据快照</p> <div class="language- extra-class"><pre class="language-text"><code>ETCDCTL_API=3 etcdctl --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/peer.crt --key=/etc/kubernetes/pki/etcd/peer.key --endpoints=https://127.0.0.1:2379 snapshot save snapshot.db
+</code></pre></div><p>2、将快照文件snapshot.db复制到infra1节点，并执行数据恢复命令</p> <p>数据恢复命令</p> <div class="language- extra-class"><pre class="language-text"><code>ETCDCTL_API=3 etcdctl snapshot restore snapshot.db --data-dir=/var/lib/etcd/
+
+注：执行上述命令需要机器上有etcdctl
+</code></pre></div><p>上述命令执行成功会将快照中的数据存放到/var/lib/etcd目录中</p> <p>3、在infra1节点启动etcd
+将如下yaml放入/etc/kubernetes/manifests</p> <div class="language- extra-class"><pre class="language-text"><code>apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    component: etcd
+    tier: control-plane
+  name: etcd-172.16.154.82
+  namespace: kube-system
+spec:
+  containers:
+  - command:
+    - etcd
+    - --name=infra0
+    - --initial-advertise-peer-urls=http://172.16.154.82:2380
+    - --listen-peer-urls=http://172.16.154.82:2380
+    - --listen-client-urls=http://172.16.154.82:2379,http://127.0.0.1:2379
+    - --advertise-client-urls=http://172.16.154.82:2379
+    - --data-dir=/var/lib/etcd
+    - --initial-cluster-token=etcd-cluster-1
+    - --initial-cluster=infra0=http://172.16.154.82:2380
+    - --initial-cluster-state=new
+    image: hub.xfyun.cn/k8s/etcd-amd64:3.1.12
+    livenessProbe:
+      httpGet:
+        host: 127.0.0.1
+        path: /health
+        port: 2379
+        scheme: HTTP
+      failureThreshold: 8
+      initialDelaySeconds: 15
+      timeoutSeconds: 15
+    name: etcd
+    volumeMounts:
+    - name: etcd-data
+      mountPath: /var/lib/etcd
+  hostNetwork: true
+  volumes:
+  - hostPath:
+      path: /var/lib/etcd
+      type: DirectoryOrCreate
+    name: etcd-data
+</code></pre></div><p>4、infra2节点加入etcd集群中
+在infra1中etcd容器中执行</p> <div class="language- extra-class"><pre class="language-text"><code>ETCDCTL_API=3 etcdctl member add infra2 --peer-urls=&quot;http://172.16.154.83:2380&quot;
+</code></pre></div><p>将如下yaml放入/etc/kubernetes/manifests，由kubelet启动etcd容器</p> <div class="language- extra-class"><pre class="language-text"><code>apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    component: etcd
+    tier: control-plane
+  name: etcd-172.16.154.83
+  namespace: kube-system
+spec:
+  containers:
+  - command:
+    - etcd
+    - --name=infra1
+    - --initial-advertise-peer-urls=http://172.16.154.83:2380
+    - --listen-peer-urls=http://172.16.154.83:2380
+    - --listen-client-urls=http://172.16.154.83:2379,http://127.0.0.1:2379
+    - --advertise-client-urls=http://172.16.154.83:2379
+    - --data-dir=/var/lib/etcd
+    - --initial-cluster-token=etcd-cluster-1
+    - --initial-cluster=infra1=http://172.16.154.82:2380,infra2=http://172.16.154.83:2380
+    - --initial-cluster-state=existing
+    image: hub.xfyun.cn/k8s/etcd-amd64:3.1.12
+    livenessProbe:
+      httpGet:
+        host: 127.0.0.1
+        path: /health
+        port: 2379
+        scheme: HTTP
+      failureThreshold: 8
+      initialDelaySeconds: 15
+      timeoutSeconds: 15
+    name: etcd
+    volumeMounts:
+    - name: etcd-data
+      mountPath: /var/lib/etcd
+  hostNetwork: true
+  volumes:
+  - hostPath:
+      path: /home/etcd
+      type: DirectoryOrCreate
+    name: etcd-data
+</code></pre></div><p>infra0节点加入集群重复上述操作；注意在加入集群之前，将之前/var/lib/etcd/的数据删除。</p> <h1 id="实践-给kubeadm单etcd增加etcd节点"><a href="#实践-给kubeadm单etcd增加etcd节点" class="header-anchor">#</a> 实践 - 给kubeadm单etcd增加etcd节点</h1> <h2 id="环境介绍"><a href="#环境介绍" class="header-anchor">#</a> 环境介绍</h2> <p>10.1.86.201   单点etcd   etcd0</p> <p>10.1.86.202   扩展节点   etcd1</p> <p>10.1.86.203   扩展节点   etcd2</p> <h2 id="安装k8s"><a href="#安装k8s" class="header-anchor">#</a> 安装k8s</h2> <p>先在etcd0节点上启动k8s，当然是使用<a href="https://sealyun.com/pro/products/" target="_blank" rel="noopener noreferrer">sealyun的安装包<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a> 三步安装不多说</p> <h2 id="修改证书"><a href="#修改证书" class="header-anchor">#</a> 修改证书</h2> <p>按照上述生成证书的方法生成证书并拷贝到对应目录下</p> <div class="language- extra-class"><pre class="language-text"><code>cp -r cfssl/ /etc/kubernetes/pki/
+</code></pre></div><h2 id="修改etcd配置："><a href="#修改etcd配置：" class="header-anchor">#</a> 修改etcd配置：</h2> <div class="language- extra-class"><pre class="language-text"><code>cd /etc/kubernetes/manifests/
+mv etcd.yaml ..   # 不要直接修改，防止k8s去读swap文件
+vim ../etcd.yaml
+</code></pre></div><p>vim里面全局替换，把127.0.0.1替换成ip地址</p> <div class="language- extra-class"><pre class="language-text"><code>:%s/127.0.0.1/10.1.86.201/g
+</code></pre></div><p>注释掉健康检测探针，否则加节点时健康检测会导致etcd0跪掉</p> <div class="language- extra-class"><pre class="language-text"><code>#   livenessProbe:
+#     exec:
+#       command:
+#       - /bin/sh
+#       - -ec
+#       - ETCDCTL_API=3 etcdctl --endpoints=https://[10.1.86.201]:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt
+#         --cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt --key=/etc/kubernetes/pki/etcd/healthcheck-client.key
+#         get foo
+#     failureThreshold: 8
+#     initialDelaySeconds: 15
+#     timeoutSeconds: 15
+</code></pre></div><p>修改证书挂载配置目录</p> <div class="language- extra-class"><pre class="language-text"><code>  volumes:
+  - hostPath:
+      path: /etc/kubernetes/pki/cfssl
+      type: DirectoryOrCreate
+    name: etcd-certs
+</code></pre></div><p>修改证书配置,全改完长这样：</p> <div class="language- extra-class"><pre class="language-text"><code>[root@dev-86-201 manifests]# cat ../etcd.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    scheduler.alpha.kubernetes.io/critical-pod: &quot;&quot;
+  creationTimestamp: null
+  labels:
+    component: etcd
+    tier: control-plane
+  name: etcd
+  namespace: kube-system
+spec:
+  containers:
+  - command:
+    - etcd
+    - --advertise-client-urls=https://10.1.86.201:2379
+    - --cert-file=/etc/kubernetes/pki/etcd/server.pem
+    - --client-cert-auth=true
+    - --data-dir=/var/lib/etcd
+    - --initial-advertise-peer-urls=https://10.1.86.201:2380
+    - --initial-cluster=etcd0=https://10.1.86.201:2380
+    - --key-file=/etc/kubernetes/pki/etcd/server-key.pem
+    - --listen-client-urls=https://10.1.86.201:2379
+    - --listen-peer-urls=https://10.1.86.201:2380
+    - --name=dev-86-201
+    - --peer-cert-file=/etc/kubernetes/pki/etcd/member1.pem
+    - --peer-client-cert-auth=true
+    - --peer-key-file=/etc/kubernetes/pki/etcd/member1-key.pem
+    - --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem
+    - --snapshot-count=10000
+    - --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem
+    image: k8s.gcr.io/etcd-amd64:3.2.18
+    imagePullPolicy: IfNotPresent
+#   livenessProbe:
+#     exec:
+#       command:
+#       - /bin/sh
+#       - -ec
+#       - ETCDCTL_API=3 etcdctl --endpoints=https://[10.1.86.201]:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt
+#         --cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt --key=/etc/kubernetes/pki/etcd/healthcheck-client.key
+#         get foo
+#     failureThreshold: 8
+#     initialDelaySeconds: 15
+#     timeoutSeconds: 15
+    name: etcd
+    resources: {}
+    volumeMounts:
+    - mountPath: /var/lib/etcd
+      name: etcd-data
+    - mountPath: /etc/kubernetes/pki/etcd
+      name: etcd-certs
+  hostNetwork: true
+  priorityClassName: system-cluster-critical
+  volumes:
+  - hostPath:
+      path: /etc/kubernetes/pki/cfssl
+      type: DirectoryOrCreate
+    name: etcd-certs
+  - hostPath:
+      path: /var/lib/etcd
+      type: DirectoryOrCreate
+    name: etcd-data
+status: {}
+</code></pre></div><p>启动etcd, 把yaml文件移回来：</p> <div class="language- extra-class"><pre class="language-text"><code>mv ../etcd.yaml .
+</code></pre></div><p>修改APIserver参数：</p> <div class="language- extra-class"><pre class="language-text"><code>mv kube-apiserver.yaml ..
+vim ../kube-apiserver.yaml
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>    - --etcd-cafile=/etc/kubernetes/pki/cfssl/ca.pem
+    - --etcd-certfile=/etc/kubernetes/pki/cfssl/client.pem
+    - --etcd-keyfile=/etc/kubernetes/pki/cfssl/client-key.pem
+    - --etcd-servers=https://10.1.86.201:2379
+</code></pre></div><p>启动apiserver:</p> <div class="language- extra-class"><pre class="language-text"><code>mv ../kube-apiserver.yaml .
+</code></pre></div><p>验证：</p> <div class="language- extra-class"><pre class="language-text"><code>kubectl get pod -n kube-system  # 能正常返回pod标志成功
+</code></pre></div><p>到此etcd0上的操作完成</p> <p>增加新节点, 进入到etcd容器内:</p> <div class="language- extra-class"><pre class="language-text"><code>[root@dev-86-201 ~]# docker exec -it a7001397e1e5 sh
+/ # alias etcdv3=&quot;ETCDCTL_API=3 etcdctl --endpoints=https://[10.1.86.201]:2379 --cacert=/etc/kubernetes/pki/etcd/ca.pem --cert=/etc/kubernetes/pki/etcd/client.pem --key=/etc/kubernetes/pki/etcd/client-key
+.pem&quot;
+/ # etcdv3 member update a874c87fd42044f  --peer-urls=&quot;https://10.1.86.201:2380&quot; # 更新peer url 很重要
+/ # etcdv3 member add etcd1 --peer-urls=&quot;https://10.1.86.202:2380&quot;
+Member 20c2a99381581958 added to cluster c9be114fc2da2776
+
+ETCD_NAME=&quot;etcd1&quot;
+ETCD_INITIAL_CLUSTER=&quot;dev-86-201=https://127.0.0.1:2380,etcd1=https://10.1.86.202:2380&quot;
+ETCD_INITIAL_CLUSTER_STATE=&quot;existing&quot;
+
+/ # alias etcdv2=&quot;ETCDCTL_API=2 etcdctl --endpoints=https://[10.1.86.201]:2379 --ca-file=/etc/kubernetes/pki/etcd/ca.pem --cert-file=/etc/kubernetes/pki/etcd/client.pem --key-file=/etc/kubernetes/pki/etcd/client-key.pem&quot;
+/ # etcdv2 cluster-health
+</code></pre></div><h2 id="etcd1上增加一个etcd节点"><a href="#etcd1上增加一个etcd节点" class="header-anchor">#</a> etcd1上增加一个etcd节点</h2> <p>同样先在etcd1（10.1.86.202) 上安装k8s，同etcd0上的安装</p> <p>把etcd0的cfssl证书目录拷贝到etcd1上备用</p> <div class="language- extra-class"><pre class="language-text"><code>scp -r root@10.1.86.201:/etc/kubernetes/pki/cfssl /etc/kubernetes/pki
+</code></pre></div><p>修改member1.json:</p> <div class="language- extra-class"><pre class="language-text"><code>[root@dev-86-202 cfssl]# cat member1.json
+{
+    &quot;CN&quot;: &quot;etcd1&quot;,      # CN 改一下
+    &quot;hosts&quot;: [
+        &quot;10.1.86.202&quot;   # 主要改成自身ip
+    ],
+    &quot;key&quot;: {
+        &quot;algo&quot;: &quot;ecdsa&quot;,
+        &quot;size&quot;: 256
+    },
+    &quot;names&quot;: [
+        {
+            &quot;C&quot;: &quot;US&quot;,
+            &quot;L&quot;: &quot;CA&quot;,
+            &quot;ST&quot;: &quot;San Francisco&quot;
+        }
+    ]
+}
+</code></pre></div><p>重新生成member1证书：</p> <div class="language- extra-class"><pre class="language-text"><code>cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=peer member1.json | cfssljson -bare member1
+</code></pre></div><p>验证证书：</p> <div class="language- extra-class"><pre class="language-text"><code>openssl x509 -in member1.pem -text -noout
+</code></pre></div><p>修改etcd1的etcd配置：</p> <div class="language- extra-class"><pre class="language-text"><code>mv etcd.yaml ..
+rm /var/lib/etcd/ -rf # 因为这是个扩展节点，需要同步etcd0的数据，所以把它自己数据删掉
+vim ../etcd.yaml
+</code></pre></div><p>修改后yaml文件u</p> <div class="language- extra-class"><pre class="language-text"><code>apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    scheduler.alpha.kubernetes.io/critical-pod: &quot;&quot;
+  creationTimestamp: null
+  labels:
+    component: etcd
+    tier: control-plane
+  name: etcd
+  namespace: kube-system
+spec:
+  containers:
+  - command:
+    - etcd
+    - --advertise-client-urls=https://10.1.86.202:2379
+    - --cert-file=/etc/kubernetes/pki/etcd/server.pem
+    - --data-dir=/var/lib/etcd
+    - --initial-advertise-peer-urls=https://10.1.86.202:2380
+    - --initial-cluster=etcd0=https://10.1.86.201:2380,etcd1=https://10.1.86.202:2380
+    - --key-file=/etc/kubernetes/pki/etcd/server-key.pem
+    - --listen-client-urls=https://10.1.86.202:2379
+    - --listen-peer-urls=https://10.1.86.202:2380
+    - --name=etcd1
+    - --peer-cert-file=/etc/kubernetes/pki/etcd/member1.pem
+    - --peer-client-cert-auth=true
+    - --peer-key-file=/etc/kubernetes/pki/etcd/member1-key.pem
+    - --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem
+    - --snapshot-count=10000
+    - --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem
+    - --initial-cluster-state=existing  # 千万别加双引号，被坑死
+    image: k8s.gcr.io/etcd-amd64:3.2.18
+    imagePullPolicy: IfNotPresent
+  # livenessProbe:
+  #   exec:
+  #     command:
+  #     - /bin/sh
+  #     - -ec
+  #     - ETCDCTL_API=3 etcdctl --endpoints=https://[10.1.86.202]:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt
+  #       --cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt --key=/etc/kubernetes/pki/etcd/healthcheck-client.key
+  #       get foo
+  #   failureThreshold: 8
+  #   initialDelaySeconds: 15
+  #   timeoutSeconds: 15
+    name: etcd
+    resources: {}
+    volumeMounts:
+    - mountPath: /var/lib/etcd
+      name: etcd-data
+    - mountPath: /etc/kubernetes/pki/etcd
+      name: etcd-certs
+  hostNetwork: true
+  priorityClassName: system-cluster-critical
+  volumes:
+  - hostPath:
+      path: /var/lib/etcd
+      type: DirectoryOrCreate
+    name: etcd-data
+  - hostPath:
+      path: /etc/kubernetes/pki/cfssl
+      type: DirectoryOrCreate
+    name: etcd-certs
+status: {}
+</code></pre></div><p>在容器内查看集群已经健康运行了：</p> <div class="language- extra-class"><pre class="language-text"><code>/ # alias etcdv2=&quot;ETCDCTL_API=2 etcdctl --endpoints=https://[10.1.86.201]:2379 --ca-file=/etc/kubernetes/pki/etcd/ca.pem --cert-file=/etc/kubernetes/pki/etcd/client.pem --key-file=/etc/kubernetes/pki/etcd/client-key.pem&quot;
+/ # etcdv2 cluster-health
+member a874c87fd42044f is healthy: got healthy result from https://10.1.86.201:2379
+member bbbbf223ec75e000 is healthy: got healthy result from https://10.1.86.202:2379
+cluster is healthy
+</code></pre></div><p>然后就可以把apiserver启动参数再加一个etcd1:</p> <div class="language- extra-class"><pre class="language-text"><code>    - --etcd-servers=https://10.1.86.201:2379
+    - --etcd-servers=https://10.1.86.202:2379
+</code></pre></div><p>第三个节点同第二个，不再赘述。
+同样我们可以把健康检查的注释去掉了。后面再加时不需要再注释了，因为两个节点的集群已经能正常工作了。</p> <p>细节问题非常多，一个端口，一个IP都不要填错，否则就会各种错误, 包括新加节点要清etcd数据这些小细节问题。
+大功告成！</p></div> <footer class="page-edit"><!----> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
+      ←
+      <a href="/blog/docker-ovs.html" class="prev">ovs对接容器网络</a></span> <span class="next"><a href="/blog/fist-terminal.html">属于极客的k8s管理工具fist</a>
+      →
+    </span></p></div> </main></div><div class="global-ui"></div></div>
+    <script src="/assets/js/app.23d3ef84.js" defer></script><script src="/assets/js/2.bc760f0a.js" defer></script><script src="/assets/js/25.9dbfb44a.js" defer></script>
+  </body>
+</html>

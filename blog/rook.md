@@ -1,9 +1,8 @@
-# rook 使用教程
-
-> [kubernetes集群三步安装](https://sealyun.com/pro/products/)
+# rook使用教程，快速编排ceph
 
 本文中需要用的yaml文件和Dockerfile等都放到这个[仓库](https://github.com/sealyun/rook)
 包含：rook operator ceph cluster storage class配置，mysql wordpress事例，性能测试fio Dockerfile与yaml等
+<!--more-->
 
 # 安装
 ```
@@ -557,8 +556,3 @@ $ kubectl edit crd cephclusters.ceph.rook.io
 
 探讨可加QQ群：98488045
 
-# 公众号：
-![sealyun](https://sealyun.com/kubernetes-qrcode.jpg)
-
-### 微信群：
-![](/wechatgroup1.png)

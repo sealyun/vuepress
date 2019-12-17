@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>CNI详细介绍 | sealyun | kubernetes安装</title>
+    <meta name="description" content="">
+    <meta name="theme-color" content="#007af5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2803648cc5852dd3e9e46bbd0bf63366";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+    <meta property="og:site_name" content="sealyun 专注于kubernetes安装"><meta property="og:title" content="sealyun kubernetes安装"><meta property="og:type" content="article"><meta property="og:url" content="/blog/cni.html"><meta name="twitter:title" content="sealyun kubernetes安装"><meta name="twitter:url" content="/blog/cni.html"><meta name="twitter:card" content="summary_large_image">
+    <link rel="preload" href="/assets/css/0.styles.943dcab2.css" as="style"><link rel="preload" href="/assets/js/app.23d3ef84.js" as="script"><link rel="preload" href="/assets/js/2.bc760f0a.js" as="script"><link rel="preload" href="/assets/js/14.9bd9e6fd.js" as="script"><link rel="prefetch" href="/assets/js/10.e86bcb27.js"><link rel="prefetch" href="/assets/js/11.bb9904fc.js"><link rel="prefetch" href="/assets/js/12.ec81ebde.js"><link rel="prefetch" href="/assets/js/13.c482403d.js"><link rel="prefetch" href="/assets/js/15.bdc6bd19.js"><link rel="prefetch" href="/assets/js/16.9e60a0b4.js"><link rel="prefetch" href="/assets/js/17.5df0c46d.js"><link rel="prefetch" href="/assets/js/18.85294fd2.js"><link rel="prefetch" href="/assets/js/19.f2879a42.js"><link rel="prefetch" href="/assets/js/20.6012d02a.js"><link rel="prefetch" href="/assets/js/21.81b7e1ca.js"><link rel="prefetch" href="/assets/js/22.1c2e71b0.js"><link rel="prefetch" href="/assets/js/23.0748294e.js"><link rel="prefetch" href="/assets/js/24.d63f1e4c.js"><link rel="prefetch" href="/assets/js/25.9dbfb44a.js"><link rel="prefetch" href="/assets/js/26.bfc3e626.js"><link rel="prefetch" href="/assets/js/27.ce51e7d7.js"><link rel="prefetch" href="/assets/js/28.ebb9caaf.js"><link rel="prefetch" href="/assets/js/29.8584027e.js"><link rel="prefetch" href="/assets/js/3.b7a496ec.js"><link rel="prefetch" href="/assets/js/30.158ceb97.js"><link rel="prefetch" href="/assets/js/31.f1024a9d.js"><link rel="prefetch" href="/assets/js/32.44cadfdb.js"><link rel="prefetch" href="/assets/js/33.af1c5cdb.js"><link rel="prefetch" href="/assets/js/34.a9e8095a.js"><link rel="prefetch" href="/assets/js/35.77ea75db.js"><link rel="prefetch" href="/assets/js/36.44da8d60.js"><link rel="prefetch" href="/assets/js/37.5e09e3fe.js"><link rel="prefetch" href="/assets/js/38.02e2aa10.js"><link rel="prefetch" href="/assets/js/39.b4e7f5f0.js"><link rel="prefetch" href="/assets/js/4.1ba98b6c.js"><link rel="prefetch" href="/assets/js/40.c879980c.js"><link rel="prefetch" href="/assets/js/41.0d571f5c.js"><link rel="prefetch" href="/assets/js/42.a7d12c13.js"><link rel="prefetch" href="/assets/js/43.60b5940b.js"><link rel="prefetch" href="/assets/js/44.b5a570c8.js"><link rel="prefetch" href="/assets/js/45.3df35b92.js"><link rel="prefetch" href="/assets/js/46.b47c3836.js"><link rel="prefetch" href="/assets/js/47.fbef4ef0.js"><link rel="prefetch" href="/assets/js/48.ae14afb1.js"><link rel="prefetch" href="/assets/js/49.4e6f30d4.js"><link rel="prefetch" href="/assets/js/5.c39869f0.js"><link rel="prefetch" href="/assets/js/50.c199fe15.js"><link rel="prefetch" href="/assets/js/51.30d345fb.js"><link rel="prefetch" href="/assets/js/52.5037db07.js"><link rel="prefetch" href="/assets/js/53.bb29d2bc.js"><link rel="prefetch" href="/assets/js/54.9e4ffa33.js"><link rel="prefetch" href="/assets/js/55.6d311bce.js"><link rel="prefetch" href="/assets/js/56.e6149a7c.js"><link rel="prefetch" href="/assets/js/57.57e2943c.js"><link rel="prefetch" href="/assets/js/58.61ea6212.js"><link rel="prefetch" href="/assets/js/59.95355587.js"><link rel="prefetch" href="/assets/js/6.0032a2d9.js"><link rel="prefetch" href="/assets/js/60.761d9050.js"><link rel="prefetch" href="/assets/js/61.b42700ba.js"><link rel="prefetch" href="/assets/js/62.6b9d864d.js"><link rel="prefetch" href="/assets/js/63.4aff7db2.js"><link rel="prefetch" href="/assets/js/64.34c83536.js"><link rel="prefetch" href="/assets/js/65.a7b0a430.js"><link rel="prefetch" href="/assets/js/66.8ee74e7e.js"><link rel="prefetch" href="/assets/js/67.3009b3ec.js"><link rel="prefetch" href="/assets/js/68.8bb3e997.js"><link rel="prefetch" href="/assets/js/7.5df889f4.js"><link rel="prefetch" href="/assets/js/8.c053b523.js"><link rel="prefetch" href="/assets/js/9.7948f30b.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.943dcab2.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><img src="https://sealyun.com/img/logo.png" alt="sealyun | kubernetes安装" class="logo"> <span class="site-name can-hide">sealyun | kubernetes安装</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav>  <ul class="sidebar-links"><li><a href="/blog/" class="sidebar-link">博客列表</a></li><li><a href="/blog/CI-CD.html" class="sidebar-link">CI 概述</a></li><li><a href="/blog/calico.html" class="sidebar-link">calico 网络原理</a></li><li><a href="/blog/calico-architecture.html" class="sidebar-link">calico架构</a></li><li><a href="/blog/calico-network-policy.html" class="sidebar-link">calico网络策略</a></li><li><a href="/blog/client-go-crd.html" class="sidebar-link">使用client-go包访问Kubernetes CRD</a></li><li><a href="/blog/cni.html" class="active sidebar-link">CNI详细介绍</a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a href="/blog/cni.html#环境介绍" class="sidebar-link">环境介绍</a></li><li class="sidebar-sub-header"><a href="/blog/cni.html#安装cni" class="sidebar-link">安装CNI</a></li><li class="sidebar-sub-header"><a href="/blog/cni.html#原理" class="sidebar-link">原理</a></li><li class="sidebar-sub-header"><a href="/blog/cni.html#总结" class="sidebar-link">总结</a></li></ul></li><li><a href="/blog/container-stop-timeout.html" class="sidebar-link">容器信号使用</a></li><li><a href="/blog/containerd.html" class="sidebar-link">containerd与kubernetes集成</a></li><li><a href="/blog/crd.html" class="sidebar-link">使用kubebuilder开发CRD</a></li><li><a href="/blog/csi.html" class="sidebar-link">CSI详解</a></li><li><a href="/blog/dev-k8s-workflow.html" class="sidebar-link">kubernetes开发流程</a></li><li><a href="/blog/docker-architech.html" class="sidebar-link">Docker架构分析</a></li><li><a href="/blog/docker-dev.html" class="sidebar-link">docker开发流程</a></li><li><a href="/blog/docker-network.html" class="sidebar-link">容器网络概述</a></li><li><a href="/blog/docker-oerlay2.html" class="sidebar-link">关于overlay2存储驱动的磁盘配额问题</a></li><li><a href="/blog/docker-ovs.html" class="sidebar-link">ovs对接容器网络</a></li><li><a href="/blog/etcd-manage.html" class="sidebar-link">etcd管南</a></li><li><a href="/blog/fist-terminal.html" class="sidebar-link">属于极客的k8s管理工具fist</a></li><li><a href="/blog/genie.html" class="sidebar-link">CNI 小精灵 genie</a></li><li><a href="/blog/istio-quickstart.html" class="sidebar-link">istio安装使用教程</a></li><li><a href="/blog/k8s-authenticating.html" class="sidebar-link">kubernetes对接第三方认证</a></li><li><a href="/blog/k8s-ha-conf.html" class="sidebar-link">kubernetes高可用相关配置</a></li><li><a href="/blog/k8s-ipvs.html" class="sidebar-link">kubernetes ipvs设置</a></li><li><a href="/blog/k8s-rbac.html" class="sidebar-link">kubernetes RBAC实战</a></li><li><a href="/blog/keepalived.html" class="sidebar-link">keepalived in docker</a></li><li><a href="/blog/kube-admin-control.html" class="sidebar-link">kubernetes Admission Controller原理介绍</a></li><li><a href="/blog/kube-batch.html" class="sidebar-link">kube-scheduler定制，支持深度学习批处理任务调度</a></li><li><a href="/blog/kube-cmd.html" class="sidebar-link">老夫k8s命令行賊6</a></li><li><a href="/blog/kube-dev.html" class="sidebar-link">kubernetes开发指南</a></li><li><a href="/blog/kube-proxy-src.html" class="sidebar-link">kube-proxy源码解析</a></li><li><a href="/blog/kube-scheduler-source-code.html" class="sidebar-link">kubernetes源码分析之kube-scheduler - 从代码看原理</a></li><li><a href="/blog/kubeadm.html" class="sidebar-link">kubeadm杂谈</a></li><li><a href="/blog/kubeadm-dev.html" class="sidebar-link">修改kubeadm证书过期时间</a></li><li><a href="/blog/kubeadm-source.html" class="sidebar-link">kubeadm源码分析</a></li><li><a href="/blog/kubernetes-vm.html" class="sidebar-link">强隔离容器的那些事</a></li><li><a href="/blog/kustomize.html" class="sidebar-link">kustomize 颤抖吧helm!</a></li><li><a href="/blog/libra.html" class="sidebar-link">facebook libra尝鲜，没赶上比特币能不能上这趟车</a></li><li><a href="/blog/macvtap.html" class="sidebar-link">macvtap实践教程</a></li><li><a href="/blog/ovn-vni.html" class="sidebar-link">从CNI到ovn</a></li><li><a href="/blog/prometheus-operator-envoy.html" class="sidebar-link">使用prometheus operator监控envoy</a></li><li><a href="/blog/rook.html" class="sidebar-link">rook使用教程，快速编排ceph</a></li><li><a href="/blog/rpc-protobuf.html" class="sidebar-link">golang基于protobuf的rpc使用</a></li><li><a href="/blog/runc.html" class="sidebar-link">runc 架构</a></li><li><a href="/blog/scratch.html" class="sidebar-link">scratch镜像</a></li><li><a href="/blog/tektoncd-pipeline.html" class="sidebar-link">tektoncd pipeline教程 - kubernetes原生pipeline</a></li><li><a href="/blog/user-token.html" class="sidebar-link">kubernetes 用户token教程</a></li><li><a href="/blog/vim.html" class="sidebar-link">是时候表现一下我的vim了</a></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="cni详细介绍"><a href="#cni详细介绍" class="header-anchor">#</a> CNI详细介绍</h1> <p>CNI接口很简单，特别一些新手一定要克服恐惧心里，和我一探究竟，本文结合原理与实践，认真读下来一定会对原理理解非常透彻。
+</p> <p><img src="https://sealyun.com/CNI.png" alt=""></p> <h2 id="环境介绍"><a href="#环境介绍" class="header-anchor">#</a> 环境介绍</h2> <p>我们安装kubernetes时先不安装CNI. 如果使用了<a href="https://store.lameleg.com" target="_blank" rel="noopener noreferrer">sealyun离线包<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a> 那么修改下 <code>kube/conf/master.sh</code></p> <p>只留如下内容即可：</p> <div class="language- extra-class"><pre class="language-text"><code>[root@helix105 shell]# cat master.sh 
+kubeadm init --config ../conf/kubeadm.yaml
+mkdir ~/.kube
+cp /etc/kubernetes/admin.conf ~/.kube/config
+
+kubectl taint nodes --all node-role.kubernetes.io/master-
+</code></pre></div><p>清空CNI相关目录：</p> <div class="language- extra-class"><pre class="language-text"><code>rm -rf /opt/cni/bin/*
+rm -rf /etc/cni/net.d/*
+</code></pre></div><p>启动kubernetes, 如果已经装过那么kubeadm reset一下:</p> <div class="language- extra-class"><pre class="language-text"><code>cd kube/shell &amp;&amp; sh init.sh &amp;&amp; sh master.sh
+</code></pre></div><p>此时你的节点是notready的，你的coredns也没有办法分配到地址：</p> <div class="language- extra-class"><pre class="language-text"><code>[root@helix105 shell]# kubectl get pod -n kube-system -o wide
+NAME                                            READY   STATUS    RESTARTS   AGE   IP              NODE                    NOMINATED NODE   READINESS GATES
+coredns-5c98db65d4-5fh6c                        0/1     Pending   0          54s   &lt;none&gt;          &lt;none&gt;                  &lt;none&gt;           &lt;none&gt;
+coredns-5c98db65d4-dbwmq                        0/1     Pending   0          54s   &lt;none&gt;          &lt;none&gt;                  &lt;none&gt;           &lt;none&gt;
+kube-controller-manager-helix105.hfa.chenqian   1/1     Running   0          19s   172.16.60.105   helix105.hfa.chenqian   &lt;none&gt;           &lt;none&gt;
+kube-proxy-k74ld                                1/1     Running   0          54s   172.16.60.105   helix105.hfa.chenqian   &lt;none&gt;           &lt;none&gt;
+kube-scheduler-helix105.hfa.chenqian            1/1     Running   0          14s   172.16.60.105   helix105.hfa.chenqian   &lt;none&gt;           &lt;none&gt;
+[root@helix105 shell]# kubectl get node
+NAME                    STATUS     ROLES    AGE   VERSION
+helix105.hfa.chenqian   NotReady   master   86s   v1.15.0
+</code></pre></div><h2 id="安装cni"><a href="#安装cni" class="header-anchor">#</a> 安装CNI</h2> <blockquote><p>创建CNI配置文件</p></blockquote> <div class="language- extra-class"><pre class="language-text"><code>$ mkdir -p /etc/cni/net.d
+$ cat &gt;/etc/cni/net.d/10-mynet.conf &lt;&lt;EOF
+{
+	&quot;cniVersion&quot;: &quot;0.2.0&quot;,
+	&quot;name&quot;: &quot;mynet&quot;,
+	&quot;type&quot;: &quot;bridge&quot;,
+	&quot;bridge&quot;: &quot;cni0&quot;,
+	&quot;isGateway&quot;: true,
+	&quot;ipMasq&quot;: true,
+	&quot;ipam&quot;: {
+		&quot;type&quot;: &quot;host-local&quot;,
+		&quot;subnet&quot;: &quot;10.22.0.0/16&quot;,
+		&quot;routes&quot;: [
+			{ &quot;dst&quot;: &quot;0.0.0.0/0&quot; }
+		]
+	}
+}
+EOF
+$ cat &gt;/etc/cni/net.d/99-loopback.conf &lt;&lt;EOF
+{
+	&quot;cniVersion&quot;: &quot;0.2.0&quot;,
+	&quot;name&quot;: &quot;lo&quot;,
+	&quot;type&quot;: &quot;loopback&quot;
+}
+EOF
+</code></pre></div><p>这里两个配置一个是给容器塞一个网卡挂在网桥上的，另外一个配置负责撸(本地回环)。。</p> <p>配置完后会发现节点ready:</p> <div class="language- extra-class"><pre class="language-text"><code>[root@helix105 shell]# kubectl get node
+NAME                    STATUS   ROLES    AGE   VERSION
+helix105.hfa.chenqian   Ready    master   15m   v1.15.0
+</code></pre></div><p>但是coredns会一直处于ContainerCreating状态,是因为bin文件还没有:</p> <div class="language- extra-class"><pre class="language-text"><code>failed to find plugin &quot;bridge&quot; in path [/opt/cni/bin]
+</code></pre></div><p><a href="https://github.com/containernetworking/plugins" target="_blank" rel="noopener noreferrer">plugins<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a>里实现了很多的CNI,如我们上面配置的bridge.</p> <div class="language- extra-class"><pre class="language-text"><code>$ cd $GOPATH/src/github.com/containernetworking/plugins
+$ ./build_linux.sh
+$ cp bin/* /opt/cni/bin
+$ ls bin/
+bandwidth  dhcp      flannel      host-local  loopback  portmap  sbr     tuning
+bridge     firewall  host-device  ipvlan      macvlan   ptp      static  vlan
+</code></pre></div><p>这里有很多二进制，我们学习的话不需要关注所有的，就看ptp(就简单的创建了设备对)或者bridge</p> <p>再看coredns已经能分配到地址了：</p> <div class="language- extra-class"><pre class="language-text"><code>[root@helix105 plugins]# kubectl get pod -n kube-system -o wide
+NAME                                            READY   STATUS    RESTARTS   AGE     IP              NODE                    NOMINATED NODE   READINESS GATES
+coredns-5c98db65d4-5fh6c                        1/1     Running   0          3h10m   10.22.0.8       helix105.hfa.chenqian   &lt;none&gt;           &lt;none&gt;
+coredns-5c98db65d4-dbwmq                        1/1     Running   0          3h10m   10.22.0.9
+</code></pre></div><p>看一下网桥,cni0上挂了两个设备,与我们上面的cni配置里配置的一样，type字段指定用哪个bin文件，bridge字段指定网桥名：</p> <div class="language- extra-class"><pre class="language-text"><code>[root@helix105 plugins]# brctl show
+bridge name	bridge id		STP enabled	interfaces
+cni0		8000.8ef6ac49c2f7	no		veth1b28b06f
+            							veth1c093940
+</code></pre></div><h2 id="原理"><a href="#原理" class="header-anchor">#</a> 原理</h2> <p>为了更好理解kubelet干嘛了，我们可以找一个脚本来解释 <a href="https://github.com/containernetworking/cni/tree/master/scripts" target="_blank" rel="noopener noreferrer">script<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a> 这个脚本也可以用来测试你的CNI：</p> <p>为了易读，我删除一些不重要的东西,原版脚本可以在连接中去拿</p> <div class="language- extra-class"><pre class="language-text"><code># 先创建一个容器，这里只为了拿到一个net namespace
+contid=$(docker run -d --net=none golang:1.12.7 /bin/sleep 10000000) 
+pid=$(docker inspect -f '{{ .State.Pid }}' $contid)
+netnspath=/proc/$pid/ns/net # 这个我们需要
+
+kubelet启动pod时也是创建好容器就有了pod的network namespaces，再去把ns传给cni 让cni去配置
+
+./exec-plugins.sh add $contid $netnspath # 传入两个参数给下一个脚本，containerid和net namespace路径
+
+docker run --net=container:$contid $@
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>NETCONFPATH=${NETCONFPATH-/etc/cni/net.d}
+
+i=0
+# 获取容器id和网络ns
+contid=$2 
+netns=$3
+
+# 这里设置了几个环境变量，CNI命令行工具就可以获取到这些参数
+export CNI_COMMAND=$(echo $1 | tr '[:lower:]' '[:upper:]')
+export PATH=$CNI_PATH:$PATH # 这个指定CNI bin文件的路径
+export CNI_CONTAINERID=$contid 
+export CNI_NETNS=$netns
+
+for netconf in $(echo $NETCONFPATH/10-mynet.conf | sort); do
+        name=$(jq -r '.name' &lt;$netconf)
+        plugin=$(jq -r '.type' &lt;$netconf) # CNI配置文件的type字段对应二进制程序名
+        export CNI_IFNAME=$(printf eth%d $i) # 容器内网卡名
+
+        # 这里执行了命令行工具
+        res=$($plugin &lt;$netconf) # 这里把CNI的配置文件通过标准输入也传给CNI命令行工具
+        if [ $? -ne 0 ]; then
+                # 把结果输出到标准输出，这样kubelet就可以拿到容器地址等一些信息
+                errmsg=$(echo $res | jq -r '.msg')
+                if [ -z &quot;$errmsg&quot; ]; then
+                        errmsg=$res
+                fi
+
+                echo &quot;${name} : error executing $CNI_COMMAND: $errmsg&quot;
+                exit 1
+        let &quot;i=i+1&quot;
+done
+</code></pre></div><p>总结一下：</p> <div class="language- extra-class"><pre class="language-text"><code>         CNI配置文件
+         容器ID
+         网络ns
+kubelet --------------&gt;  CNI command
+   ^                        |
+   |                        |
+   +------------------------+
+       结果标准输出
+</code></pre></div><h3 id="bridge-cni实现"><a href="#bridge-cni实现" class="header-anchor">#</a> bridge CNI实现</h3> <p>既然这么简单，那么就可以去看看实现了：</p> <p><a href="https://github.com/containernetworking/plugins/tree/master/plugins/main/bridge" target="_blank" rel="noopener noreferrer">bridge CNI代码<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></p> <div class="language- extra-class"><pre class="language-text"><code>//cmdAdd 负责创建网络
+func cmdAdd(args *skel.CmdArgs) error 
+
+//入参数都已经写到这里面了，前面的参数从环境变量读取的，CNI配置从stdin读取的
+type CmdArgs struct {
+	ContainerID string
+	Netns       string
+	IfName      string
+	Args        string //这个里面携带一些额外参数, 如pod name等
+	Path        string
+	StdinData   []byte
+}
+</code></pre></div><p>所以CNI配置文件除了name type这些特定字段，你自己也可以加自己的一些字段.然后自己去解析</p> <p>然后啥事都得靠自己了</p> <div class="language- extra-class"><pre class="language-text"><code>//这里创建了设备对，并挂载到cni0王桥上
+hostInterface, containerInterface, err := setupVeth(netns, br, args.IfName, n.MTU, n.HairpinMode, n.Vlan)
+</code></pre></div><p>具体怎么挂的就是调用了<a href="github.com/vishvananda/netlink">netlink</a> 这个库，sealos在做内核负载时同样用了该库。</p> <div class="language- extra-class"><pre class="language-text"><code>err := netns.Do(func(hostNS ns.NetNS) error { //创建设备对
+	hostVeth, containerVeth, err := ip.SetupVeth(ifName, mtu, hostNS)
+    ...
+    //配置容器内的网卡名mac地址等
+	contIface.Name = containerVeth.Name
+	contIface.Mac = containerVeth.HardwareAddr.String()
+	contIface.Sandbox = netns.Path()
+	hostIface.Name = hostVeth.Name
+	return nil
+})
+...
+
+// 根据index找到宿主机设备对名
+hostVeth, err := netlink.LinkByName(hostIface.Name)
+...
+hostIface.Mac = hostVeth.Attrs().HardwareAddr.String()
+
+// 把宿主机端设备对挂给网桥
+if err := netlink.LinkSetMaster(hostVeth, br); err != nil {}
+
+// 设置hairpin mode
+if err = netlink.LinkSetHairpin(hostVeth, hairpinMode); err != nil {
+}
+
+// 设置vlanid
+if vlanID != 0 {
+	err = netlink.BridgeVlanAdd(hostVeth, uint16(vlanID), true, true, false, true)
+}
+
+return hostIface, contIface, nil
+</code></pre></div><p>最后把结果返回：</p> <div class="language- extra-class"><pre class="language-text"><code>type Result struct {
+	CNIVersion string         `json:&quot;cniVersion,omitempty&quot;`
+	Interfaces []*Interface   `json:&quot;interfaces,omitempty&quot;`
+	IPs        []*IPConfig    `json:&quot;ips,omitempty&quot;`
+	Routes     []*types.Route `json:&quot;routes,omitempty&quot;`
+	DNS        types.DNS      `json:&quot;dns,omitempty&quot;`
+}
+
+// 这样kubelet就收到返回信息了
+func (r *Result) PrintTo(writer io.Writer) error {
+	data, err := json.MarshalIndent(r, &quot;&quot;, &quot;    &quot;)
+	if err != nil {
+		return err
+	}
+	_, err = writer.Write(data)
+	return err
+}
+</code></pre></div><p>如：</p> <div class="language- extra-class"><pre class="language-text"><code>{
+  &quot;cniVersion&quot;: &quot;0.4.0&quot;,
+  &quot;interfaces&quot;: [                                            (this key omitted by IPAM plugins)
+      {
+          &quot;name&quot;: &quot;&lt;name&gt;&quot;,
+          &quot;mac&quot;: &quot;&lt;MAC address&gt;&quot;,                            (required if L2 addresses are meaningful)
+          &quot;sandbox&quot;: &quot;&lt;netns path or hypervisor identifier&gt;&quot; (required for container/hypervisor interfaces, empty/omitted for host interfaces)
+      }
+  ],
+  &quot;ips&quot;: [
+      {
+          &quot;version&quot;: &quot;&lt;4-or-6&gt;&quot;,
+          &quot;address&quot;: &quot;&lt;ip-and-prefix-in-CIDR&gt;&quot;,
+          &quot;gateway&quot;: &quot;&lt;ip-address-of-the-gateway&gt;&quot;,          (optional)
+          &quot;interface&quot;: &lt;numeric index into 'interfaces' list&gt;
+      },
+      ...
+  ],
+  &quot;routes&quot;: [                                                (optional)
+      {
+          &quot;dst&quot;: &quot;&lt;ip-and-prefix-in-cidr&gt;&quot;,
+          &quot;gw&quot;: &quot;&lt;ip-of-next-hop&gt;&quot;                           (optional)
+      },
+      ...
+  ],
+  &quot;dns&quot;: {                                                   (optional)
+    &quot;nameservers&quot;: &lt;list-of-nameservers&gt;                     (optional)
+    &quot;domain&quot;: &lt;name-of-local-domain&gt;                         (optional)
+    &quot;search&quot;: &lt;list-of-additional-search-domains&gt;            (optional)
+    &quot;options&quot;: &lt;list-of-options&gt;                             (optional)
+  }
+}
+</code></pre></div><blockquote><p>获取pod名称</p></blockquote> <p>CNI_ARGS 环境变量存了一些额外信息, 值的格式为：<code>FOO=BAR;ABC=123</code>, 比如其中就有我们挺需要的podname. <code>K8S_POD_NAME=xxxx</code></p> <h2 id="总结"><a href="#总结" class="header-anchor">#</a> 总结</h2> <p>CNI接口层面是非常简单的，所以更多的就是在CNI本身的实现了，懂了上文这些就可以自己去实现一个CNI了,是不是很酷，也会让大家更熟悉网络以更从容的姿态排查网络问题了。</p> <p>探讨可加QQ群：98488045</p></div> <footer class="page-edit"><!----> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
+      ←
+      <a href="/blog/client-go-crd.html" class="prev">使用client-go包访问Kubernetes CRD</a></span> <span class="next"><a href="/blog/container-stop-timeout.html">容器信号使用</a>
+      →
+    </span></p></div> </main></div><div class="global-ui"></div></div>
+    <script src="/assets/js/app.23d3ef84.js" defer></script><script src="/assets/js/2.bc760f0a.js" defer></script><script src="/assets/js/14.9bd9e6fd.js" defer></script>
+  </body>
+</html>

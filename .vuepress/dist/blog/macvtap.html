@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>macvtap实践教程 | sealyun | kubernetes安装</title>
+    <meta name="description" content="">
+    <meta name="theme-color" content="#007af5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2803648cc5852dd3e9e46bbd0bf63366";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+    <meta property="og:site_name" content="sealyun 专注于kubernetes安装"><meta property="og:title" content="sealyun kubernetes安装"><meta property="og:type" content="article"><meta property="og:url" content="/blog/macvtap.html"><meta name="twitter:title" content="sealyun kubernetes安装"><meta name="twitter:url" content="/blog/macvtap.html"><meta name="twitter:card" content="summary_large_image">
+    <link rel="preload" href="/assets/css/0.styles.943dcab2.css" as="style"><link rel="preload" href="/assets/js/app.23d3ef84.js" as="script"><link rel="preload" href="/assets/js/2.bc760f0a.js" as="script"><link rel="preload" href="/assets/js/46.b47c3836.js" as="script"><link rel="prefetch" href="/assets/js/10.e86bcb27.js"><link rel="prefetch" href="/assets/js/11.bb9904fc.js"><link rel="prefetch" href="/assets/js/12.ec81ebde.js"><link rel="prefetch" href="/assets/js/13.c482403d.js"><link rel="prefetch" href="/assets/js/14.9bd9e6fd.js"><link rel="prefetch" href="/assets/js/15.bdc6bd19.js"><link rel="prefetch" href="/assets/js/16.9e60a0b4.js"><link rel="prefetch" href="/assets/js/17.5df0c46d.js"><link rel="prefetch" href="/assets/js/18.85294fd2.js"><link rel="prefetch" href="/assets/js/19.f2879a42.js"><link rel="prefetch" href="/assets/js/20.6012d02a.js"><link rel="prefetch" href="/assets/js/21.81b7e1ca.js"><link rel="prefetch" href="/assets/js/22.1c2e71b0.js"><link rel="prefetch" href="/assets/js/23.0748294e.js"><link rel="prefetch" href="/assets/js/24.d63f1e4c.js"><link rel="prefetch" href="/assets/js/25.9dbfb44a.js"><link rel="prefetch" href="/assets/js/26.bfc3e626.js"><link rel="prefetch" href="/assets/js/27.ce51e7d7.js"><link rel="prefetch" href="/assets/js/28.ebb9caaf.js"><link rel="prefetch" href="/assets/js/29.8584027e.js"><link rel="prefetch" href="/assets/js/3.b7a496ec.js"><link rel="prefetch" href="/assets/js/30.158ceb97.js"><link rel="prefetch" href="/assets/js/31.f1024a9d.js"><link rel="prefetch" href="/assets/js/32.44cadfdb.js"><link rel="prefetch" href="/assets/js/33.af1c5cdb.js"><link rel="prefetch" href="/assets/js/34.a9e8095a.js"><link rel="prefetch" href="/assets/js/35.77ea75db.js"><link rel="prefetch" href="/assets/js/36.44da8d60.js"><link rel="prefetch" href="/assets/js/37.5e09e3fe.js"><link rel="prefetch" href="/assets/js/38.02e2aa10.js"><link rel="prefetch" href="/assets/js/39.b4e7f5f0.js"><link rel="prefetch" href="/assets/js/4.1ba98b6c.js"><link rel="prefetch" href="/assets/js/40.c879980c.js"><link rel="prefetch" href="/assets/js/41.0d571f5c.js"><link rel="prefetch" href="/assets/js/42.a7d12c13.js"><link rel="prefetch" href="/assets/js/43.60b5940b.js"><link rel="prefetch" href="/assets/js/44.b5a570c8.js"><link rel="prefetch" href="/assets/js/45.3df35b92.js"><link rel="prefetch" href="/assets/js/47.fbef4ef0.js"><link rel="prefetch" href="/assets/js/48.ae14afb1.js"><link rel="prefetch" href="/assets/js/49.4e6f30d4.js"><link rel="prefetch" href="/assets/js/5.c39869f0.js"><link rel="prefetch" href="/assets/js/50.c199fe15.js"><link rel="prefetch" href="/assets/js/51.30d345fb.js"><link rel="prefetch" href="/assets/js/52.5037db07.js"><link rel="prefetch" href="/assets/js/53.bb29d2bc.js"><link rel="prefetch" href="/assets/js/54.9e4ffa33.js"><link rel="prefetch" href="/assets/js/55.6d311bce.js"><link rel="prefetch" href="/assets/js/56.e6149a7c.js"><link rel="prefetch" href="/assets/js/57.57e2943c.js"><link rel="prefetch" href="/assets/js/58.61ea6212.js"><link rel="prefetch" href="/assets/js/59.95355587.js"><link rel="prefetch" href="/assets/js/6.0032a2d9.js"><link rel="prefetch" href="/assets/js/60.761d9050.js"><link rel="prefetch" href="/assets/js/61.b42700ba.js"><link rel="prefetch" href="/assets/js/62.6b9d864d.js"><link rel="prefetch" href="/assets/js/63.4aff7db2.js"><link rel="prefetch" href="/assets/js/64.34c83536.js"><link rel="prefetch" href="/assets/js/65.a7b0a430.js"><link rel="prefetch" href="/assets/js/66.8ee74e7e.js"><link rel="prefetch" href="/assets/js/67.3009b3ec.js"><link rel="prefetch" href="/assets/js/68.8bb3e997.js"><link rel="prefetch" href="/assets/js/7.5df889f4.js"><link rel="prefetch" href="/assets/js/8.c053b523.js"><link rel="prefetch" href="/assets/js/9.7948f30b.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.943dcab2.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><img src="https://sealyun.com/img/logo.png" alt="sealyun | kubernetes安装" class="logo"> <span class="site-name can-hide">sealyun | kubernetes安装</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav>  <ul class="sidebar-links"><li><a href="/blog/" class="sidebar-link">博客列表</a></li><li><a href="/blog/CI-CD.html" class="sidebar-link">CI 概述</a></li><li><a href="/blog/calico.html" class="sidebar-link">calico 网络原理</a></li><li><a href="/blog/calico-architecture.html" class="sidebar-link">calico架构</a></li><li><a href="/blog/calico-network-policy.html" class="sidebar-link">calico网络策略</a></li><li><a href="/blog/client-go-crd.html" class="sidebar-link">使用client-go包访问Kubernetes CRD</a></li><li><a href="/blog/cni.html" class="sidebar-link">CNI详细介绍</a></li><li><a href="/blog/container-stop-timeout.html" class="sidebar-link">容器信号使用</a></li><li><a href="/blog/containerd.html" class="sidebar-link">containerd与kubernetes集成</a></li><li><a href="/blog/crd.html" class="sidebar-link">使用kubebuilder开发CRD</a></li><li><a href="/blog/csi.html" class="sidebar-link">CSI详解</a></li><li><a href="/blog/dev-k8s-workflow.html" class="sidebar-link">kubernetes开发流程</a></li><li><a href="/blog/docker-architech.html" class="sidebar-link">Docker架构分析</a></li><li><a href="/blog/docker-dev.html" class="sidebar-link">docker开发流程</a></li><li><a href="/blog/docker-network.html" class="sidebar-link">容器网络概述</a></li><li><a href="/blog/docker-oerlay2.html" class="sidebar-link">关于overlay2存储驱动的磁盘配额问题</a></li><li><a href="/blog/docker-ovs.html" class="sidebar-link">ovs对接容器网络</a></li><li><a href="/blog/etcd-manage.html" class="sidebar-link">etcd管南</a></li><li><a href="/blog/fist-terminal.html" class="sidebar-link">属于极客的k8s管理工具fist</a></li><li><a href="/blog/genie.html" class="sidebar-link">CNI 小精灵 genie</a></li><li><a href="/blog/istio-quickstart.html" class="sidebar-link">istio安装使用教程</a></li><li><a href="/blog/k8s-authenticating.html" class="sidebar-link">kubernetes对接第三方认证</a></li><li><a href="/blog/k8s-ha-conf.html" class="sidebar-link">kubernetes高可用相关配置</a></li><li><a href="/blog/k8s-ipvs.html" class="sidebar-link">kubernetes ipvs设置</a></li><li><a href="/blog/k8s-rbac.html" class="sidebar-link">kubernetes RBAC实战</a></li><li><a href="/blog/keepalived.html" class="sidebar-link">keepalived in docker</a></li><li><a href="/blog/kube-admin-control.html" class="sidebar-link">kubernetes Admission Controller原理介绍</a></li><li><a href="/blog/kube-batch.html" class="sidebar-link">kube-scheduler定制，支持深度学习批处理任务调度</a></li><li><a href="/blog/kube-cmd.html" class="sidebar-link">老夫k8s命令行賊6</a></li><li><a href="/blog/kube-dev.html" class="sidebar-link">kubernetes开发指南</a></li><li><a href="/blog/kube-proxy-src.html" class="sidebar-link">kube-proxy源码解析</a></li><li><a href="/blog/kube-scheduler-source-code.html" class="sidebar-link">kubernetes源码分析之kube-scheduler - 从代码看原理</a></li><li><a href="/blog/kubeadm.html" class="sidebar-link">kubeadm杂谈</a></li><li><a href="/blog/kubeadm-dev.html" class="sidebar-link">修改kubeadm证书过期时间</a></li><li><a href="/blog/kubeadm-source.html" class="sidebar-link">kubeadm源码分析</a></li><li><a href="/blog/kubernetes-vm.html" class="sidebar-link">强隔离容器的那些事</a></li><li><a href="/blog/kustomize.html" class="sidebar-link">kustomize 颤抖吧helm!</a></li><li><a href="/blog/libra.html" class="sidebar-link">facebook libra尝鲜，没赶上比特币能不能上这趟车</a></li><li><a href="/blog/macvtap.html" class="active sidebar-link">macvtap实践教程</a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a href="/blog/macvtap.html#qemu-libvirt环境" class="sidebar-link">qemu libvirt环境</a></li><li class="sidebar-sub-header"><a href="/blog/macvtap.html#虚拟机镜像" class="sidebar-link">虚拟机镜像</a></li><li class="sidebar-sub-header"><a href="/blog/macvtap.html#启动虚拟机" class="sidebar-link">启动虚拟机</a></li><li class="sidebar-sub-header"><a href="/blog/macvtap.html#裸用qemu" class="sidebar-link">裸用qemu</a></li><li class="sidebar-sub-header"><a href="/blog/macvtap.html#cloud-init介绍" class="sidebar-link">cloud-init介绍</a></li><li class="sidebar-sub-header"><a href="/blog/macvtap.html#常见问题" class="sidebar-link">常见问题</a></li></ul></li><li><a href="/blog/ovn-vni.html" class="sidebar-link">从CNI到ovn</a></li><li><a href="/blog/prometheus-operator-envoy.html" class="sidebar-link">使用prometheus operator监控envoy</a></li><li><a href="/blog/rook.html" class="sidebar-link">rook使用教程，快速编排ceph</a></li><li><a href="/blog/rpc-protobuf.html" class="sidebar-link">golang基于protobuf的rpc使用</a></li><li><a href="/blog/runc.html" class="sidebar-link">runc 架构</a></li><li><a href="/blog/scratch.html" class="sidebar-link">scratch镜像</a></li><li><a href="/blog/tektoncd-pipeline.html" class="sidebar-link">tektoncd pipeline教程 - kubernetes原生pipeline</a></li><li><a href="/blog/user-token.html" class="sidebar-link">kubernetes 用户token教程</a></li><li><a href="/blog/vim.html" class="sidebar-link">是时候表现一下我的vim了</a></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="macvtap实践教程"><a href="#macvtap实践教程" class="header-anchor">#</a> macvtap实践教程</h1> <p>macvtap是虚拟机网络虚拟化常用的一种技术，当然容器也可以用. MACVTAP 的实现基于传统的 MACVLAN. 和 TAP 设备一样，每一个 MACVTAP 设备拥有一个对应的 Linux 字符设备，并拥有和 TAP 设备一样的 IOCTL 接口，因此能直接被 KVM/Qemu使用，方便地完成网络数据交换工作. 引入 MACVTAP 设备的目标是：简化虚拟化环境中的交换网络，代替传统的 Linux TAP 设备加 Bridge 设备组合，同时支持新的虚拟化网络技术，如 802.1 Qbg.</p> <p>如kata的虚拟化网络就用了这个技术，以下实践完就会对kata的网络原理比较清楚了，建议对照教程动手实践.</p> <h1 id="实验环境介绍"><a href="#实验环境介绍" class="header-anchor">#</a> 实验环境介绍</h1> <p><img src="/macvtap.jpg" alt="">
+此图非常重要，读整篇文章最好脑海里都有</p> <h1 id="初始化环境"><a href="#初始化环境" class="header-anchor">#</a> 初始化环境</h1> <h2 id="qemu-libvirt环境"><a href="#qemu-libvirt环境" class="header-anchor">#</a> qemu libvirt环境</h2> <p>我已经做好了qemu libvirt的镜像，大家可以直接使用：
+在容器中有非常多的好处，环境如果乱了可以快速恢复干净的环境。
+使用设备对也可减少对宿主机网络的影响。</p> <div class="language- extra-class"><pre class="language-text"><code>docker run -d --privileged -v /dev:/dev -v /home/fanux:/root --name qemu-vm fanux/libvirt:latest init
+</code></pre></div><p>注意：</p> <ol><li>网络等操作需要容器有特权模式</li> <li>tap网络需要挂载/dev目录</li> <li>/home/fanux可以作为工作目录，镜像自己编写的libvirt配置等放在里面防止删除容器后丢失</li> <li>由于libvirt需要systemd所以我们在容器中启动init进程</li></ol> <p>也可自己构建镜像，我提供了一个Dockerfile, -j参数根据你机器CPU来设置编译时的线程数:</p> <div class="language- extra-class"><pre class="language-text"><code>FROM centos:7.6.1810
+RUN yum install -y wget &amp;&amp; wget https://download.qemu.org/qemu-4.0.0.tar.xz &amp;&amp; \
+    tar xvJf qemu-4.0.0.tar.xz  \
+    &amp;&amp; yum install -y automake gcc-c++ gcc make autoconf libtool gtk2-devel \
+    &amp;&amp; cd qemu-4.0.0 \
+    &amp;&amp; ./configure \
+    &amp;&amp; make -j 72 &amp;&amp; make install \
+    &amp;&amp; yum install -y bridge-utils &amp;&amp; yum install -y net-tools tunctl iproute &amp;&amp; yum -y install openssh-clients \
+    cd .. &amp;&amp; rm qemu-4.0.0.tar.xz &amp;&amp; rm -rf qemu-4.0.0
+RUN yum install -y libvirt virt-manager gustfish openssh-clients
+</code></pre></div><h2 id="虚拟机镜像"><a href="#虚拟机镜像" class="header-anchor">#</a> 虚拟机镜像</h2> <p>进入容器</p> <div class="language- extra-class"><pre class="language-text"><code>[root@compute84 libvirt]# docker exec -it qemu-vm bash
+bash-4.2# cd
+bash-4.2# ls
+CentOS-7-x86_64-GenericCloud.qcow2     centos.qcow2	    image    nohup.out	start.sh  vm3.xml
+CentOS-7-x86_64-Minimal-1810.iso       cloud-init-start.sh  kernel   qemu	vm.xml
+Fedora-Cloud-Base-30-1.2.x86_64.qcow2  destroy.sh	    libvirt  run.sh	vm2.xml
+</code></pre></div><p>下载虚拟机镜像：</p> <p>openstack已经提供很多已经装过cloud-init的镜像，地址：
+https://docs.openstack.org/image-guide/obtain-images.html</p> <p>我用的一个比较新的centos的qcow2格式镜像：</p> <div class="language- extra-class"><pre class="language-text"><code>wget http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1905.qcow2
+</code></pre></div><p>修改虚拟机root密码：</p> <div class="language- extra-class"><pre class="language-text"><code>virt-customize -a CentOS-7-x86_64-GenericCloud.qcow2 --root-password password:coolpass
+</code></pre></div><h2 id="启动虚拟机"><a href="#启动虚拟机" class="header-anchor">#</a> 启动虚拟机</h2> <p>查看容器网络信息：</p> <div class="language- extra-class"><pre class="language-text"><code>bash-4.2# systemctl start libvirtd
+bash-4.2# ip addr
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: virbr0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue state DOWN group default qlen 1000
+    link/ether 52:54:00:c6:59:47 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.122.1/24 brd 192.168.122.255 scope global virbr0
+       valid_lft forever preferred_lft forever
+3: virbr0-nic: &lt;BROADCAST,MULTICAST&gt; mtu 1500 qdisc pfifo_fast master virbr0 state DOWN group default qlen 1000
+    link/ether 52:54:00:c6:59:47 brd ff:ff:ff:ff:ff:ff
+1310: eth0@if1311: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default 
+    link/ether 02:42:ac:11:00:02 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet 172.17.0.2/16 scope global eth0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::42:acff:fe11:2/64 scope link 
+       valid_lft forever preferred_lft forever
+</code></pre></div><p>1,2,3是libvirt创建的可以忽略，最主要是eth0</p> <h3 id="编写libvirt配置"><a href="#编写libvirt配置" class="header-anchor">#</a> 编写libvirt配置</h3> <p>vm3.xml:</p> <div class="language- extra-class"><pre class="language-text"><code>&lt;domain type='kvm'&gt;
+  &lt;name&gt;vm3&lt;/name&gt;
+  &lt;memory unit='MiB'&gt;2048&lt;/memory&gt;
+  &lt;currentMemory unit='MiB'&gt;2048&lt;/currentMemory&gt;
+  &lt;os&gt;
+    &lt;type arch='x86_64'&gt;hvm&lt;/type&gt;
+    &lt;boot dev='hd'/&gt;
+  &lt;/os&gt;
+  &lt;clock offset='utc'/&gt;
+  &lt;on_poweroff&gt;destroy&lt;/on_poweroff&gt;
+  &lt;on_reboot&gt;restart&lt;/on_reboot&gt;
+  &lt;on_crash&gt;destroy&lt;/on_crash&gt;
+  &lt;devices&gt;
+    &lt;emulator&gt;/usr/local/bin/qemu-system-x86_64&lt;/emulator&gt;
+  &lt;disk type='file' device='disk'&gt;
+       &lt;driver name='qemu' type='qcow2'/&gt;
+       &lt;source file='/root/CentOS-7-x86_64-GenericCloud.qcow2'/&gt;
+       &lt;target dev='vda' bus='virtio'/&gt;
+  &lt;/disk&gt;
+  &lt;interface type='direct'&gt; 
+    &lt;source dev='eth0' mode='bridge' /&gt; 
+    &lt;model type='virtio' /&gt;    
+    &lt;driver name='vhost' /&gt; 
+  &lt;/interface&gt;
+  &lt;serial type='pty'&gt;
+    &lt;target port='0'/&gt;
+  &lt;/serial&gt;
+  &lt;console type='pty'&gt;
+    &lt;target type='serial' port='0'/&gt;
+  &lt;/console&gt;
+  &lt;/devices&gt;
+&lt;/domain&gt;
+</code></pre></div><p>这里配置正确镜像地址，interface的地方是macvtap相关的配置。</p> <h3 id="启动虚拟机-2"><a href="#启动虚拟机-2" class="header-anchor">#</a> 启动虚拟机</h3> <div class="language- extra-class"><pre class="language-text"><code>bash-4.2# virsh define vm3.xml 
+Domain vm3 defined from vm3.xml
+bash-4.2# virsh start vm3     
+Domain vm3 started
+</code></pre></div><p>启动完后就可以看到macvtap设备被创建出来了</p> <div class="language- extra-class"><pre class="language-text"><code>bash-4.2# ip addr
+7: macvtap0@eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP group default qlen 500
+    link/ether 52:54:00:56:e4:20 brd ff:ff:ff:ff:ff:ff
+    inet6 fe80::5054:ff:fe56:e420/64 scope link 
+       valid_lft forever preferred_lft forever
+</code></pre></div><p>进入到虚拟机：</p> <div class="language- extra-class"><pre class="language-text"><code>virsh console vm3
+</code></pre></div><p>如果卡在这一步：</p> <div class="language- extra-class"><pre class="language-text"><code>A start job is running for LSB: Bri... networking
+cloud-init[2253]: 2019-06-27 08:37:09,971 - url_helper.py[WARNING]: Calling 'http://192.168.122.1/latest/meta-data/instance-id' failed [87/120s]: request error
+</code></pre></div><p>等它超时就好，因为macvtap时我们需要进入虚拟机去配置网络。
+然后就可以进入虚拟机了：</p> <div class="language- extra-class"><pre class="language-text"><code>CentOS Linux 7 (Core)
+Kernel 3.10.0-957.1.3.el7.x86_64 on an x86_64
+
+localhost login: root
+Password: 
+Last login: Thu Jun 27 07:19:32 from gateway
+</code></pre></div><p>密码是我们上面设置的镜像密码：coolpass</p> <h3 id="配置虚拟机ip"><a href="#配置虚拟机ip" class="header-anchor">#</a> 配置虚拟机IP</h3> <div class="language- extra-class"><pre class="language-text"><code>[root@localhost ~]# ip addr
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether 52:54:00:56:e4:20 brd ff:ff:ff:ff:ff:ff
+    inet6 fe80::5054:ff:fe56:e420/64 scope link 
+       valid_lft forever preferred_lft forever
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>[root@localhost ~]# ip addr add 172.17.0.2/16 dev eth0
+[root@localhost ~]# ip route add default via 172.17.0.1 dev eth0
+[root@localhost ~]# ip addr
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether 52:54:00:56:e4:20 brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.2/16 scope global eth0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::5054:ff:fe56:e420/64 scope link 
+       valid_lft forever preferred_lft forever
+[root@localhost ~]# ip route 
+default via 172.17.0.1 dev eth0 
+172.17.0.0/16 dev eth0 proto kernel scope link src 172.17.0.2 
+[root@localhost ~]# ping 172.17.0.1
+PING 172.17.0.1 (172.17.0.1) 56(84) bytes of data.
+64 bytes from 172.17.0.1: icmp_seq=1 ttl=64 time=0.622 ms
+64 bytes from 172.17.0.1: icmp_seq=2 ttl=64 time=0.194 ms
+</code></pre></div><p>配置完后就可以ping通网关了。</p> <h4 id="修改dns配置"><a href="#修改dns配置" class="header-anchor">#</a> 修改DNS配置</h4> <p>这个不改可能会导致ssh时非常慢：</p> <div class="language- extra-class"><pre class="language-text"><code>[root@localhost ~]# cat /etc/resolv.conf 
+; Created by cloud-init on instance boot automatically, do not edit.
+;
+; generated by /usr/sbin/dhclient-script
+nameserver 114.114.114.114
+</code></pre></div><h4 id="修改sshd配置"><a href="#修改sshd配置" class="header-anchor">#</a> 修改sshd配置</h4> <p>修改/etc/ssh/sshd-config文件，将其中的PermitRootLogin no修改为yes，PubkeyAuthentication yes修改为no，AuthorizedKeysFile .ssh/authorized_keys前面加上#屏蔽掉，PasswordAuthentication no修改为yes就可以了。</p> <h4 id="启动ssh客户端容器"><a href="#启动ssh客户端容器" class="header-anchor">#</a> 启动ssh客户端容器</h4> <div class="language- extra-class"><pre class="language-text"><code>docker run --rm -it fanux/libvirt bash
+[root@ee18547e9ed2 /]# ssh root@172.17.0.2
+ssh: connect to host 172.17.0.2 port 22: Connection refused
+</code></pre></div><p>会发现不通, 这是因为容器里的eth0和虚拟机里的eth0都配置了相同的地址导致，只需要把容器里的eth0地址删掉即可：</p> <div class="language- extra-class"><pre class="language-text"><code>bash-4.2# ip addr del 172.17.0.2/16 dev eth0
+</code></pre></div><p>再次ssh即可进入虚拟机：</p> <div class="language- extra-class"><pre class="language-text"><code>[root@ee18547e9ed2 /]# ssh root@172.17.0.2
+The authenticity of host '172.17.0.2 (172.17.0.2)' can't be established.
+ECDSA key fingerprint is SHA256:kTk3yy8588WQHNtwpzS+h6u0W3RELWC8hJQwIwLOkdc.
+ECDSA key fingerprint is MD5:0c:f3:b5:69:c6:08:05:14:f8:da:42:2f:85:29:51:d0.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added '172.17.0.2' (ECDSA) to the list of known hosts.
+root@172.17.0.2's password: 
+Last login: Thu Jun 27 08:38:00 2019
+[root@localhost ~]# ip addr
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether 52:54:00:56:e4:20 brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.2/16 scope global eth0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::5054:ff:fe56:e420/64 scope link 
+       valid_lft forever preferred_lft forever
+</code></pre></div><h4 id="修改虚拟机mac地址"><a href="#修改虚拟机mac地址" class="header-anchor">#</a> 修改虚拟机mac地址</h4> <div class="language- extra-class"><pre class="language-text"><code>[root@localhost ~]# ip link set eth0 address 52:54:00:56:e4:23
+</code></pre></div><p>会发现就连不上虚拟机了</p> <p>改回：</p> <div class="language- extra-class"><pre class="language-text"><code>[root@localhost ~]# ip link set eth0 address 52:54:00:56:e4:20
+</code></pre></div><p>又可正常连接了，为啥？</p> <p>这是因为虚拟机的eth0的mac地址是必须与macvtap0的mac地址保持一样，原理很简单</p> <ol><li>ARP时问IP地址是172.17.0.2的机器mac地址是什么</li> <li>虚拟机回了一个52:54:00:56:e4:20</li> <li>macvtap0是可以理解成挂在网桥端口上的，这样就把包发给macvtap0了（因为mac地址一样,不一样就不会发给macvtap了）</li> <li>macvtap0就把包丢给qemu应用进程（最终到虚拟机eth0）</li></ol> <h2 id="裸用qemu"><a href="#裸用qemu" class="header-anchor">#</a> 裸用qemu</h2> <p>以上是通过libvirt进行使用的，这样屏蔽了很多底层的细节，如果是直接使用qemu命令需要如下操作：</p> <p>创建macvtap设备：</p> <div class="language- extra-class"><pre class="language-text"><code>ip link add link eth0 name macvtap0 type macvtap mode bridge
+ip link set macvtap0 address 1a:46:0b:ca:bc:7b up
+bash-4.2# cat /sys/class/net/macvtap0/ifindex  # 对应下面命令的/dev/tap2
+2
+bash-4.2# cat /sys/class/net/macvtap0/address # 与qemu mac地址配置一致
+1a:46:0b:ca:bc:7b
+</code></pre></div><p>启动qemu,然后虚拟机里面的地址配置同libvirt，可以通过vnc客户端（vnc viewer）进入虚拟机配置，不在赘述:</p> <div class="language- extra-class"><pre class="language-text"><code>bash-4.2# qemu-system-x86_64 -enable-kvm /root/CentOS-7-x86_64-GenericCloud.qcow2\
+-netdev tap,fd=30,id=hostnet0,vhost=on,vhostfd=4 30&lt;&gt;/dev/tap2 4&lt;&gt;/dev/vhost-net \
+-device virtio-net-pci,netdev=hostnet0,id=net0,mac=1a:46:0b:ca:bc:7b   \
+-monitor telnet:127.0.0.1:5801,server,nowait
+VNC server running on ::1:5900
+</code></pre></div><h2 id="cloud-init介绍"><a href="#cloud-init介绍" class="header-anchor">#</a> cloud-init介绍</h2> <p>上文提到，通过macvtap技术配置虚拟机网卡地址是需要进入虚拟机配置的, 然而我们实现一个虚拟机管理系统时显然不会手动进入去配置，这就需要cloud-init了</p> <p>它可以帮助我们在虚拟机启动时配置虚拟机，如配置密码，配置网络，执行命令和写一些文件等。
+先创建一个user-data文件，里面内容如下：</p> <div class="language- extra-class"><pre class="language-text"><code>#cloud-config
+write_files:
+ - content: |
+    DEVICE=eth0
+    ONBOOT=yes
+    TYPE=Ethernet
+    USERCTL=no
+    IPADDR=172.17.0.2
+    NETMASK=255.255.0.0
+    GATEWAY=172.17.0.1
+    BOOTPROTO=static
+    DNS1=172.17.0.1
+    ONBOOT=yes
+   path: /etc/sysconfig/network-scripts/ifcfg-eth0
+runcmd:
+ - systemctl start network
+groups:
+  - centos: [root]
+  - cloud-users
+ssh_pwauth: yes
+chpasswd:
+    expire: false
+    list: |
+        user1:222222
+        root:333333
+</code></pre></div><p>创建cloud-init镜像文件</p> <div class="language- extra-class"><pre class="language-text"><code>yum install -y cloud-utils
+cloud-localds my-seed.img user-data
+</code></pre></div><p>libvirt中使用该镜像</p> <div class="language- extra-class"><pre class="language-text"><code>  &lt;disk type='file' device='disk'&gt;
+       &lt;driver name='qemu' type='raw'/&gt;
+       &lt;source file='/root/my-seed.img'/&gt;
+       &lt;target dev='vdb' bus='virtio'/&gt;
+  &lt;/disk&gt;
+</code></pre></div><p>为了防止cloud-init走网络获取metadata，因为网卡没设置好所以会卡住五分钟，我们直接把网络获取metadata禁止掉：</p> <p>vi /etc/cloud/cloud.cfg.d/05_logging.cfg</p> <p>加上：</p> <div class="language- extra-class"><pre class="language-text"><code>network:
+  config: disabled
+</code></pre></div><p>然后启动虚拟机即可</p> <h2 id="常见问题"><a href="#常见问题" class="header-anchor">#</a> 常见问题</h2> <blockquote><p>Inappropriate ioctl for device</p></blockquote> <div class="language- extra-class"><pre class="language-text"><code>qemu-system-x86_64: -net tap,fd=5: TUNGETIFF ioctl() failed: Inappropriate ioctl for device
+TUNSETOFFLOAD ioctl() failed: Inappropriate ioctl for device
+</code></pre></div><p>因为容器没有挂载/dev目录</p> <blockquote><p>KVM bios被禁</p></blockquote> <div class="language- extra-class"><pre class="language-text"><code>[root@helix105 ~]# docker run busybox uname -a
+Could not access KVM kernel module: No such file or directory
+qemu-lite-system-x86_64: failed to initialize KVM: No such file or directory
+
+/usr/bin/docker-current: Error response from daemon: oci runtime error: Unable to launch /usr/bin/qemu-lite-system-x86_64: exit status 1.
+ERRO[0001] error getting events from daemon: net/http: request canceled 
+[root@helix105 ~]# lsmod |grep kvm
+kvm                   598016  0 
+irqbypass              16384  1 kvm
+[root@helix105 ~]# modprobe kvm-intel
+modprobe: ERROR: could not insert 'kvm_intel': Operation not supported
+You have mail in /var/spool/mail/root
+[root@helix105 ~]# dmesg |grep kvm
+[    8.239309] kvm: disabled by bios
+</code></pre></div><p>这个要进bios打开</p> <blockquote><p>KVM: Permission denied</p></blockquote> <div class="language- extra-class"><pre class="language-text"><code>bash-4.2# virsh start vm_name1
+error: Failed to start domain vm_name1
+error: internal error: qemu unexpectedly closed the monitor: Could not access KVM kernel module: Permission denied
+2019-06-20T07:26:33.304320Z qemu-system-x86_64: failed to initialize KVM: Permission denied
+</code></pre></div><p>解决办法：</p> <div class="language- extra-class"><pre class="language-text"><code>#chown root:kvm /dev/kvm
+修改/etc/libvirt/qemu.conf，
+#user=&quot;root&quot;
+user=&quot;root&quot;
+#group=&quot;root&quot;
+group=&quot;root&quot;
+重启服务
+#service libvirtd restart，问题解决了
+</code></pre></div><p>探讨可加QQ群：98488045</p></div> <footer class="page-edit"><!----> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
+      ←
+      <a href="/blog/libra.html" class="prev">facebook libra尝鲜，没赶上比特币能不能上这趟车</a></span> <span class="next"><a href="/blog/ovn-vni.html">从CNI到ovn</a>
+      →
+    </span></p></div> </main></div><div class="global-ui"></div></div>
+    <script src="/assets/js/app.23d3ef84.js" defer></script><script src="/assets/js/2.bc760f0a.js" defer></script><script src="/assets/js/46.b47c3836.js" defer></script>
+  </body>
+</html>

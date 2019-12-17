@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>kube-scheduler定制，支持深度学习批处理任务调度 | sealyun | kubernetes安装</title>
+    <meta name="description" content="">
+    <meta name="theme-color" content="#007af5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2803648cc5852dd3e9e46bbd0bf63366";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+    <meta property="og:site_name" content="sealyun 专注于kubernetes安装"><meta property="og:title" content="sealyun kubernetes安装"><meta property="og:type" content="article"><meta property="og:url" content="/blog/kube-batch.html"><meta name="twitter:title" content="sealyun kubernetes安装"><meta name="twitter:url" content="/blog/kube-batch.html"><meta name="twitter:card" content="summary_large_image">
+    <link rel="preload" href="/assets/css/0.styles.943dcab2.css" as="style"><link rel="preload" href="/assets/js/app.23d3ef84.js" as="script"><link rel="preload" href="/assets/js/2.bc760f0a.js" as="script"><link rel="preload" href="/assets/js/35.77ea75db.js" as="script"><link rel="prefetch" href="/assets/js/10.e86bcb27.js"><link rel="prefetch" href="/assets/js/11.bb9904fc.js"><link rel="prefetch" href="/assets/js/12.ec81ebde.js"><link rel="prefetch" href="/assets/js/13.c482403d.js"><link rel="prefetch" href="/assets/js/14.9bd9e6fd.js"><link rel="prefetch" href="/assets/js/15.bdc6bd19.js"><link rel="prefetch" href="/assets/js/16.9e60a0b4.js"><link rel="prefetch" href="/assets/js/17.5df0c46d.js"><link rel="prefetch" href="/assets/js/18.85294fd2.js"><link rel="prefetch" href="/assets/js/19.f2879a42.js"><link rel="prefetch" href="/assets/js/20.6012d02a.js"><link rel="prefetch" href="/assets/js/21.81b7e1ca.js"><link rel="prefetch" href="/assets/js/22.1c2e71b0.js"><link rel="prefetch" href="/assets/js/23.0748294e.js"><link rel="prefetch" href="/assets/js/24.d63f1e4c.js"><link rel="prefetch" href="/assets/js/25.9dbfb44a.js"><link rel="prefetch" href="/assets/js/26.bfc3e626.js"><link rel="prefetch" href="/assets/js/27.ce51e7d7.js"><link rel="prefetch" href="/assets/js/28.ebb9caaf.js"><link rel="prefetch" href="/assets/js/29.8584027e.js"><link rel="prefetch" href="/assets/js/3.b7a496ec.js"><link rel="prefetch" href="/assets/js/30.158ceb97.js"><link rel="prefetch" href="/assets/js/31.f1024a9d.js"><link rel="prefetch" href="/assets/js/32.44cadfdb.js"><link rel="prefetch" href="/assets/js/33.af1c5cdb.js"><link rel="prefetch" href="/assets/js/34.a9e8095a.js"><link rel="prefetch" href="/assets/js/36.44da8d60.js"><link rel="prefetch" href="/assets/js/37.5e09e3fe.js"><link rel="prefetch" href="/assets/js/38.02e2aa10.js"><link rel="prefetch" href="/assets/js/39.b4e7f5f0.js"><link rel="prefetch" href="/assets/js/4.1ba98b6c.js"><link rel="prefetch" href="/assets/js/40.c879980c.js"><link rel="prefetch" href="/assets/js/41.0d571f5c.js"><link rel="prefetch" href="/assets/js/42.a7d12c13.js"><link rel="prefetch" href="/assets/js/43.60b5940b.js"><link rel="prefetch" href="/assets/js/44.b5a570c8.js"><link rel="prefetch" href="/assets/js/45.3df35b92.js"><link rel="prefetch" href="/assets/js/46.b47c3836.js"><link rel="prefetch" href="/assets/js/47.fbef4ef0.js"><link rel="prefetch" href="/assets/js/48.ae14afb1.js"><link rel="prefetch" href="/assets/js/49.4e6f30d4.js"><link rel="prefetch" href="/assets/js/5.c39869f0.js"><link rel="prefetch" href="/assets/js/50.c199fe15.js"><link rel="prefetch" href="/assets/js/51.30d345fb.js"><link rel="prefetch" href="/assets/js/52.5037db07.js"><link rel="prefetch" href="/assets/js/53.bb29d2bc.js"><link rel="prefetch" href="/assets/js/54.9e4ffa33.js"><link rel="prefetch" href="/assets/js/55.6d311bce.js"><link rel="prefetch" href="/assets/js/56.e6149a7c.js"><link rel="prefetch" href="/assets/js/57.57e2943c.js"><link rel="prefetch" href="/assets/js/58.61ea6212.js"><link rel="prefetch" href="/assets/js/59.95355587.js"><link rel="prefetch" href="/assets/js/6.0032a2d9.js"><link rel="prefetch" href="/assets/js/60.761d9050.js"><link rel="prefetch" href="/assets/js/61.b42700ba.js"><link rel="prefetch" href="/assets/js/62.6b9d864d.js"><link rel="prefetch" href="/assets/js/63.4aff7db2.js"><link rel="prefetch" href="/assets/js/64.34c83536.js"><link rel="prefetch" href="/assets/js/65.a7b0a430.js"><link rel="prefetch" href="/assets/js/66.8ee74e7e.js"><link rel="prefetch" href="/assets/js/67.3009b3ec.js"><link rel="prefetch" href="/assets/js/68.8bb3e997.js"><link rel="prefetch" href="/assets/js/7.5df889f4.js"><link rel="prefetch" href="/assets/js/8.c053b523.js"><link rel="prefetch" href="/assets/js/9.7948f30b.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.943dcab2.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><img src="https://sealyun.com/img/logo.png" alt="sealyun | kubernetes安装" class="logo"> <span class="site-name can-hide">sealyun | kubernetes安装</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav>  <ul class="sidebar-links"><li><a href="/blog/" class="sidebar-link">博客列表</a></li><li><a href="/blog/CI-CD.html" class="sidebar-link">CI 概述</a></li><li><a href="/blog/calico.html" class="sidebar-link">calico 网络原理</a></li><li><a href="/blog/calico-architecture.html" class="sidebar-link">calico架构</a></li><li><a href="/blog/calico-network-policy.html" class="sidebar-link">calico网络策略</a></li><li><a href="/blog/client-go-crd.html" class="sidebar-link">使用client-go包访问Kubernetes CRD</a></li><li><a href="/blog/cni.html" class="sidebar-link">CNI详细介绍</a></li><li><a href="/blog/container-stop-timeout.html" class="sidebar-link">容器信号使用</a></li><li><a href="/blog/containerd.html" class="sidebar-link">containerd与kubernetes集成</a></li><li><a href="/blog/crd.html" class="sidebar-link">使用kubebuilder开发CRD</a></li><li><a href="/blog/csi.html" class="sidebar-link">CSI详解</a></li><li><a href="/blog/dev-k8s-workflow.html" class="sidebar-link">kubernetes开发流程</a></li><li><a href="/blog/docker-architech.html" class="sidebar-link">Docker架构分析</a></li><li><a href="/blog/docker-dev.html" class="sidebar-link">docker开发流程</a></li><li><a href="/blog/docker-network.html" class="sidebar-link">容器网络概述</a></li><li><a href="/blog/docker-oerlay2.html" class="sidebar-link">关于overlay2存储驱动的磁盘配额问题</a></li><li><a href="/blog/docker-ovs.html" class="sidebar-link">ovs对接容器网络</a></li><li><a href="/blog/etcd-manage.html" class="sidebar-link">etcd管南</a></li><li><a href="/blog/fist-terminal.html" class="sidebar-link">属于极客的k8s管理工具fist</a></li><li><a href="/blog/genie.html" class="sidebar-link">CNI 小精灵 genie</a></li><li><a href="/blog/istio-quickstart.html" class="sidebar-link">istio安装使用教程</a></li><li><a href="/blog/k8s-authenticating.html" class="sidebar-link">kubernetes对接第三方认证</a></li><li><a href="/blog/k8s-ha-conf.html" class="sidebar-link">kubernetes高可用相关配置</a></li><li><a href="/blog/k8s-ipvs.html" class="sidebar-link">kubernetes ipvs设置</a></li><li><a href="/blog/k8s-rbac.html" class="sidebar-link">kubernetes RBAC实战</a></li><li><a href="/blog/keepalived.html" class="sidebar-link">keepalived in docker</a></li><li><a href="/blog/kube-admin-control.html" class="sidebar-link">kubernetes Admission Controller原理介绍</a></li><li><a href="/blog/kube-batch.html" class="active sidebar-link">kube-scheduler定制，支持深度学习批处理任务调度</a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a href="/blog/kube-batch.html#延迟绑定" class="sidebar-link">延迟绑定</a></li><li class="sidebar-sub-header"><a href="/blog/kube-batch.html#检查资源是否充足checkresourceisenough" class="sidebar-link">检查资源是否充足CheckResourceIsEnough</a></li><li class="sidebar-sub-header"><a href="/blog/kube-batch.html#如何获取节点已经分配gpu的数量" class="sidebar-link">如何获取节点已经分配GPU的数量</a></li><li class="sidebar-sub-header"><a href="/blog/kube-batch.html#增加podupdater，可更新podcondition状态" class="sidebar-link">增加podupdater，可更新podcondition状态</a></li><li class="sidebar-sub-header"><a href="/blog/kube-batch.html#需要把batch-scheduler的cache给generic-scheduler资源检查时需要用" class="sidebar-link">需要把batch scheduler的cache给generic_scheduler资源检查时需要用</a></li><li class="sidebar-sub-header"><a href="/blog/kube-batch.html#检查资源是否充足详细算法：" class="sidebar-link">检查资源是否充足详细算法：</a></li></ul></li><li><a href="/blog/kube-cmd.html" class="sidebar-link">老夫k8s命令行賊6</a></li><li><a href="/blog/kube-dev.html" class="sidebar-link">kubernetes开发指南</a></li><li><a href="/blog/kube-proxy-src.html" class="sidebar-link">kube-proxy源码解析</a></li><li><a href="/blog/kube-scheduler-source-code.html" class="sidebar-link">kubernetes源码分析之kube-scheduler - 从代码看原理</a></li><li><a href="/blog/kubeadm.html" class="sidebar-link">kubeadm杂谈</a></li><li><a href="/blog/kubeadm-dev.html" class="sidebar-link">修改kubeadm证书过期时间</a></li><li><a href="/blog/kubeadm-source.html" class="sidebar-link">kubeadm源码分析</a></li><li><a href="/blog/kubernetes-vm.html" class="sidebar-link">强隔离容器的那些事</a></li><li><a href="/blog/kustomize.html" class="sidebar-link">kustomize 颤抖吧helm!</a></li><li><a href="/blog/libra.html" class="sidebar-link">facebook libra尝鲜，没赶上比特币能不能上这趟车</a></li><li><a href="/blog/macvtap.html" class="sidebar-link">macvtap实践教程</a></li><li><a href="/blog/ovn-vni.html" class="sidebar-link">从CNI到ovn</a></li><li><a href="/blog/prometheus-operator-envoy.html" class="sidebar-link">使用prometheus operator监控envoy</a></li><li><a href="/blog/rook.html" class="sidebar-link">rook使用教程，快速编排ceph</a></li><li><a href="/blog/rpc-protobuf.html" class="sidebar-link">golang基于protobuf的rpc使用</a></li><li><a href="/blog/runc.html" class="sidebar-link">runc 架构</a></li><li><a href="/blog/scratch.html" class="sidebar-link">scratch镜像</a></li><li><a href="/blog/tektoncd-pipeline.html" class="sidebar-link">tektoncd pipeline教程 - kubernetes原生pipeline</a></li><li><a href="/blog/user-token.html" class="sidebar-link">kubernetes 用户token教程</a></li><li><a href="/blog/vim.html" class="sidebar-link">是时候表现一下我的vim了</a></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="kube-scheduler定制，支持深度学习批处理任务调度"><a href="#kube-scheduler定制，支持深度学习批处理任务调度" class="header-anchor">#</a> kube-scheduler定制，支持深度学习批处理任务调度</h1> <h1 id="什么是批处理任务"><a href="#什么是批处理任务" class="header-anchor">#</a> 什么是批处理任务</h1> <p>深度学习中经常会出现多机多卡的任务，也就是同事会起多个pod，但是这多个pod属于同一个任务。</p> <p>这样就会有一个问题</p> <p>一个任务要起100个pod，每个pod需要一张卡，总共需要100张GPU卡，而集群中只有99张空闲的GPU卡，这样默认的k8s调度器会如何处理？</p> <p>因为默认调度器是一个一个pod调度的，只会检查单个pod资源够不够，这样前99个都能成功，最后一个pod调度失败。</p> <p>这样非常有可能造成</p> <ol><li>任务跑不了</li> <li>前99个占着GPU不释放，新的任务无法调度</li> <li>严重时整个集群死锁，都“占着茅坑不拉屎”
+</li></ol> <p>所以需要在调度时对整个task所需所有资源进行检查，当集群总体资源不够时，一个pod都得不到调度。</p> <p>社区提供了一个能支持这种特性的<a href="https://github.com/kubernetes-sigs/kube-batch/blob/master/doc/usage/tutorial.md" target="_blank" rel="noopener noreferrer">调度器<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a>
+但是这个调度器是没办法和原生调度器很好的配合工作的</p> <ol><li>最大的问题在于两个调度器都有cache，这样cache的内容会冲突，导致调度混乱</li> <li>这个调度器没法和原生调度器同时起作用，这样用了这个batch调度器后就没法用亲和性什么的特性了</li></ol> <p>所以我们做的事是将两者特性融合，选择的方法是定制化开发kube-scheduler</p> <p>其实scheduler是可以通过extender扩展的，但是extender还是太弱了，它仅能在预选和优选过程中加入自己的过滤策略，而这对于批处理任务远远不够。</p> <h1 id="实现难点"><a href="#实现难点" class="header-anchor">#</a> 实现难点</h1> <blockquote><p>需要优选时加batch任务检查
+拿到一个pod ---&gt; 如果是一个batchpod ---&gt; 查询集群资源是否满足batch任务---&gt;否调度失败</p></blockquote> <blockquote><p>需要保障batch任务中其它pod能得到调度</p></blockquote> <p>如果集群资源能满足这个batch任务直接去bind有个问题：
+假设调度队列是这样,假设集群中有三个GPU，而batch任务需要三个GPU：</p> <table><thead><tr><th>A batch pod -&gt;</th> <th>pod -&gt;</th> <th>pod -&gt;</th> <th>A batch pod -&gt;</th> <th>A batch pod</th></tr></thead> <tbody><tr><td>集群资源够 调度成功</td> <td>调度了别的pod</td> <td>调度了别的pod</td> <td>GPU被别的pod占用 GPU不够 失败</td> <td>GPU不够 失败</td></tr></tbody></table> <p>所以最终结果是A批任务占用了一个GPU但是整个任务是调度失败的，那一个GPU还得不到释放</p> <p>所以需要修改pod调度队列里的顺序?让A batch pod连续调度? 没这么简单，</p> <p>pod调度是创建协程并发调度的，这样即便去调整任务队列里pod的顺序也不一定能保证batch任务其它pod能得到优先调度。</p> <div class="language- extra-class"><pre class="language-text"><code>go wait.Until(sched.scheduleOne, 0, sched.config.StopEverything)
+</code></pre></div><blockquote><p>只要batch pod走到Bind逻辑了就没有回头路了</p></blockquote> <p>batch任务中所有pod先进行assume调度，其中任意一个失败就清理掉其它已经bind但是还没实际进行调度的pod。 并把所有pod扔回队列，或者直接返回调度失败清理改任务的pod，让上层重新触发?</p> <p>scheduler流程 scheduler/sheduler.go scheduleOne逻辑：</p> <p>选节点-&gt;cache assume pod on node-&gt; 创建协程bind</p> <p>所以在assume时去检查，不满足退还已经调度的pod是不可行的，因为之前batch任务中的pod可能已经bind过了， 所以只能batch任务中最后一个pod得到确认才能去bind前面的pod</p> <blockquote><p>预占用策略
+预占用策略： 第一个batch pod任务来时，检查集群资源是不是够，如果够进行预占，把其它几个node打上标记，让接下来pod无法占用其它的node，这样batch任务其实pod过来就有节点可用。</p></blockquote> <p>回到了不能bind的问题。。。</p> <p>这种问题有两点：</p> <p>如何知道batch任务中其它pod需要什么样的节点，如果pod都一样问题可简化
+如果后面的pod失败了，第一个pod还是已经bind，还是会出现一样的问题
+最终还是在所有pod assume之前不能bind单个pod</p> <p>综上，需要在几个地方处理</p> <p>队列最好用优先级队列，把正在调度的pod的关联pod优先级提高
+选节点时做判断，看集群资源是否够
+选好节点assume pod时检查，如果自己不够或者pod组不够就不去bind
+问题是之前的pod已经走了bind流程，所以最重要的是如何解决让之前的pod不去bind，延迟bind</p> <blockquote><p>最终方案 - 延迟绑定</p></blockquote> <p>方案：在batch任务bind时进行特殊处理</p> <ol><li>如果是batch任务扔进task cache，不进行binding</li> <li>如果batch任务最后一个pod扔进task cache,该task ready，放进bind队列</li> <li>在bind队列里取task 进行bind，task互斥锁与普通pod bind时互斥</li></ol> <blockquote><p>使用
+batch任务使用，pod增加两个注解：</p></blockquote> <div class="language- extra-class"><pre class="language-text"><code>      annotations:
+        scheduling.k8s.io/group-name: qj-1
+        scheduling.k8s.io/group-pod-num: 3
+</code></pre></div><p>pod加上这两个注解表示属于同一个task, num表示task里有多少pod。</p> <p>本来是再定义一个CRD去描述这个task，耦合会小一些，但是实现麻烦些，需要多监听一个CRD，偷懒就没这样做</p> <h1 id="实现"><a href="#实现" class="header-anchor">#</a> 实现</h1> <p>延迟绑定流程：
+<img src="/batch-scheduler-flow.png" alt=""></p> <ul><li>如果是普通的pod，找到节点后assume就直接bind</li> <li>如果是批处理任务，直接扔到批处理缓存中返回</li> <li>有个协程一直检查批缓存中是否有成功的task (pod都齐了)</li> <li>成功的task扔进binding队列，worker取成功的task进行批量绑定，绑定时与普通pod互斥</li></ul> <p>batch scheduler接口与成员
+<img src="/batch-scheduler.png" alt=""></p> <p>Run 起一个协程检查成功的task并塞入队列
+RunBind 起一个task绑定协程
+PodQuePriority 去动态修改pod队列的优先级，让同task的pod优先调度</p> <p>执行流程：
+<img src="/batch-scheduler-run.png" alt=""></p> <h2 id="延迟绑定"><a href="#延迟绑定" class="header-anchor">#</a> 延迟绑定</h2> <p>scheduler/scheduler.go:</p> <div class="language- extra-class"><pre class="language-text"><code>	//fanux if it is a batch pod, return
+	if sched.Config.BatchScheduler.IsBatchPod(assumedPod) {
+		err = sched.Config.BatchScheduler.HandleBatchPod(assumedPod)
+		if err != nil {
+			glog.Errorf(&quot;schedule batch pod failed: %v&quot;, assumedPod.Namespace, assumedPod.Name)
+		}
+		return
+	}
+</code></pre></div><p>增加绑定互斥，防止batch任务和普通pod同事binding:</p> <div class="language- extra-class"><pre class="language-text"><code>	go func() {
+		//fanux add bind mutex
+		sched.Config.BatchScheduler.Lock()
+		defer sched.Config.BatchScheduler.UnLock()
+
+		err := sched.bind(assumedPod, &amp;v1.Binding{
+</code></pre></div><h2 id="检查资源是否充足checkresourceisenough"><a href="#检查资源是否充足checkresourceisenough" class="header-anchor">#</a> 检查资源是否充足CheckResourceIsEnough</h2> <p>should't use filterFunc, needs nodelist</p> <p>scheduler/util/batch.go</p> <div class="language- extra-class"><pre class="language-text"><code>package util
+
+import &quot;api/core/v1&quot;
+
+//CheckResourceIsEnough is
+func CheckResourceIsEnough(pod *v1.Pod, nodes []*v1.Node) (bool, error) {
+	return false, nil
+}
+</code></pre></div><p>scheduler/core/generic_scheduler.go</p> <div class="language- extra-class"><pre class="language-text"><code>	//fanux add checkBatchPodResource
+	flag, err := util.CheckResourceIsEnough(pod, filteredNodes)
+	if !flag || err != nil {
+		return &quot;&quot;, err
+	}
+
+	trace.Step(&quot;Prioritizing&quot;)
+</code></pre></div><p>处理资源不足时的情况</p> <div class="language- extra-class"><pre class="language-text"><code>	suggestedHost, err := sched.schedule(pod)
+
+	//fanux add handle if resource not enough
+	if strings.Contains(err.Error(), common.BatchResourceNotEnough) {
+		sched.Config.BatchScheduler.HandleResourceNotEnough(pod)
+	} else if err != nil {
+</code></pre></div><h2 id="如何获取节点已经分配gpu的数量"><a href="#如何获取节点已经分配gpu的数量" class="header-anchor">#</a> 如何获取节点已经分配GPU的数量</h2> <p>nodeInfo allocatableResource - requestedResource is avaliavle resource</p> <div class="language- extra-class"><pre class="language-text"><code>	requestedResource *Resource
+	nonzeroRequest    *Resource
+	allocatableResource *Resource
+</code></pre></div><p>GPU 是 ScalarResources, 资源名称叫 : <code>NVIDIAGPUResourceName = &quot;nvidia.com/gpu&quot;</code></p> <div class="language- extra-class"><pre class="language-text"><code>type Resource struct {
+	MilliCPU         int64
+	Memory           int64
+	EphemeralStorage int64
+	// We store allowedPodNumber (which is Node.Status.Allocatable.Pods().Value())
+	// explicitly as int, to avoid conversions and improve performance.
+	AllowedPodNumber int
+	// ScalarResources
+	ScalarResources map[v1.ResourceName]int64
+}
+</code></pre></div><h2 id="增加podupdater，可更新podcondition状态"><a href="#增加podupdater，可更新podcondition状态" class="header-anchor">#</a> 增加podupdater，可更新podcondition状态</h2> <div class="language- extra-class"><pre class="language-text"><code>	batchScheduler := batch.NewBatchScheduler(c.schedulerCache, c.podQueue, &amp;binder{c.client}, &amp;podConditionUpdater{c.client})
+</code></pre></div><h2 id="需要把batch-scheduler的cache给generic-scheduler资源检查时需要用"><a href="#需要把batch-scheduler的cache给generic-scheduler资源检查时需要用" class="header-anchor">#</a> 需要把batch scheduler的cache给generic_scheduler资源检查时需要用</h2> <p>需要知道已经有哪些pod已经assume过了，把这个数量减掉才是batch任务还需要多少GPU</p> <p>core/generic_scheduler.go</p> <div class="language- extra-class"><pre class="language-text"><code>	//fanux add batch Cache
+	//check batch pod resource is enough need batch scheduler cache
+	BatchCache common.TaskCache
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>	//fanux add checkBatchPodResource
+	flag, err := common.CheckResourceIsEnough(pod, filteredNodes, g.cachedNodeInfoMap, g.BatchCache)
+</code></pre></div><p>factory.go</p> <div class="language- extra-class"><pre class="language-text"><code>	//fanux check batch resource is enough need batch scheduler cache
+	batchCache := batchScheduler.GetTaskCache()
+
+	algo := core.NewGenericScheduler(
+        ...
+		batchCache,
+	)
+</code></pre></div><p>then checkresource :</p> <div class="language- extra-class"><pre class="language-text"><code>	//shoud not use metadata, need use metadata - assumed pod num in batch cache
+	_, podNum := GetPodBathMeta(pod)
+	podNum -= batchCache.GetTaskAssumedPodNum(pod)
+</code></pre></div><h2 id="检查资源是否充足详细算法："><a href="#检查资源是否充足详细算法：" class="header-anchor">#</a> 检查资源是否充足详细算法：</h2> <p>有很多细节</p> <div class="language- extra-class"><pre class="language-text"><code>//获取pod需要多少GPU，这个需要把pod里容器配额加起来
+func GetPodGPUCount(pod *v1.Pod) (count int) {
+	for _, c := range pod.Spec.Containers {
+		limit, ok := c.Resources.Limits[NVIDIAGPUResourceName]
+		l, okay := limit.AsInt64()
+		if !ok || !okay {
+			continue
+		}
+		count += int(l)
+	}
+
+	glog.Infof(&quot;Pod [%s] need GPU [%d]&quot;, pod.GetName(), count)
+
+	return
+}
+
+//获取节点空闲GPU，需要把可分配的减去已经申请的
+func GetNodeFreeGPU(nodeInfo *cache.NodeInfo) int {
+	if nodeInfo == nil {
+		return 0
+	}
+
+	allocatable, ok := nodeInfo.AllocatableResource().ScalarResources[NVIDIAGPUResourceName]
+	if !ok {
+		glog.Errorf(&quot;can't fetch allocatable GPU : %v&quot;, nodeInfo)
+		return 0
+	}
+	glog.Infof(&quot;node [%s] allocatable GPU [%d]&quot;, nodeInfo.Node().Name, allocatable)
+
+	requested, ok := nodeInfo.RequestedResource().ScalarResources[NVIDIAGPUResourceName]
+	if !ok {
+		//glog.Errorf(&quot;can't fetch requested GPU : %v&quot;, nodeInfo)
+		//return 0
+		requested = 0
+	}
+	glog.Infof(&quot;node [%s] requested GPU [%d]&quot;, nodeInfo.Node().Name, requested)
+
+	available := allocatable - requested
+
+	glog.Infof(&quot;available node [%s] GPU : [%d]&quot;, nodeInfo.Node().Name, available)
+
+	return int(available)
+}
+
+//这里最关键的点是需要把annotations里面获取的task pod总数减去已经assume过的batch pod，这样才是真实所需
+func CheckResourceIsEnough(pod *v1.Pod, nodes []*v1.Node, cachedNodeInfoMap map[string]*cache.NodeInfo, batchCache TaskCache) (bool, error) {
+	//if is not batch pod, return true,nil
+	if !IsBatch(pod) {
+		glog.Infof(&quot;pod %s is not batch pod&quot;, pod.GetName())
+		return true, nil
+	}
+
+	//shoud not use metadata, need use metadata - ready pod num in batch cache
+	_, podNum := GetPodBathMeta(pod)
+	podNum -= batchCache.GetTaskAssumedPodNum(pod)
+
+	everyPodNeedsGPU := GetPodGPUCount(pod)
+	if everyPodNeedsGPU == 0 {
+		glog.Infof(&quot;pod %s require 0 GPU&quot;, pod.GetName())
+		return true, nil
+	}
+
+	// TODO maybe check nodes[1:], node[0] already allocate a pod, CPU and other metric may reach limit
+	for _, node := range nodes {
+		nodeInfo, ok := cachedNodeInfoMap[node.Name]
+		if !ok {
+			continue
+		}
+		nodeFree := GetNodeFreeGPU(nodeInfo)
+		podNum -= nodeFree / everyPodNeedsGPU
+		glog.Infof(&quot;pod: [%s] node: [%s] podNum [%d] nodeFree [%d] podNeed [%d]&quot;, pod.GetName(), node.Name, podNum, nodeFree, everyPodNeedsGPU)
+		if podNum &lt;= 0 {
+			return true, nil
+		}
+	}
+
+	return false, fmt.Errorf(&quot;BatchResourceNotEnough : pod name is %s&quot;, pod.GetName())
+}
+
+//判断是不是batch pod
+func IsBatch(pod *v1.Pod) bool {
+	g, n := GetPodBathMeta(pod)
+	if g == &quot;&quot; || n == 0 {
+		glog.Infof(&quot;The pod's group name is empty string,pod name is %v.&quot;, pod.GetName())
+		return false
+	}
+	return true
+}
+</code></pre></div><h1 id="关于gpu的使用与发现"><a href="#关于gpu的使用与发现" class="header-anchor">#</a> 关于GPU的使用与发现</h1> <p><a href="https://github.com/sealyun/GPU/releases" target="_blank" rel="noopener noreferrer">资源包<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></p> <p>这里包含docker nv-docker GPU-device plugin
+install.sh...</p> <p>/etc/docker/daemon.json</p> <div class="language- extra-class"><pre class="language-text"><code>[root@compute-gpu006 ~]# cat /etc/docker/daemon.json
+{
+    &quot;default-runtime&quot;:&quot;nvidia&quot;,
+    &quot;runtimes&quot;: {
+        &quot;nvidia&quot;: {
+            &quot;path&quot;: &quot;/usr/bin/nvidia-container-runtime&quot;,
+            &quot;runtimeArgs&quot;: []
+        }
+    }
+}
+</code></pre></div><p>kubectl describe node xxx:</p> <div class="language- extra-class"><pre class="language-text"><code>Capacity:
+ cpu:                72
+ ephemeral-storage:  222779Mi
+ hugepages-1Gi:      0
+ hugepages-2Mi:      2Gi
+ memory:             791014684Ki
+ nvidia.com/gpu:     2                # 这里就能看到GPU了
+ pods:               110
+Allocatable:
+ cpu:                72
+ ephemeral-storage:  210240641086
+ hugepages-1Gi:      0
+ hugepages-2Mi:      2Gi
+ memory:             788815132Ki
+ nvidia.com/gpu:     2
+ pods:               110
+</code></pre></div><h1 id="总结"><a href="#总结" class="header-anchor">#</a> 总结</h1> <p>原生调度器的设计就是pod one by one，所以做这个功能的开发还是改动非常大的，也是比较困难的，工作量不大，但是需要找到一个优雅的方案，
+合理的架构比较麻烦,想了很久做了这个侵入不太大的实现方案，欢迎大家一起讨论</p></div> <footer class="page-edit"><!----> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
+      ←
+      <a href="/blog/kube-admin-control.html" class="prev">kubernetes Admission Controller原理介绍</a></span> <span class="next"><a href="/blog/kube-cmd.html">老夫k8s命令行賊6</a>
+      →
+    </span></p></div> </main></div><div class="global-ui"></div></div>
+    <script src="/assets/js/app.23d3ef84.js" defer></script><script src="/assets/js/2.bc760f0a.js" defer></script><script src="/assets/js/35.77ea75db.js" defer></script>
+  </body>
+</html>

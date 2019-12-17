@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>kubernetes对接第三方认证 | sealyun | kubernetes安装</title>
+    <meta name="description" content="">
+    <meta name="theme-color" content="#007af5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2803648cc5852dd3e9e46bbd0bf63366";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+    <meta property="og:site_name" content="sealyun 专注于kubernetes安装"><meta property="og:title" content="sealyun kubernetes安装"><meta property="og:type" content="article"><meta property="og:url" content="/blog/k8s-authenticating.html"><meta name="twitter:title" content="sealyun kubernetes安装"><meta name="twitter:url" content="/blog/k8s-authenticating.html"><meta name="twitter:card" content="summary_large_image">
+    <link rel="preload" href="/assets/css/0.styles.943dcab2.css" as="style"><link rel="preload" href="/assets/js/app.23d3ef84.js" as="script"><link rel="preload" href="/assets/js/2.bc760f0a.js" as="script"><link rel="preload" href="/assets/js/29.8584027e.js" as="script"><link rel="prefetch" href="/assets/js/10.e86bcb27.js"><link rel="prefetch" href="/assets/js/11.bb9904fc.js"><link rel="prefetch" href="/assets/js/12.ec81ebde.js"><link rel="prefetch" href="/assets/js/13.c482403d.js"><link rel="prefetch" href="/assets/js/14.9bd9e6fd.js"><link rel="prefetch" href="/assets/js/15.bdc6bd19.js"><link rel="prefetch" href="/assets/js/16.9e60a0b4.js"><link rel="prefetch" href="/assets/js/17.5df0c46d.js"><link rel="prefetch" href="/assets/js/18.85294fd2.js"><link rel="prefetch" href="/assets/js/19.f2879a42.js"><link rel="prefetch" href="/assets/js/20.6012d02a.js"><link rel="prefetch" href="/assets/js/21.81b7e1ca.js"><link rel="prefetch" href="/assets/js/22.1c2e71b0.js"><link rel="prefetch" href="/assets/js/23.0748294e.js"><link rel="prefetch" href="/assets/js/24.d63f1e4c.js"><link rel="prefetch" href="/assets/js/25.9dbfb44a.js"><link rel="prefetch" href="/assets/js/26.bfc3e626.js"><link rel="prefetch" href="/assets/js/27.ce51e7d7.js"><link rel="prefetch" href="/assets/js/28.ebb9caaf.js"><link rel="prefetch" href="/assets/js/3.b7a496ec.js"><link rel="prefetch" href="/assets/js/30.158ceb97.js"><link rel="prefetch" href="/assets/js/31.f1024a9d.js"><link rel="prefetch" href="/assets/js/32.44cadfdb.js"><link rel="prefetch" href="/assets/js/33.af1c5cdb.js"><link rel="prefetch" href="/assets/js/34.a9e8095a.js"><link rel="prefetch" href="/assets/js/35.77ea75db.js"><link rel="prefetch" href="/assets/js/36.44da8d60.js"><link rel="prefetch" href="/assets/js/37.5e09e3fe.js"><link rel="prefetch" href="/assets/js/38.02e2aa10.js"><link rel="prefetch" href="/assets/js/39.b4e7f5f0.js"><link rel="prefetch" href="/assets/js/4.1ba98b6c.js"><link rel="prefetch" href="/assets/js/40.c879980c.js"><link rel="prefetch" href="/assets/js/41.0d571f5c.js"><link rel="prefetch" href="/assets/js/42.a7d12c13.js"><link rel="prefetch" href="/assets/js/43.60b5940b.js"><link rel="prefetch" href="/assets/js/44.b5a570c8.js"><link rel="prefetch" href="/assets/js/45.3df35b92.js"><link rel="prefetch" href="/assets/js/46.b47c3836.js"><link rel="prefetch" href="/assets/js/47.fbef4ef0.js"><link rel="prefetch" href="/assets/js/48.ae14afb1.js"><link rel="prefetch" href="/assets/js/49.4e6f30d4.js"><link rel="prefetch" href="/assets/js/5.c39869f0.js"><link rel="prefetch" href="/assets/js/50.c199fe15.js"><link rel="prefetch" href="/assets/js/51.30d345fb.js"><link rel="prefetch" href="/assets/js/52.5037db07.js"><link rel="prefetch" href="/assets/js/53.bb29d2bc.js"><link rel="prefetch" href="/assets/js/54.9e4ffa33.js"><link rel="prefetch" href="/assets/js/55.6d311bce.js"><link rel="prefetch" href="/assets/js/56.e6149a7c.js"><link rel="prefetch" href="/assets/js/57.57e2943c.js"><link rel="prefetch" href="/assets/js/58.61ea6212.js"><link rel="prefetch" href="/assets/js/59.95355587.js"><link rel="prefetch" href="/assets/js/6.0032a2d9.js"><link rel="prefetch" href="/assets/js/60.761d9050.js"><link rel="prefetch" href="/assets/js/61.b42700ba.js"><link rel="prefetch" href="/assets/js/62.6b9d864d.js"><link rel="prefetch" href="/assets/js/63.4aff7db2.js"><link rel="prefetch" href="/assets/js/64.34c83536.js"><link rel="prefetch" href="/assets/js/65.a7b0a430.js"><link rel="prefetch" href="/assets/js/66.8ee74e7e.js"><link rel="prefetch" href="/assets/js/67.3009b3ec.js"><link rel="prefetch" href="/assets/js/68.8bb3e997.js"><link rel="prefetch" href="/assets/js/7.5df889f4.js"><link rel="prefetch" href="/assets/js/8.c053b523.js"><link rel="prefetch" href="/assets/js/9.7948f30b.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.943dcab2.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><img src="https://sealyun.com/img/logo.png" alt="sealyun | kubernetes安装" class="logo"> <span class="site-name can-hide">sealyun | kubernetes安装</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav>  <ul class="sidebar-links"><li><a href="/blog/" class="sidebar-link">博客列表</a></li><li><a href="/blog/CI-CD.html" class="sidebar-link">CI 概述</a></li><li><a href="/blog/calico.html" class="sidebar-link">calico 网络原理</a></li><li><a href="/blog/calico-architecture.html" class="sidebar-link">calico架构</a></li><li><a href="/blog/calico-network-policy.html" class="sidebar-link">calico网络策略</a></li><li><a href="/blog/client-go-crd.html" class="sidebar-link">使用client-go包访问Kubernetes CRD</a></li><li><a href="/blog/cni.html" class="sidebar-link">CNI详细介绍</a></li><li><a href="/blog/container-stop-timeout.html" class="sidebar-link">容器信号使用</a></li><li><a href="/blog/containerd.html" class="sidebar-link">containerd与kubernetes集成</a></li><li><a href="/blog/crd.html" class="sidebar-link">使用kubebuilder开发CRD</a></li><li><a href="/blog/csi.html" class="sidebar-link">CSI详解</a></li><li><a href="/blog/dev-k8s-workflow.html" class="sidebar-link">kubernetes开发流程</a></li><li><a href="/blog/docker-architech.html" class="sidebar-link">Docker架构分析</a></li><li><a href="/blog/docker-dev.html" class="sidebar-link">docker开发流程</a></li><li><a href="/blog/docker-network.html" class="sidebar-link">容器网络概述</a></li><li><a href="/blog/docker-oerlay2.html" class="sidebar-link">关于overlay2存储驱动的磁盘配额问题</a></li><li><a href="/blog/docker-ovs.html" class="sidebar-link">ovs对接容器网络</a></li><li><a href="/blog/etcd-manage.html" class="sidebar-link">etcd管南</a></li><li><a href="/blog/fist-terminal.html" class="sidebar-link">属于极客的k8s管理工具fist</a></li><li><a href="/blog/genie.html" class="sidebar-link">CNI 小精灵 genie</a></li><li><a href="/blog/istio-quickstart.html" class="sidebar-link">istio安装使用教程</a></li><li><a href="/blog/k8s-authenticating.html" class="active sidebar-link">kubernetes对接第三方认证</a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a href="/blog/k8s-authenticating.html#概述" class="sidebar-link">概述</a></li><li class="sidebar-sub-header"><a href="/blog/k8s-authenticating.html#dex介绍" class="sidebar-link">dex介绍</a></li><li class="sidebar-sub-header"><a href="/blog/k8s-authenticating.html#流程" class="sidebar-link">流程</a></li><li class="sidebar-sub-header"><a href="/blog/k8s-authenticating.html#环境介绍与注意事项" class="sidebar-link">环境介绍与注意事项</a></li><li class="sidebar-sub-header"><a href="/blog/k8s-authenticating.html#安装" class="sidebar-link">安装</a></li></ul></li><li><a href="/blog/k8s-ha-conf.html" class="sidebar-link">kubernetes高可用相关配置</a></li><li><a href="/blog/k8s-ipvs.html" class="sidebar-link">kubernetes ipvs设置</a></li><li><a href="/blog/k8s-rbac.html" class="sidebar-link">kubernetes RBAC实战</a></li><li><a href="/blog/keepalived.html" class="sidebar-link">keepalived in docker</a></li><li><a href="/blog/kube-admin-control.html" class="sidebar-link">kubernetes Admission Controller原理介绍</a></li><li><a href="/blog/kube-batch.html" class="sidebar-link">kube-scheduler定制，支持深度学习批处理任务调度</a></li><li><a href="/blog/kube-cmd.html" class="sidebar-link">老夫k8s命令行賊6</a></li><li><a href="/blog/kube-dev.html" class="sidebar-link">kubernetes开发指南</a></li><li><a href="/blog/kube-proxy-src.html" class="sidebar-link">kube-proxy源码解析</a></li><li><a href="/blog/kube-scheduler-source-code.html" class="sidebar-link">kubernetes源码分析之kube-scheduler - 从代码看原理</a></li><li><a href="/blog/kubeadm.html" class="sidebar-link">kubeadm杂谈</a></li><li><a href="/blog/kubeadm-dev.html" class="sidebar-link">修改kubeadm证书过期时间</a></li><li><a href="/blog/kubeadm-source.html" class="sidebar-link">kubeadm源码分析</a></li><li><a href="/blog/kubernetes-vm.html" class="sidebar-link">强隔离容器的那些事</a></li><li><a href="/blog/kustomize.html" class="sidebar-link">kustomize 颤抖吧helm!</a></li><li><a href="/blog/libra.html" class="sidebar-link">facebook libra尝鲜，没赶上比特币能不能上这趟车</a></li><li><a href="/blog/macvtap.html" class="sidebar-link">macvtap实践教程</a></li><li><a href="/blog/ovn-vni.html" class="sidebar-link">从CNI到ovn</a></li><li><a href="/blog/prometheus-operator-envoy.html" class="sidebar-link">使用prometheus operator监控envoy</a></li><li><a href="/blog/rook.html" class="sidebar-link">rook使用教程，快速编排ceph</a></li><li><a href="/blog/rpc-protobuf.html" class="sidebar-link">golang基于protobuf的rpc使用</a></li><li><a href="/blog/runc.html" class="sidebar-link">runc 架构</a></li><li><a href="/blog/scratch.html" class="sidebar-link">scratch镜像</a></li><li><a href="/blog/tektoncd-pipeline.html" class="sidebar-link">tektoncd pipeline教程 - kubernetes原生pipeline</a></li><li><a href="/blog/user-token.html" class="sidebar-link">kubernetes 用户token教程</a></li><li><a href="/blog/vim.html" class="sidebar-link">是时候表现一下我的vim了</a></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="kubernetes对接第三方认证"><a href="#kubernetes对接第三方认证" class="header-anchor">#</a> kubernetes对接第三方认证</h1> <h2 id="概述"><a href="#概述" class="header-anchor">#</a> 概述</h2> <p>本文介绍如何使用github账户去关联自己kubernetes账户。达到如下效果：</p> <ol><li>使用github用户email作为kubernetes用户，如fhtjob@hotmail.com</li> <li>创建对应的clusterrole绑定给fhtjob@hotmail.com这个用户</li> <li>给fhtjob@hotmail这个用户创建一个kubeconfig文件，让改用户可以使用kubectl命令操作集群，且只有部分权限
+</li></ol> <h2 id="dex介绍"><a href="#dex介绍" class="header-anchor">#</a> dex介绍</h2> <p><a href="https://github.com/coreos/dex" target="_blank" rel="noopener noreferrer">dex<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a> 是一个统一认证的服务，支持各种认证协议如Ouath2 ldap等，自己可以作为一个identity provider,也可以连到别的id provider(如github)上,dex作为一个中间代理.</p> <h2 id="流程"><a href="#流程" class="header-anchor">#</a> 流程</h2> <div class="language- extra-class"><pre class="language-text"><code>          http://47.52.197.163:5555    http://47.52.197.163:32000
+  人(浏览器）   dex client                 dex server               github                      kubectl             kubernetes server
+  |   login(scope) |                         |                       |                           |                        |
+  |------1--------&gt;|                         |                       |                           |                        |
+  |                |----------2-------------&gt;|                       |                           |                        |
+  |                |                         |----------3-----------&gt;|                           |                        |
+  |                |                         |   id_token            |                           |                        |
+  |                |                         |&lt;---------4------------| callback                  |                        |
+  |  id_token      |&lt;----------5-------------|callback               |                           |                        |
+  |&lt;-------6-------|                         |                       |                           |                        |
+  |                |                         |                       |               id_token    |                        |
+  |------------------------------------------------7--------------------------------------------&gt;|        id_token        |
+  |                |                         |                       |                           |----------8------------&gt;|
+  |                |                         |                       |                           |                        | valid? 
+  |                |                         |                       |                           |                        | expired?
+  |                |                         |                       |                           |                        | user Authorized?
+  |                |                         |                       |                           |&lt;---------9-------------|
+  X&lt;----------------------------------------------10---------------------------------------------|                        |
+  |                |                         |                       |                           |                        |
+  |                |                         |                       |                           |                        |
+  |                |                         |                       |                           |                        |
+</code></pre></div><ul><li>scope: 你需要哪些信息，如邮箱,openid,用户名等</li> <li>id_token: 加密后的你需要的信息</li> <li>dex client: dex的客户端，比如可以是我们自己写的管理的服务端，会去调用第三方登录的流程，或者我们写的一个网站后台处理登录的逻辑</li> <li>dex server: dex的服务端，一边作为client的服务端，另一边其实是github的客户端</li></ul> <ol><li>用户在浏览器发起登录请求</li> <li>dexclient把请求重定向给dexserver</li> <li>dexserver重定向给github，这时用户就会跳转到github的页面去授权允许访问哪些信息</li> <li>github把对应信息加密调用dexserver的回调url(http://47.52.197.163:32000/callback)把信息传给dex server, 注意区分dex client的回调</li> <li>dexserver把信息回调给dex client(http://47.52.197.163:5555/callback)</li> <li>浏览器中拿到token</li> <li>把token加到kubeconfig文件中，让kubectl可以使用</li> <li>kubectl把token传给kubernetes server, server有 dex server的公钥可以解析token，拿到username, 看是否过期，看授权是否允许执行该动作</li> <li>把执行结果返回给kubectl</li></ol> <h2 id="环境介绍与注意事项"><a href="#环境介绍与注意事项" class="header-anchor">#</a> 环境介绍与注意事项</h2> <ul><li>采用云服务器进行该实验，Floatingip是47.52.197.163</li> <li>你需要有一个github账户，我的是github.com/fanux 把email(fhtjob@hotmail.com)作为kubernetes账户</li> <li>服务器上要装golang</li> <li>官方教程有很多坑，建议看我的教程</li> <li>需要有个k8s集群，那么我最推荐的安装方式当然是购买我的<a href="https://market.aliyun.com/products/57742013/cmxz025618.html?spm=5176.730005.0.0.TFKV5K#sku=yuncode1961800000" target="_blank" rel="noopener noreferrer">安装包<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a>哈哈</li></ul> <h2 id="安装"><a href="#安装" class="header-anchor">#</a> 安装</h2> <h3 id="修改kube-apiserver配置"><a href="#修改kube-apiserver配置" class="header-anchor">#</a> 修改kube apiserver配置</h3> <div class="language- extra-class"><pre class="language-text"><code>[root@master2 ~]# cat /etc/kubernetes/manifests/kube-apiserver.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    scheduler.alpha.kubernetes.io/critical-pod: &quot;&quot;
+  creationTimestamp: null
+  labels:
+    component: kube-apiserver
+    tier: control-plane
+  name: kube-apiserver
+  namespace: kube-system
+spec:
+  containers:
+  - command:
+    - kube-apiserver
+    - --oidc-issuer-url=https://47.52.197.163:32000   # 加上这五个参数
+    - --oidc-client-id=example-app
+    - --oidc-ca-file=/etc/kubernetes/ssl/ca.pem # dex证书，挂载进来的
+    - --oidc-username-claim=email
+    - --oidc-groups-claim=groups
+
+...
+
+    - mountPath: /etc/kubernetes/ssl  # 把dex的证书挂进去给apiserver使用
+      name: dex
+      readOnly: true
+  volumes:
+  - hostPath:
+      path: /etc/kubernetes/ssl
+      type: DirectoryOrCreate
+    name: dex
+</code></pre></div><p>用kubeadm安装的修改/etc/kubernetes/manifests/kube-apiserver.yaml这个文件即可，建议不要直接修改，拷贝出来修改再复制回去，防止kubelet去拉swap文件导致controller manager异常</p> <h3 id="创建github-app"><a href="#创建github-app" class="header-anchor">#</a> 创建github app</h3> <p>点你github头像，settings-&gt;developer settins -&gt; new oauth app</p> <p>Application name: example-app
+Homepage URL：https://47.52.197.163:32000<br>
+Authorization callback URL: https://47.52.197.163:32000/callback</p> <p>URL千万别填错，注意是dex server的URL而不是dex client的5555</p> <p>然后你就能看到一个ID一个secrect 后面需要用</p> <h3 id="部署dex"><a href="#部署dex" class="header-anchor">#</a> 部署dex</h3> <p>没装go的自己去装。。。</p> <div class="language- extra-class"><pre class="language-text"><code>go get github.com/coreos/dex 
+cd $GOPATH/src/github.com/coreos/dex
+</code></pre></div><p>生成证书
+gencert.sh需要改一下，把我们IP加进去</p> <div class="language- extra-class"><pre class="language-text"><code>[alt_names]
+DNS.1 = dex.example.com
+IP.1 = 47.52.197.163
+IP.2 = 172.31.244.238
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>$ cd examples/k8s
+$ ./gencert.sh
+$ cp examples/k8s/ssl /etc/kubernetes # 可曾记得我们挂载的目录
+</code></pre></div><p>创建secrect,这个会给dex server用</p> <div class="language- extra-class"><pre class="language-text"><code>$ kubectl create secret tls dex.example.com.tls --cert=ssl/cert.pem --key=ssl/key.pem
+</code></pre></div><p>再创建一个secrect给dex server Github OAuth2 客户端用，dex server是github的一个客户端要理解</p> <div class="language- extra-class"><pre class="language-text"><code>$ kubectl create secret \
+    generic github-client \
+    --from-literal=client-id=$GITHUB_CLIENT_ID \   # 这俩东西替换成在github页面上创建的APP clientid和secrect
+    --from-literal=client-secret=$GITHUB_CLIENT_SECRET
+</code></pre></div><p>启动dex.yaml，注意代码里直接clone下来的没有配置存储，而且镜像比较老，建议用我的：</p> <div class="language- extra-class"><pre class="language-text"><code>apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: dex
+  name: dex
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: dex
+    spec:
+      containers:
+      - image: quay.io/coreos/dex:v2.10.0
+        name: dex
+        command: [&quot;/usr/local/bin/dex&quot;, &quot;serve&quot;, &quot;/etc/dex/cfg/config.yaml&quot;]
+
+        ports:
+        - name: https
+          containerPort: 5556
+
+        volumeMounts:
+        - name: config
+          mountPath: /etc/dex/cfg
+        - name: data
+          mountPath: /etc/example
+        - name: tls
+          mountPath: /etc/dex/tls
+
+        env:
+        - name: GITHUB_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: github-client
+              key: client-id
+        - name: GITHUB_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: github-client
+              key: client-secret
+      volumes:
+      - name: data
+        hostPath:
+            path: /data/example
+      - name: config
+        configMap:
+          name: dex
+          items:
+          - key: config.yaml
+            path: config.yaml
+      - name: tls
+        secret:
+          secretName: dex.example.com.tls
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: dex
+data:
+  config.yaml: |
+    issuer: https://47.52.197.163:32000
+    storage:
+      type: sqlite3
+      config:
+        file: /etc/example/dex.db
+
+    web:
+      https: 0.0.0.0:5556
+      tlsCert: /etc/dex/tls/tls.crt
+      tlsKey: /etc/dex/tls/tls.key
+    connectors:
+    - type: github
+      id: github
+      name: GitHub
+      config:
+        clientID: $GITHUB_CLIENT_ID
+        clientSecret: $GITHUB_CLIENT_SECRET
+        redirectURI: https://47.52.197.163:32000/callback
+        org: kubernetes
+    oauth2:
+      skipApprovalScreen: true
+
+    staticClients:
+    - id: example-app
+      redirectURIs:
+      - 'http://47.52.197.163:5555/callback'
+      name: 'Example App'
+      secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+
+    enablePasswordDB: true
+    staticPasswords:
+    - email: &quot;admin@example.com&quot;
+      # bcrypt hash of the string &quot;password&quot;
+      hash: &quot;$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W&quot;
+      username: &quot;admin&quot;
+      userID: &quot;08a8684b-db88-4b73-90a9-3cd1661f5466&quot;
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dex
+spec:
+  type: NodePort
+  ports:
+  - name: dex
+    port: 5556
+    protocol: TCP
+    targetPort: 5556
+    nodePort: 32000
+  selector:
+    app: dex
+</code></pre></div><p>主要修改了：</p> <ul><li>镜像</li> <li>一些地址，改成自己的IP</li> <li>存储，我改成了sqlite, 需要挂载一个文件进去，在宿主机上创建一个文件</li></ul> <div class="language- extra-class"><pre class="language-text"><code>$ touch /data/example/dex.db
+$ kubectl create -f dex.yaml
+</code></pre></div><h3 id="启动dex-client"><a href="#启动dex-client" class="header-anchor">#</a> 启动dex client</h3> <p>编译客户端dex目录下：</p> <div class="language- extra-class"><pre class="language-text"><code>make
+</code></pre></div><p>启动客户端：</p> <div class="language- extra-class"><pre class="language-text"><code>$ ./bin/example-app --issuer https://47.52.197.163:32000 --issuer-root-ca examples/k8s/ssl/ca.pem --redirect-uri http://47.52.197.163:5555/callback
+</code></pre></div><h3 id="浏览器访问获取token"><a href="#浏览器访问获取token" class="header-anchor">#</a> 浏览器访问获取token</h3> <p>浏览器访问 http://47.52.197.163:5555 ,点击login后能看到 Log in to dex 下面可以选 log in with Email 和 log in with github
+点击log in with github 授权后得到：</p> <div class="language- extra-class"><pre class="language-text"><code>Token:
+
+eyJhbGciOiJSUzI1NiIsImtpZCI6ImMyZWIzYzkwMmM0NDliMTYwMGNjNzNhMWYyNWVjMjI0MDY4NmE0OGMifQ.eyJpc3MiOiJodHRwczovLzQ3LjUyLjE5Ny4xNjM6MzIwMDAiLCJzdWIiOiJDZ2M0T1RFeU5UVTNFZ1puYVhSb2RXSSIsImF1ZCI6ImV4YW1wbGUtYXBwIiwiZXhwIjoxNTI0MDIwNzA3LCJpYXQiOjE1MjM5MzQzMDcsImF0X2hhc2giOiI5czJob0lzUHRlMW9nc3VKemRab1pnIiwiZW1haWwiOiJmaHRqb2JAaG90bWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6InN0ZXZlbiJ9.uJAL08BZioSWPaEFh8R50JQVRw6QXgC1n3sn5ovzaoauy51YFjdSh08UZT8KQon8R5JdZ4U06BczwmOG_tT0mWVd_mDqLnRm6lGpm9znYiC1OLNGZOdzuQVsuxe4Lk1YOvxTsJQtpYuOcXXKkwmdfWNeh4VyZoALiVZxLfL44lSnU55JutLNnGD5S6Aiu6YF0xwlcX5Eq1j2pYtg4isnPtU4k6gbiEYCMPm0Gs3FPljnLT7a-TB1tjZLc4RDwBZ4OoiYRu5mAmH5SHHq1_TS9wDTXX16KlQTG9tS_I11n--1grYTz5WondBoM14BJebDdcSF7nRWJ-I8CU_UYu6gcA
+Claims:
+
+{
+  &quot;iss&quot;: &quot;https://47.52.197.163:32000&quot;,
+  &quot;sub&quot;: &quot;Cgc4OTEyNTU3EgZnaXRodWI&quot;,
+  &quot;aud&quot;: &quot;example-app&quot;,
+  &quot;exp&quot;: 1524020707,
+  &quot;iat&quot;: 1523934307,
+  &quot;at_hash&quot;: &quot;9s2hoIsPte1ogsuJzdZoZg&quot;,
+  &quot;email&quot;: &quot;fhtjob@hotmail.com&quot;,
+  &quot;email_verified&quot;: true,
+  &quot;name&quot;: &quot;steven&quot;
+}
+Refresh Token:
+
+Chlrem12bDdmdGJ1dWNlYnk0b2llcWd0YzNqEhloNGhwbmlsZnByZ29mdWdsdWZ6bGp4cHhs
+</code></pre></div><p>那么 恭喜你成功了, 这个token就是我们要的东西</p> <h3 id="验证tocken"><a href="#验证tocken" class="header-anchor">#</a> 验证tocken</h3> <div class="language- extra-class"><pre class="language-text"><code> curl -H &quot;Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImJjOTU0NjdlM2I0OTE5YWE1OTEzZDNkMDU3NGM2ZTRjYjBjY2NhNzgifQ.eyJpc3MiOiJodHRwczovLzQ3LjUyLjE5Ny4xNjM6MzIwMDAiLCJzdWIiOiJDZ2M0T1RFeU5UVTNFZ1puYVhSb2RXSSIsImF1ZCI6ImV4YW1wbGUtYXBwIiwiZXhwIjoxNTIzOTYyNjUyLCJpYXQiOjE1MjM4NzYyNTIsImF0X2hhc2giOiJFUXRWWm5ObE50c2hhWERfZ3N2UkNBIiwiZW1haWwiOiJmaHRqb2JAaG90bWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6InN0ZXZlbiJ9.vu0keGMoRGg6OAYpMZNN9zm4pnKXGyXDkZaRNj6MXDY9XsfnBDT4HnXkY17Lvm1ow0xPbq9cgVL3JBZT73jiddgFNAIXJffHfPejlVRSqXx9iF1uEcNIc5tDA1hUPtBrX8n_rzdz0sZsPMb4ZYMx3AdEylszpVrS_OelbB4I_2eLfO0KzwcEknOgV8cZZghCCITl6ZTOeeWEv5FPvJjRC2rpu_MkSY5tAf30SITwldFUMgF8ei3aPrZdojPLgqUWtxKaDmPpcHVLhYr0sLE_BnDZLjGP4ff8l5yy_EfDc7sQsrJR7StwZXRnK-n2omqaV3z-n5IxaUty85e_97FA1g&quot; -k https://172.31.244.238:6443/api/v1/namespaces/default/pods
+</code></pre></div><p>你会发现</p> <div class="language- extra-class"><pre class="language-text"><code>{
+  &quot;kind&quot;: &quot;Status&quot;,
+  &quot;apiVersion&quot;: &quot;v1&quot;,
+  &quot;metadata&quot;: {
+
+  },
+  &quot;status&quot;: &quot;Failure&quot;,
+  &quot;message&quot;: &quot;pods is forbidden: User \&quot;fhtjob@hotmail.com\&quot; cannot list pods in the namespace \&quot;default\&quot;&quot;,
+  &quot;reason&quot;: &quot;Forbidden&quot;,
+  &quot;details&quot;: {
+    &quot;kind&quot;: &quot;pods&quot;
+  },
+  &quot;code&quot;: 403
+}
+</code></pre></div><p>fhtjob@hotmail.com这个用户没有权限访问pods。我们给他创建一个角色绑定：</p> <div class="language- extra-class"><pre class="language-text"><code>[root@master2 dex]# cat examples/k8s/role.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: read-secrets-global
+subjects:
+- kind: User
+  name: &quot;fhtjob@hotmail.com&quot; # Name is case sensitive
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin  # 超级用户给他
+  apiGroup: rbac.authorization.k8s.io
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>$ kubectl create -f examples/k8s/role.yaml
+</code></pre></div><p>再次curl:</p> <div class="language- extra-class"><pre class="language-text"><code>
+ot@master2 dex]# curl -H &quot;Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImJjOTU0NjdlM2I0OTE5YWE1OTEzZDNkMDU3NGM2ZTRjYjBjY2NhNzgifQ.eyJpc3MiOiJodHRwczovLzQ3LjUyLjE5Ny4xNjM6MzIwMDAiLCJzdWIiOiJDZ2M0T1RFeU5UVTNFZ1puYVhSb2RXSSIsImF1ZCI6ImV4YW1wbGUtYXBwIiwiZXhwIjoxNTIzOTYyNjUyLCJpYXQiOjE1MjM4NzYyNTIsImF0X2hhc2giOiJFUXRWWm5ObE50c2hhWERfZ3N2UkNBIiwiZW1haWwiOiJmaHRqb2JAaG90bWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6InN0ZXZlbiJ9.vu0keGMoRGg6OAYpMZNN9zm4pnKXGyXDkZaRNj6MXDY9XsfnBDT4HnXkY17Lvm1ow0xPbq9cgVL3JBZT73jiddgFNAIXJffHfPejlVRSqXx9iF1uEcNIc5tDA1hUPtBrX8n_rzdz0sZsPMb4ZYMx3AdEylszpVrS_OelbB4I_2eLfO0KzwcEknOgV8cZZghCCITl6ZTOeeWEv5FPvJjRC2rpu_MkSY5tAf30SITwldFUMgF8ei3aPrZdojPLgqUWtxKaDmPpcHVLhYr0sLE_BnDZLjGP4ff8l5yy_EfDc7sQsrJR7StwZXRnK-n2omqaV3z-n5IxaUty85e_97FA1g&quot; -k https://172.31.244.238:6443/api/v1/namespaces/default/pods
+{
+  &quot;kind&quot;: &quot;PodList&quot;,
+  &quot;apiVersion&quot;: &quot;v1&quot;,
+  &quot;metadata&quot;: {
+    &quot;selfLink&quot;: &quot;/api/v1/namespaces/default/pods&quot;,
+    &quot;resourceVersion&quot;: &quot;333066&quot;
+  },
+  &quot;items&quot;: [
+    {
+      &quot;metadata&quot;: {
+        &quot;name&quot;: &quot;dex-578588c896-rsp9w&quot;,
+        &quot;generateName&quot;: &quot;dex-578588c896-&quot;,
+        &quot;namespace&quot;: &quot;default&quot;,
+        &quot;selfLink&quot;: &quot;/api/v1/namespaces/default/pods/dex-578588c896-rsp9w&quot;,
+</code></pre></div><p>成功</p> <h3 id="把tocken加入到证书中"><a href="#把tocken加入到证书中" class="header-anchor">#</a> 把tocken加入到证书中</h3> <p>最简单的方式：</p> <div class="language- extra-class"><pre class="language-text"><code>[root@master2 dex]# cat ~/.kube/config
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN5RENDQWJDZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRFNE1ETXlOekV6TURNMU9Gb1hEVEk0TURNeU5ERXpNRE0xT0Zvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTnl1CldVdWQxNEJjcFgvbU4xQ3dtUnZzRDJyVFF5aGdOQ3FDTGQ5M2VVVzRqbHJCQ0pCUGkzcE9mOXNTVFJELzV3V0YKUUpzOTE5eVZuRmdOOXBHVVRHbjVieHVtNzgrS3lvY20xTnJ3Z1kxUUpnWlZxVUZhQ1I5VDJ1RThBM1lyKzdITAovS3FHMEZ3S05UV0w3Zy85VFAzdmpQMW5XR3NTTElmVHAxMjNaK0lxZHJaQlI0NUZDQzBOQzU4cmxEYUErVFdOCjRVQ2xJalBKRHJuV2M1Z2E4a3NVYXN4UkQ5clR2dm5iOG05V2NEYnhXdEViTlJyS0R6cUp5K00wT1BacDdIY1QKWkhHUnlXTVR3WVhRVGlmWFhxVTY1U2VkdEdjT3ZsOHl0ck1UZndCRkh2Y1NWQW9sNytYUnNicSs4bDRKc0M5OApPN0tOODAxT0dvaUFyWWNFYjRjQ0F3RUFBYU1qTUNFd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFLcFpoN0t5ZzRLM0dyK0NZRzdwbVlXUGR1eFUKMXcrY1BPZ053OE83MHNFWE5lbnFMbEZVdThtYjMxQTZ4RHZKWHZ4OXNiQ0o5YzdDeDFiaVNNYnFrWlBHRGs4UgpZSm5wZlB4WXBUWlBISmFkK1ZCb2tVY0J3QlluTTB1SXFzZGhvbHhPelVBUU9UbVo5M3UzSi9MeUNob3IwSmlJCm1uQ1hlaHlDaTZ1YTVvTldXNmVNWnlaRWxzRnpXcnlGdHkyNGRKVWkvQkd0SjR2ZStlRmtLTE9VTXpnMjBBU3YKZU1ldkdUL1FibWd1YXZhT1RCdjVDYW05RElSNEZSd2YvV2hwdHpMTVdCVFJXb2ROOUhkcE1tRDhxUmU1YnVWNgpiZ245VFgzejBncUhGMzFQZlBjcTJWRFRJWnJZK084MTBwOTQrbTA5YmxrcTQzSDdXQmhGTmdvditzUT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+    server: https://172.31.244.238:6443
+  name: kubernetes
+contexts:
+- context:
+    cluster: kubernetes
+    user: kubernetes-admin
+  name: kubernetes-admin@kubernetes
+current-context: kubernetes-admin@kubernetes
+kind: Config
+preferences: {}
+users:
+- name: kubernetes-admin
+  user:
+    token: eyJhbGciOiJSUzI1NiIsImtpZCI6ImJjOTU0NjdlM2I0OTE5YWE1OTEzZDNkMDU3NGM2ZTRjYjBjY2NhNzgifQ.eyJpc3MiOiJodHRwczovLzQ3LjUyLjE5Ny4xNjM6MzIwMDAiLCJzdWIiOiJDZ2M0T1RFeU5UVTNFZ1puYVhSb2RXSSIsImF1ZCI6ImV4YW1wbGUtYXBwIiwiZXhwIjoxNTIzOTY3NDQzLCJpYXQiOjE1MjM4ODEwNDMsImF0X2hhc2giOiJMUzNKUVpiWDVuVnBuam5zSU5nNGZnIiwiZW1haWwiOiJmaHRqb2JAaG90bWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6InN0ZXZlbiJ9.KjKSkqqX1I21rkqF4t39x8YmEFx2yPlQSMFInVeAp4lCRACljMvTY07GSWycEez0SarPtO80dTqcM4buz7WMVPMRuSqg-HuCPB3DjzD4M84OiHZSFB_5xOJIUqP0dWLAuPTalu2T-le4Gp0gPXc863YfLEMzRm8cxbvdASwQrTZ5oKgoRVznDREW3NIgEONUU9A64bBeWi5xH1eyCbvh4l3Q-ZfkYG4A4w46FwAmfL4ClxCBiIkpZWhKv5GcN8bg7-msaNlvlejpvbSuVWpt5CLJzpCXHh1AqCUBkXzp8ObSGGIw1BfkVFnyH26bpho2kAzxbGtdwNx4TdGlu_XYlw
+</code></pre></div><p>注意把user那的client-certificate-data client-key-data 删掉，加上token, 我这直接在/etc/kubernetes/admin.conf上修改的，也可以重新生成配置文件：</p> <div class="language- extra-class"><pre class="language-text"><code>kubectl config set-credentials fanux \
+--client-certificate=/etc/kubernetes/pki/ca.crt \
+--client-key=/etc/kubernetes/pki/ca.key \
+--token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImJjOTU0NjdlM2I0OTE5YWE1OTEzZDNkMDU3NGM2ZTRjYjBjY2NhNzgifQ.eyJpc3MiOiJodHRwczovLzQ3LjUyLjE5Ny4xNjM6MzIwMDAiLCJzdWIiOiJDZ2M0T1RFeU5UVTNFZ1puYVhSb2RXSSIsImF1ZCI6ImV4YW1wbGUtYXBwIiwiZXhwIjoxNTIzOTYyNjUyLCJpYXQiOjE1MjM4NzYyNTIsImF0X2hhc2giOiJFUXRWWm5ObE50c2hhWERfZ3N2UkNBIiwiZW1haWwiOiJmaHRqb2JAaG90bWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6InN0ZXZlbiJ9.vu0keGMoRGg6OAYpMZNN9zm4pnKXGyXDkZaRNj6MXDY9XsfnBDT4HnXkY17Lvm1ow0xPbq9cgVL3JBZT73jiddgFNAIXJffHfPejlVRSqXx9iF1uEcNIc5tDA1hUPtBrX8n_rzdz0sZsPMb4ZYMx3AdEylszpVrS_OelbB4I_2eLfO0KzwcEknOgV8cZZghCCITl6ZTOeeWEv5FPvJjRC2rpu_MkSY5tAf30SITwldFUMgF8ei3aPrZdojPLgqUWtxKaDmPpcHVLhYr0sLE_BnDZLjGP4ff8l5yy_EfDc7sQsrJR7StwZXRnK-n2omqaV3z-n5IxaUty85e_97FA1g \
+--embed-certs=true \
+--kubeconfig=fanux.config
+
+kubectl config set-context kubernetes \
+--cluster=kubernetes \
+--user=fanux \
+--namespace=default \
+--kubeconfig=fanux.config
+
+kubectl config use-context kubernetes --kubeconfig=fanux.config
+
+kubectl config set-cluster kubernetes --server=https://172.31.244.238:6443 --certificate-authority=/etc/kubernetes/pki/ca.key  --kubeconfig=fanux.config
+</code></pre></div><p>验证：</p> <div class="language- extra-class"><pre class="language-text"><code>$ kubectl get pod #正常
+</code></pre></div><p>删除角色绑定再执行get pod</p> <div class="language- extra-class"><pre class="language-text"><code>[root@master2 dex]# kubectl delete -f examples/k8s/role.yaml
+clusterrolebinding.rbac.authorization.k8s.io &quot;read-secrets-global&quot; deleted
+[root@master2 dex]# kubectl get pod
+Error from server (Forbidden): pods is forbidden: User &quot;fhtjob@hotmail.com&quot; cannot list pods in the namespace &quot;default&quot;
+</code></pre></div><p>已经无权限了。
+至于给用户分配更细的权限，比较简单，读者门自己倒持去吧</p></div> <footer class="page-edit"><!----> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
+      ←
+      <a href="/blog/istio-quickstart.html" class="prev">istio安装使用教程</a></span> <span class="next"><a href="/blog/k8s-ha-conf.html">kubernetes高可用相关配置</a>
+      →
+    </span></p></div> </main></div><div class="global-ui"></div></div>
+    <script src="/assets/js/app.23d3ef84.js" defer></script><script src="/assets/js/2.bc760f0a.js" defer></script><script src="/assets/js/29.8584027e.js" defer></script>
+  </body>
+</html>

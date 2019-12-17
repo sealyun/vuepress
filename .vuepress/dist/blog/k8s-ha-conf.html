@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>kubernetes高可用相关配置 | sealyun | kubernetes安装</title>
+    <meta name="description" content="">
+    <meta name="theme-color" content="#007af5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2803648cc5852dd3e9e46bbd0bf63366";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+    <meta property="og:site_name" content="sealyun 专注于kubernetes安装"><meta property="og:title" content="sealyun kubernetes安装"><meta property="og:type" content="article"><meta property="og:url" content="/blog/k8s-ha-conf.html"><meta name="twitter:title" content="sealyun kubernetes安装"><meta name="twitter:url" content="/blog/k8s-ha-conf.html"><meta name="twitter:card" content="summary_large_image">
+    <link rel="preload" href="/assets/css/0.styles.943dcab2.css" as="style"><link rel="preload" href="/assets/js/app.23d3ef84.js" as="script"><link rel="preload" href="/assets/js/2.bc760f0a.js" as="script"><link rel="preload" href="/assets/js/30.158ceb97.js" as="script"><link rel="prefetch" href="/assets/js/10.e86bcb27.js"><link rel="prefetch" href="/assets/js/11.bb9904fc.js"><link rel="prefetch" href="/assets/js/12.ec81ebde.js"><link rel="prefetch" href="/assets/js/13.c482403d.js"><link rel="prefetch" href="/assets/js/14.9bd9e6fd.js"><link rel="prefetch" href="/assets/js/15.bdc6bd19.js"><link rel="prefetch" href="/assets/js/16.9e60a0b4.js"><link rel="prefetch" href="/assets/js/17.5df0c46d.js"><link rel="prefetch" href="/assets/js/18.85294fd2.js"><link rel="prefetch" href="/assets/js/19.f2879a42.js"><link rel="prefetch" href="/assets/js/20.6012d02a.js"><link rel="prefetch" href="/assets/js/21.81b7e1ca.js"><link rel="prefetch" href="/assets/js/22.1c2e71b0.js"><link rel="prefetch" href="/assets/js/23.0748294e.js"><link rel="prefetch" href="/assets/js/24.d63f1e4c.js"><link rel="prefetch" href="/assets/js/25.9dbfb44a.js"><link rel="prefetch" href="/assets/js/26.bfc3e626.js"><link rel="prefetch" href="/assets/js/27.ce51e7d7.js"><link rel="prefetch" href="/assets/js/28.ebb9caaf.js"><link rel="prefetch" href="/assets/js/29.8584027e.js"><link rel="prefetch" href="/assets/js/3.b7a496ec.js"><link rel="prefetch" href="/assets/js/31.f1024a9d.js"><link rel="prefetch" href="/assets/js/32.44cadfdb.js"><link rel="prefetch" href="/assets/js/33.af1c5cdb.js"><link rel="prefetch" href="/assets/js/34.a9e8095a.js"><link rel="prefetch" href="/assets/js/35.77ea75db.js"><link rel="prefetch" href="/assets/js/36.44da8d60.js"><link rel="prefetch" href="/assets/js/37.5e09e3fe.js"><link rel="prefetch" href="/assets/js/38.02e2aa10.js"><link rel="prefetch" href="/assets/js/39.b4e7f5f0.js"><link rel="prefetch" href="/assets/js/4.1ba98b6c.js"><link rel="prefetch" href="/assets/js/40.c879980c.js"><link rel="prefetch" href="/assets/js/41.0d571f5c.js"><link rel="prefetch" href="/assets/js/42.a7d12c13.js"><link rel="prefetch" href="/assets/js/43.60b5940b.js"><link rel="prefetch" href="/assets/js/44.b5a570c8.js"><link rel="prefetch" href="/assets/js/45.3df35b92.js"><link rel="prefetch" href="/assets/js/46.b47c3836.js"><link rel="prefetch" href="/assets/js/47.fbef4ef0.js"><link rel="prefetch" href="/assets/js/48.ae14afb1.js"><link rel="prefetch" href="/assets/js/49.4e6f30d4.js"><link rel="prefetch" href="/assets/js/5.c39869f0.js"><link rel="prefetch" href="/assets/js/50.c199fe15.js"><link rel="prefetch" href="/assets/js/51.30d345fb.js"><link rel="prefetch" href="/assets/js/52.5037db07.js"><link rel="prefetch" href="/assets/js/53.bb29d2bc.js"><link rel="prefetch" href="/assets/js/54.9e4ffa33.js"><link rel="prefetch" href="/assets/js/55.6d311bce.js"><link rel="prefetch" href="/assets/js/56.e6149a7c.js"><link rel="prefetch" href="/assets/js/57.57e2943c.js"><link rel="prefetch" href="/assets/js/58.61ea6212.js"><link rel="prefetch" href="/assets/js/59.95355587.js"><link rel="prefetch" href="/assets/js/6.0032a2d9.js"><link rel="prefetch" href="/assets/js/60.761d9050.js"><link rel="prefetch" href="/assets/js/61.b42700ba.js"><link rel="prefetch" href="/assets/js/62.6b9d864d.js"><link rel="prefetch" href="/assets/js/63.4aff7db2.js"><link rel="prefetch" href="/assets/js/64.34c83536.js"><link rel="prefetch" href="/assets/js/65.a7b0a430.js"><link rel="prefetch" href="/assets/js/66.8ee74e7e.js"><link rel="prefetch" href="/assets/js/67.3009b3ec.js"><link rel="prefetch" href="/assets/js/68.8bb3e997.js"><link rel="prefetch" href="/assets/js/7.5df889f4.js"><link rel="prefetch" href="/assets/js/8.c053b523.js"><link rel="prefetch" href="/assets/js/9.7948f30b.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.943dcab2.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><img src="https://sealyun.com/img/logo.png" alt="sealyun | kubernetes安装" class="logo"> <span class="site-name can-hide">sealyun | kubernetes安装</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav>  <ul class="sidebar-links"><li><a href="/blog/" class="sidebar-link">博客列表</a></li><li><a href="/blog/CI-CD.html" class="sidebar-link">CI 概述</a></li><li><a href="/blog/calico.html" class="sidebar-link">calico 网络原理</a></li><li><a href="/blog/calico-architecture.html" class="sidebar-link">calico架构</a></li><li><a href="/blog/calico-network-policy.html" class="sidebar-link">calico网络策略</a></li><li><a href="/blog/client-go-crd.html" class="sidebar-link">使用client-go包访问Kubernetes CRD</a></li><li><a href="/blog/cni.html" class="sidebar-link">CNI详细介绍</a></li><li><a href="/blog/container-stop-timeout.html" class="sidebar-link">容器信号使用</a></li><li><a href="/blog/containerd.html" class="sidebar-link">containerd与kubernetes集成</a></li><li><a href="/blog/crd.html" class="sidebar-link">使用kubebuilder开发CRD</a></li><li><a href="/blog/csi.html" class="sidebar-link">CSI详解</a></li><li><a href="/blog/dev-k8s-workflow.html" class="sidebar-link">kubernetes开发流程</a></li><li><a href="/blog/docker-architech.html" class="sidebar-link">Docker架构分析</a></li><li><a href="/blog/docker-dev.html" class="sidebar-link">docker开发流程</a></li><li><a href="/blog/docker-network.html" class="sidebar-link">容器网络概述</a></li><li><a href="/blog/docker-oerlay2.html" class="sidebar-link">关于overlay2存储驱动的磁盘配额问题</a></li><li><a href="/blog/docker-ovs.html" class="sidebar-link">ovs对接容器网络</a></li><li><a href="/blog/etcd-manage.html" class="sidebar-link">etcd管南</a></li><li><a href="/blog/fist-terminal.html" class="sidebar-link">属于极客的k8s管理工具fist</a></li><li><a href="/blog/genie.html" class="sidebar-link">CNI 小精灵 genie</a></li><li><a href="/blog/istio-quickstart.html" class="sidebar-link">istio安装使用教程</a></li><li><a href="/blog/k8s-authenticating.html" class="sidebar-link">kubernetes对接第三方认证</a></li><li><a href="/blog/k8s-ha-conf.html" class="active sidebar-link">kubernetes高可用相关配置</a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a href="/blog/k8s-ha-conf.html#机器" class="sidebar-link">机器</a></li><li class="sidebar-sub-header"><a href="/blog/k8s-ha-conf.html#组件版本" class="sidebar-link">组件版本</a></li><li class="sidebar-sub-header"><a href="/blog/k8s-ha-conf.html#配置" class="sidebar-link">配置</a></li><li class="sidebar-sub-header"><a href="/blog/k8s-ha-conf.html#部署完成后操作" class="sidebar-link">部署完成后操作</a></li><li class="sidebar-sub-header"><a href="/blog/k8s-ha-conf.html#部署前注意事项" class="sidebar-link">部署前注意事项</a></li></ul></li><li><a href="/blog/k8s-ipvs.html" class="sidebar-link">kubernetes ipvs设置</a></li><li><a href="/blog/k8s-rbac.html" class="sidebar-link">kubernetes RBAC实战</a></li><li><a href="/blog/keepalived.html" class="sidebar-link">keepalived in docker</a></li><li><a href="/blog/kube-admin-control.html" class="sidebar-link">kubernetes Admission Controller原理介绍</a></li><li><a href="/blog/kube-batch.html" class="sidebar-link">kube-scheduler定制，支持深度学习批处理任务调度</a></li><li><a href="/blog/kube-cmd.html" class="sidebar-link">老夫k8s命令行賊6</a></li><li><a href="/blog/kube-dev.html" class="sidebar-link">kubernetes开发指南</a></li><li><a href="/blog/kube-proxy-src.html" class="sidebar-link">kube-proxy源码解析</a></li><li><a href="/blog/kube-scheduler-source-code.html" class="sidebar-link">kubernetes源码分析之kube-scheduler - 从代码看原理</a></li><li><a href="/blog/kubeadm.html" class="sidebar-link">kubeadm杂谈</a></li><li><a href="/blog/kubeadm-dev.html" class="sidebar-link">修改kubeadm证书过期时间</a></li><li><a href="/blog/kubeadm-source.html" class="sidebar-link">kubeadm源码分析</a></li><li><a href="/blog/kubernetes-vm.html" class="sidebar-link">强隔离容器的那些事</a></li><li><a href="/blog/kustomize.html" class="sidebar-link">kustomize 颤抖吧helm!</a></li><li><a href="/blog/libra.html" class="sidebar-link">facebook libra尝鲜，没赶上比特币能不能上这趟车</a></li><li><a href="/blog/macvtap.html" class="sidebar-link">macvtap实践教程</a></li><li><a href="/blog/ovn-vni.html" class="sidebar-link">从CNI到ovn</a></li><li><a href="/blog/prometheus-operator-envoy.html" class="sidebar-link">使用prometheus operator监控envoy</a></li><li><a href="/blog/rook.html" class="sidebar-link">rook使用教程，快速编排ceph</a></li><li><a href="/blog/rpc-protobuf.html" class="sidebar-link">golang基于protobuf的rpc使用</a></li><li><a href="/blog/runc.html" class="sidebar-link">runc 架构</a></li><li><a href="/blog/scratch.html" class="sidebar-link">scratch镜像</a></li><li><a href="/blog/tektoncd-pipeline.html" class="sidebar-link">tektoncd pipeline教程 - kubernetes原生pipeline</a></li><li><a href="/blog/user-token.html" class="sidebar-link">kubernetes 用户token教程</a></li><li><a href="/blog/vim.html" class="sidebar-link">是时候表现一下我的vim了</a></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="kubernetes高可用相关配置"><a href="#kubernetes高可用相关配置" class="header-anchor">#</a> kubernetes高可用相关配置</h1> <h2 id="机器"><a href="#机器" class="header-anchor">#</a> 机器</h2> <table><thead><tr><th>IP</th> <th>用途</th> <th>备注</th></tr></thead> <tbody><tr><td>10.100.81.11</td> <td>master、etcd</td> <td>主节点</td></tr> <tr><td>10.100.81.12</td> <td>master、etcd、keepalived、haproxy</td> <td>主节点，同时部署keepalived、haproxy，保证master高可用</td></tr> <tr><td>10.100.81.13</td> <td>master、etcd、keepalived、haproxy</td> <td>主节点，同时部署keepalived、haproxy，保证master高可用</td></tr> <tr><td>10.100.81.14</td> <td>node、etcd</td> <td>非业务节点</td></tr> <tr><td>10.100.81.15</td> <td>node、etcd</td> <td>非业务节点</td></tr> <tr><td>10.100.81.16</td> <td>node</td> <td>业务节点</td></tr> <tr><td>10.100.81.17</td> <td>node</td> <td>业务节点</td></tr> <tr><td>10.100.81.18</td> <td>node</td> <td>业务节点</td></tr> <tr><td>10.100.81.19</td> <td>node</td> <td>业务节点</td></tr> <tr><td>10.100.81.20</td> <td>node</td> <td>业务节点</td></tr> <tr><td>10.100.81.21</td> <td>node</td> <td>业务节点</td></tr> <tr><td>10.100.81.22</td> <td>node</td> <td>业务节点</td></tr> <tr><td>10.100.81.23</td> <td>node</td> <td>业务节点</td></tr> <tr><td>10.100.81.24</td> <td>node、harbor</td> <td>业务节点</td></tr> <tr><td>10.100.81.25</td> <td>node</td> <td>业务节点</td></tr></tbody></table> <h2 id="组件版本"><a href="#组件版本" class="header-anchor">#</a> 组件版本</h2> <table><thead><tr><th>组件名</th> <th>版本</th></tr></thead> <tbody><tr><td>docker</td> <td>Docker version 1.12.6, build 78d1802</td></tr> <tr><td>kubernetes</td> <td>v1.10.0</td></tr> <tr><td>harbor</td> <td>v1.2.0</td></tr> <tr><td>keepalived</td> <td>v1.3.5</td></tr> <tr><td>haproxy</td> <td>1.7</td></tr></tbody></table> <h2 id="配置"><a href="#配置" class="header-anchor">#</a> 配置</h2> <p>组件配置</p> <h3 id="docker"><a href="#docker" class="header-anchor">#</a> docker</h3> <p>配置文件：/usr/lib/systemd/system/docker.service</p> <div class="language- extra-class"><pre class="language-text"><code>[Unit]
+Description=Docker Application Container Engine
+Documentation=https://docs.docker.com
+After=network.target
+
+[Service]
+Type=notify
+# the default is not to use systemd for cgroups because the delegate issues still
+# exists and systemd currently does not support the cgroup feature set required
+# for containers run by docker
+ExecStart=/usr/bin/dockerd -H 0.0.0.0:2375 -H unix:///var/run/docker.sock --registry-mirror https://registry.docker-cn.com --insecure-registry 172.16.59.153 --insecure-registry hub.xfyun.cn --insecure-registry k8s.gcr.io --insecure-registry quay.io --default-ulimit core=0:0 --live-restore
+ExecReload=/bin/kill -s HUP $MAINPID
+# Having non-zero Limit*s causes performance problems due to accounting overhead
+# in the kernel. We recommend using cgroups to do container-local accounting.
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=infinity
+# Uncomment TasksMax if your systemd version supports it.
+# Only systemd 226 and above support this version.
+#TasksMax=infinity
+TimeoutStartSec=0
+# set delegate yes so that systemd does not reset the cgroups of docker containers
+Delegate=yes
+# kill only the docker process, not all processes in the cgroup
+KillMode=process
+
+MountFlags=slave
+
+[Install]
+WantedBy=multi-user.target
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>--registry-mirror：指定 docker pull 时使用的注册服务器镜像地址,指定为https://registry.docker-cn.com可以加快docker hub中的镜像拉取速度
+--insecure-registry：配置非安全的docker镜像注册服务器
+--default-ulimit：配置容器默认的ulimit选项
+--live-restore：开启此选项，当dockerd服务出现问题时，容器照样运行，服务恢复后，容器也可以再被服务抓到并可管理
+MountFlags=slave：解决移除容器时出现的&quot;Unable to remove filesystem for $id: remove /var/lib/docker/containers/$id/shm: device or resource busy&quot;问题
+</code></pre></div><h3 id="kubernetes"><a href="#kubernetes" class="header-anchor">#</a> kubernetes</h3> <h4 id="etcd"><a href="#etcd" class="header-anchor">#</a> etcd</h4> <p>以10.100.81.11节点为例，其它节点类似：</p> <div class="language- extra-class"><pre class="language-text"><code>apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    component: etcd
+    tier: control-plane
+  name: etcd-10.100.81.11
+  namespace: kube-system
+spec:
+  containers:
+  - command:
+    - etcd
+    - --name=infra0
+    - --initial-advertise-peer-urls=http://10.100.81.11:2380
+    - --listen-peer-urls=http://10.100.81.11:2380
+    - --listen-client-urls=http://10.100.81.11:2379,http://127.0.0.1:2379
+    - --advertise-client-urls=http://10.100.81.11:2379
+    - --data-dir=/var/lib/etcd
+    - --initial-cluster-token=etcd-cluster-1
+    - --initial-cluster=infra0=http://10.100.81.11:2380,infra1=http://10.100.81.12:2380,infra2=http://10.100.81.13:2380,infra3=http://10.100.81.14:2380,infra4=http://10.100.81.15:2380
+    - --initial-cluster-state=new
+    image: k8s.gcr.io/etcd-amd64:3.1.12
+    livenessProbe:
+      httpGet:
+        host: 127.0.0.1
+        path: /health
+        port: 2379
+        scheme: HTTP
+      failureThreshold: 8
+      initialDelaySeconds: 15
+      timeoutSeconds: 15
+    name: etcd
+    volumeMounts:
+    - name: etcd-data
+      mountPath: /var/lib/etcd
+  hostNetwork: true
+  volumes:
+  - hostPath:
+      path: /var/lib/etcd
+      type: DirectoryOrCreate
+    name: etcd-data
+</code></pre></div><h3 id="kubernetes系统组件"><a href="#kubernetes系统组件" class="header-anchor">#</a> kubernetes系统组件</h3> <h4 id="kubeadm-init-启动k8s集群config-yaml配置"><a href="#kubeadm-init-启动k8s集群config-yaml配置" class="header-anchor">#</a> kubeadm init 启动k8s集群config.yaml配置</h4> <div class="language- extra-class"><pre class="language-text"><code>apiVersion: kubeadm.k8s.io/v1alpha1
+kind: MasterConfiguration
+networking:
+  podSubnet: 192.168.0.0/16
+api:
+  advertiseAddress: 10.100.81.11
+etcd:
+  endpoints:
+  - http://10.100.81.11:2379 
+  - http://10.100.81.12:2379
+  - http://10.100.81.13:2379
+  - http://10.100.81.14:2379
+  - http://10.100.81.15:2379
+
+apiServerCertSANs:
+  - 10.100.81.11
+  - master01.bja.paas
+  - 10.100.81.12
+  - master02.bja.paas
+  - 10.100.81.13
+  - master03.bja.paas
+  - 10.100.81.10
+  
+  - 127.0.0.1
+token:
+kubernetesVersion: v1.10.0
+apiServerExtraArgs:
+  endpoint-reconciler-type: lease
+  bind-address: 10.100.81.11
+  runtime-config: storage.k8s.io/v1alpha1=true
+  admission-control: NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,NodeRestriction,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota
+featureGates:
+  CoreDNS: true
+</code></pre></div><h4 id="kubelet配置"><a href="#kubelet配置" class="header-anchor">#</a> kubelet配置</h4> <p>/etc/systemd/system/kubelet.service.d/10-kubeadm.conf</p> <div class="language- extra-class"><pre class="language-text"><code>[Service]
+Environment=&quot;KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf&quot;
+Environment=&quot;KUBELET_SYSTEM_PODS_ARGS=--pod-manifest-path=/etc/kubernetes/manifests --allow-privileged=true&quot;
+Environment=&quot;KUBELET_NETWORK_ARGS=--network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin&quot;
+Environment=&quot;KUBELET_DNS_ARGS=--cluster-dns=10.96.0.10 --cluster-domain=cluster.local&quot;
+Environment=&quot;KUBELET_AUTHZ_ARGS=--authorization-mode=Webhook --client-ca-file=/etc/kubernetes/pki/ca.crt&quot;
+Environment=&quot;KUBELET_CADVISOR_ARGS=--cadvisor-port=0&quot;
+Environment=&quot;KUBELET_CGROUP_ARGS=--cgroup-driver=cgroupfs&quot;
+Environment=&quot;KUBELET_CERTIFICATE_ARGS=--rotate-certificates=true --cert-dir=/var/lib/kubelet/pki --eviction-hard=memory.available&lt;5%,nodefs.available&lt;5%,imagefs.available&lt;5%&quot;
+ExecStart=
+ExecStart=/usr/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_SYSTEM_PODS_ARGS $KUBELET_NETWORK_ARGS $KUBELET_DNS_ARGS $KUBELET_AUTHZ_ARGS $KUBELET_CADVISOR_ARGS $KUBELET_CGROUP_ARGS $KUBELET_CERTIFICATE_ARGS $KUBELET_EXTRA_ARGS
+
+</code></pre></div><h3 id="keepalived"><a href="#keepalived" class="header-anchor">#</a> keepalived</h3> <p>keepalived采取直接在物理机部署，使用<code>yum install keepalived</code>安装。</p> <p>启动配置文件：/etc/keepalived/keepalived.conf。keepalived的MASTER和BACKUP配置有部分差异</p> <p>MASTER</p> <div class="language- extra-class"><pre class="language-text"><code>! Configuration File for keepalived
+
+global_defs {
+   notification_email {
+     root@localhost
+   }
+   router_id master02
+}
+
+vrrp_script chk_haproxy {
+       script &quot;/etc/keepalived/haproxy_check.sh&quot;
+       interval 3
+       weight -20
+}
+
+vrrp_instance VI_1 {
+    state MASTER    # BACKUP节点改成BACKUP
+    interface bond1
+    virtual_router_id 151
+    priority 110    # BACKUP节点改成100
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    virtual_ipaddress {
+       10.100.81.10 # k8s使用的VIP
+       10.100.81.9  # 数据库组件使用的VIP
+    }
+    track_script {
+       chk_haproxy
+    }
+}
+
+</code></pre></div><p>haproxy检查脚本：/etc/keepalived/haproxy_check.sh</p> <div class="language- extra-class"><pre class="language-text"><code>#!/bin/bash
+
+if [ `ps -C haproxy --no-header |wc -l` -eq 0 ] ; then
+    docker restart k8s-haproxy
+    sleep 2
+    if [ `ps -C haproxy --no-header |wc -l` -eq 0 ] ; then
+        service keepalived stop
+    fi
+fi
+</code></pre></div><h3 id="haproxy"><a href="#haproxy" class="header-anchor">#</a> haproxy</h3> <p>haproxy以容器的形式启动，启动命令如下：</p> <div class="language- extra-class"><pre class="language-text"><code>docker run -d --net host --name k8s-haproxy -v /etc/haproxy:/usr/local/etc/haproxy:ro haproxy:1.7
+</code></pre></div><p>haproxy配置文件：/etc/haproxy/haproxy.conf</p> <div class="language- extra-class"><pre class="language-text"><code>global
+  daemon
+  log 127.0.0.1 local0
+  log 127.0.0.1 local1 notice
+  maxconn 4096
+
+defaults
+  log               global
+  retries           3
+  maxconn           2000
+  timeout connect   5s
+  timeout client    50s
+  timeout server    50s
+
+frontend k8s
+  bind *:6444
+  mode tcp
+  default_backend k8s-backend
+
+backend k8s-backend
+  balance roundrobin
+  mode tcp
+  server k8s-1 10.100.81.11:6443 check
+  server k8s-2 10.100.81.12:6443 check
+  server k8s-3 10.100.81.13:6443 check
+</code></pre></div><h2 id="部署完成后操作"><a href="#部署完成后操作" class="header-anchor">#</a> 部署完成后操作</h2> <h3 id="修改kube-proxy-configmap"><a href="#修改kube-proxy-configmap" class="header-anchor">#</a> 修改kube-proxy configmap</h3> <div class="language- extra-class"><pre class="language-text"><code>kubectl edit configmap kube-proxy -n kube-system
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>.....
+kubeconfig.conf: |-
+  apiVersion: v1
+  kind: Config
+  clusters:
+  - cluster:
+      certificate-authority: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      server: https://10.100.81.10:6444  # 更改此行ip为vip,改成10.100.81.10
+    name: default
+  contexts:
+  - context:
+      cluster: default
+      namespace: default
+      user: default
+    name: default
+  current-context: default
+  users:
+  - name: default
+    user:
+      tokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+......
+</code></pre></div><p>执行如下命令让kube-proxy组件重新启动</p> <div class="language- extra-class"><pre class="language-text"><code>kubectl get pod -n kube-system | grep kube-proxy | awk '{print $1}' | xargs kubectl delete pod -n kube-system
+</code></pre></div><h3 id="修改所有node节点kubelet-conf"><a href="#修改所有node节点kubelet-conf" class="header-anchor">#</a> 修改所有node节点kubelet.conf</h3> <div class="language- extra-class"><pre class="language-text"><code>/etc/kubernetes/kubelet.conf
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN5RENDQWJDZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRFNE1EVXhPREF4TXpNME1Gb1hEVEk0TURVeE5UQXhNek0wTUZvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTGJoCmw1TDRaNHFiWTJ3MmY5TFlEb0ZqVlhhcHRhYklkQmZmTS9zMTJaWFd1NU5LYWlPR09ub3RxK1gwM0VJb3Z4VEkKUGh5NzBqY294VGlLUTk5ZkFsUS82a2Vhc0x5MDNGZXJvYkhmaldUenBkZE5mWVNEZStMazlMV0hIZ0phOXVUQQpDU3kyay9sZGo3VWQ0Sk9pMi9lcGhVTUNNMUNlbmdPeWZDNUl0SUpFZzJmMk95cTE5U0JBeW1zYzFTalg5Q0F6CnNyMlhiTm9hK1lVS2Flek1QSldvYlNxdEg0czQ1TkluYytMREJFTkk4VGVITktybENsamdIeUorUjU1V2pCTW8KeSs3Y1BxL2cwTkxmSU4xRjJVbkFFa3RTSmVYUFBSaGlQUUhJcGRBU0xySXhVcE9HNlN3Yk51bmRGdGsxaUJiUgpUSW9md2UyT0VhZkhySmV5OHJrQ0F3RUFBYU1qTUNFd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFLME1mOFM5VjUyaG9VZ3JYcGQyK09rOHF2Ny8KR3hpWnRFelFISW9RdWRLLzJ2ZGJHbXdnem10V3hFNHRYRWQyUnlXTTZZR1VQSmNpMmszY1Z6QkpSaGcvWFB2UQppRVBpUDk5ZkdiM0kxd0QyanlURWVaZVd1ekdSRDk5ait3bStmcE9wQzB2ZU1LN3hzM1VURjRFOFlhWGcwNmdDCjBXTkFNdTRxQmZaSUlKSEVDVDhLUlB5TEN5Zlgvbm84Q25WTndaM3pCbGZaQmFONGZaOWw0UUdGMVd4dlc0OHkKYmpvRDhqUVJnL1kwYUVUMWMrSEhpWTNmNDF0dG9kMWJoSWR3c1NDNUhhRjJQSVAvZ2dCSnZ2Uzh2V1cwcVRDegpDV2EzcVJ0bVB0MHdtcEZic2RPWmdsWkl6aWduYTdaaDFWMDJVM0VFZ2kwYjNGZWR5OW5MRUZaMGJZbz0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+    server: https://10.100.81.10:6444   # 此处改为VIP加haproxy监听端口6444
+  name: default-cluster
+contexts:
+- context:
+    cluster: default-cluster
+    namespace: default
+    user: default-auth
+  name: default-context
+current-context: default-context
+kind: Config
+preferences: {}
+users:
+- name: default-auth
+  user:
+    client-certificate: /var/lib/kubelet/pki/kubelet-client.crt
+    client-key: /var/lib/kubelet/pki/kubelet-client.key
+</code></pre></div><h2 id="部署前注意事项"><a href="#部署前注意事项" class="header-anchor">#</a> 部署前注意事项</h2> <h3 id="_1-确保所有节点时间同步"><a href="#_1-确保所有节点时间同步" class="header-anchor">#</a> 1. 确保所有节点时间同步</h3> <h3 id="_2-确保所有节点ip转发功能打开"><a href="#_2-确保所有节点ip转发功能打开" class="header-anchor">#</a> 2. 确保所有节点ip转发功能打开</h3> <div class="language- extra-class"><pre class="language-text"><code>net.ipv4.ip_forward = 1
+</code></pre></div></div> <footer class="page-edit"><!----> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
+      ←
+      <a href="/blog/k8s-authenticating.html" class="prev">kubernetes对接第三方认证</a></span> <span class="next"><a href="/blog/k8s-ipvs.html">kubernetes ipvs设置</a>
+      →
+    </span></p></div> </main></div><div class="global-ui"></div></div>
+    <script src="/assets/js/app.23d3ef84.js" defer></script><script src="/assets/js/2.bc760f0a.js" defer></script><script src="/assets/js/30.158ceb97.js" defer></script>
+  </body>
+</html>

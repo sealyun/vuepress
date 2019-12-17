@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>kubernetes源码分析之kube-scheduler - 从代码看原理 | sealyun | kubernetes安装</title>
+    <meta name="description" content="">
+    <meta name="theme-color" content="#007af5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?2803648cc5852dd3e9e46bbd0bf63366";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+    <meta property="og:site_name" content="sealyun 专注于kubernetes安装"><meta property="og:title" content="sealyun kubernetes安装"><meta property="og:type" content="article"><meta property="og:url" content="/blog/kube-scheduler-source-code.html"><meta name="twitter:title" content="sealyun kubernetes安装"><meta name="twitter:url" content="/blog/kube-scheduler-source-code.html"><meta name="twitter:card" content="summary_large_image">
+    <link rel="preload" href="/assets/css/0.styles.943dcab2.css" as="style"><link rel="preload" href="/assets/js/app.23d3ef84.js" as="script"><link rel="preload" href="/assets/js/2.bc760f0a.js" as="script"><link rel="preload" href="/assets/js/39.b4e7f5f0.js" as="script"><link rel="prefetch" href="/assets/js/10.e86bcb27.js"><link rel="prefetch" href="/assets/js/11.bb9904fc.js"><link rel="prefetch" href="/assets/js/12.ec81ebde.js"><link rel="prefetch" href="/assets/js/13.c482403d.js"><link rel="prefetch" href="/assets/js/14.9bd9e6fd.js"><link rel="prefetch" href="/assets/js/15.bdc6bd19.js"><link rel="prefetch" href="/assets/js/16.9e60a0b4.js"><link rel="prefetch" href="/assets/js/17.5df0c46d.js"><link rel="prefetch" href="/assets/js/18.85294fd2.js"><link rel="prefetch" href="/assets/js/19.f2879a42.js"><link rel="prefetch" href="/assets/js/20.6012d02a.js"><link rel="prefetch" href="/assets/js/21.81b7e1ca.js"><link rel="prefetch" href="/assets/js/22.1c2e71b0.js"><link rel="prefetch" href="/assets/js/23.0748294e.js"><link rel="prefetch" href="/assets/js/24.d63f1e4c.js"><link rel="prefetch" href="/assets/js/25.9dbfb44a.js"><link rel="prefetch" href="/assets/js/26.bfc3e626.js"><link rel="prefetch" href="/assets/js/27.ce51e7d7.js"><link rel="prefetch" href="/assets/js/28.ebb9caaf.js"><link rel="prefetch" href="/assets/js/29.8584027e.js"><link rel="prefetch" href="/assets/js/3.b7a496ec.js"><link rel="prefetch" href="/assets/js/30.158ceb97.js"><link rel="prefetch" href="/assets/js/31.f1024a9d.js"><link rel="prefetch" href="/assets/js/32.44cadfdb.js"><link rel="prefetch" href="/assets/js/33.af1c5cdb.js"><link rel="prefetch" href="/assets/js/34.a9e8095a.js"><link rel="prefetch" href="/assets/js/35.77ea75db.js"><link rel="prefetch" href="/assets/js/36.44da8d60.js"><link rel="prefetch" href="/assets/js/37.5e09e3fe.js"><link rel="prefetch" href="/assets/js/38.02e2aa10.js"><link rel="prefetch" href="/assets/js/4.1ba98b6c.js"><link rel="prefetch" href="/assets/js/40.c879980c.js"><link rel="prefetch" href="/assets/js/41.0d571f5c.js"><link rel="prefetch" href="/assets/js/42.a7d12c13.js"><link rel="prefetch" href="/assets/js/43.60b5940b.js"><link rel="prefetch" href="/assets/js/44.b5a570c8.js"><link rel="prefetch" href="/assets/js/45.3df35b92.js"><link rel="prefetch" href="/assets/js/46.b47c3836.js"><link rel="prefetch" href="/assets/js/47.fbef4ef0.js"><link rel="prefetch" href="/assets/js/48.ae14afb1.js"><link rel="prefetch" href="/assets/js/49.4e6f30d4.js"><link rel="prefetch" href="/assets/js/5.c39869f0.js"><link rel="prefetch" href="/assets/js/50.c199fe15.js"><link rel="prefetch" href="/assets/js/51.30d345fb.js"><link rel="prefetch" href="/assets/js/52.5037db07.js"><link rel="prefetch" href="/assets/js/53.bb29d2bc.js"><link rel="prefetch" href="/assets/js/54.9e4ffa33.js"><link rel="prefetch" href="/assets/js/55.6d311bce.js"><link rel="prefetch" href="/assets/js/56.e6149a7c.js"><link rel="prefetch" href="/assets/js/57.57e2943c.js"><link rel="prefetch" href="/assets/js/58.61ea6212.js"><link rel="prefetch" href="/assets/js/59.95355587.js"><link rel="prefetch" href="/assets/js/6.0032a2d9.js"><link rel="prefetch" href="/assets/js/60.761d9050.js"><link rel="prefetch" href="/assets/js/61.b42700ba.js"><link rel="prefetch" href="/assets/js/62.6b9d864d.js"><link rel="prefetch" href="/assets/js/63.4aff7db2.js"><link rel="prefetch" href="/assets/js/64.34c83536.js"><link rel="prefetch" href="/assets/js/65.a7b0a430.js"><link rel="prefetch" href="/assets/js/66.8ee74e7e.js"><link rel="prefetch" href="/assets/js/67.3009b3ec.js"><link rel="prefetch" href="/assets/js/68.8bb3e997.js"><link rel="prefetch" href="/assets/js/7.5df889f4.js"><link rel="prefetch" href="/assets/js/8.c053b523.js"><link rel="prefetch" href="/assets/js/9.7948f30b.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.943dcab2.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><img src="https://sealyun.com/img/logo.png" alt="sealyun | kubernetes安装" class="logo"> <span class="site-name can-hide">sealyun | kubernetes安装</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/docs/" class="nav-link">使用文档</a></div><div class="nav-item"><a href="http://store.lameleg.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  离线包下载
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><a href="/faq/" class="nav-link">常见问题</a></div><div class="nav-item"><a href="/changelog/" class="nav-link">版本变更</a></div><div class="nav-item"><a href="/github/" class="nav-link">开源项目</a></div><div class="nav-item"><a href="/contact/" class="nav-link">联系方式</a></div><div class="nav-item"><a href="http://store.lameleg.com:8536/" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  论坛
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="友情连接" class="dropdown-title"><span class="title">友情连接</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://fuckcloudnative.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  云原生实验室
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://kuboard.cn/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  kuboard
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://www.qikqiak.com/?utm_source=sealyun.com" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  阳明的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li><li class="dropdown-item"><h4></h4> <ul class="dropdown-subitem-wrapper"><li class="dropdown-subitem"><a href="https://zhangguanzhang.github.io/#sealyun" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  张馆长的博客
+  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul></li></ul></div></div> <!----></nav>  <ul class="sidebar-links"><li><a href="/blog/" class="sidebar-link">博客列表</a></li><li><a href="/blog/CI-CD.html" class="sidebar-link">CI 概述</a></li><li><a href="/blog/calico.html" class="sidebar-link">calico 网络原理</a></li><li><a href="/blog/calico-architecture.html" class="sidebar-link">calico架构</a></li><li><a href="/blog/calico-network-policy.html" class="sidebar-link">calico网络策略</a></li><li><a href="/blog/client-go-crd.html" class="sidebar-link">使用client-go包访问Kubernetes CRD</a></li><li><a href="/blog/cni.html" class="sidebar-link">CNI详细介绍</a></li><li><a href="/blog/container-stop-timeout.html" class="sidebar-link">容器信号使用</a></li><li><a href="/blog/containerd.html" class="sidebar-link">containerd与kubernetes集成</a></li><li><a href="/blog/crd.html" class="sidebar-link">使用kubebuilder开发CRD</a></li><li><a href="/blog/csi.html" class="sidebar-link">CSI详解</a></li><li><a href="/blog/dev-k8s-workflow.html" class="sidebar-link">kubernetes开发流程</a></li><li><a href="/blog/docker-architech.html" class="sidebar-link">Docker架构分析</a></li><li><a href="/blog/docker-dev.html" class="sidebar-link">docker开发流程</a></li><li><a href="/blog/docker-network.html" class="sidebar-link">容器网络概述</a></li><li><a href="/blog/docker-oerlay2.html" class="sidebar-link">关于overlay2存储驱动的磁盘配额问题</a></li><li><a href="/blog/docker-ovs.html" class="sidebar-link">ovs对接容器网络</a></li><li><a href="/blog/etcd-manage.html" class="sidebar-link">etcd管南</a></li><li><a href="/blog/fist-terminal.html" class="sidebar-link">属于极客的k8s管理工具fist</a></li><li><a href="/blog/genie.html" class="sidebar-link">CNI 小精灵 genie</a></li><li><a href="/blog/istio-quickstart.html" class="sidebar-link">istio安装使用教程</a></li><li><a href="/blog/k8s-authenticating.html" class="sidebar-link">kubernetes对接第三方认证</a></li><li><a href="/blog/k8s-ha-conf.html" class="sidebar-link">kubernetes高可用相关配置</a></li><li><a href="/blog/k8s-ipvs.html" class="sidebar-link">kubernetes ipvs设置</a></li><li><a href="/blog/k8s-rbac.html" class="sidebar-link">kubernetes RBAC实战</a></li><li><a href="/blog/keepalived.html" class="sidebar-link">keepalived in docker</a></li><li><a href="/blog/kube-admin-control.html" class="sidebar-link">kubernetes Admission Controller原理介绍</a></li><li><a href="/blog/kube-batch.html" class="sidebar-link">kube-scheduler定制，支持深度学习批处理任务调度</a></li><li><a href="/blog/kube-cmd.html" class="sidebar-link">老夫k8s命令行賊6</a></li><li><a href="/blog/kube-dev.html" class="sidebar-link">kubernetes开发指南</a></li><li><a href="/blog/kube-proxy-src.html" class="sidebar-link">kube-proxy源码解析</a></li><li><a href="/blog/kube-scheduler-source-code.html" class="active sidebar-link">kubernetes源码分析之kube-scheduler - 从代码看原理</a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a href="/blog/kube-scheduler-source-code.html#关于源码编译" class="sidebar-link">关于源码编译</a></li><li class="sidebar-sub-header"><a href="/blog/kube-scheduler-source-code.html#cache状态机" class="sidebar-link">cache状态机</a></li><li class="sidebar-sub-header"><a href="/blog/kube-scheduler-source-code.html#cache实现" class="sidebar-link">cache实现</a></li><li class="sidebar-sub-header"><a href="/blog/kube-scheduler-source-code.html#bind动作：" class="sidebar-link">bind动作：</a></li><li class="sidebar-sub-header"><a href="/blog/kube-scheduler-source-code.html#调度算法" class="sidebar-link">调度算法</a></li><li class="sidebar-sub-header"><a href="/blog/kube-scheduler-source-code.html#调度器扩展" class="sidebar-link">调度器扩展</a></li><li class="sidebar-sub-header"><a href="/blog/kube-scheduler-source-code.html#extender接口" class="sidebar-link">Extender接口</a></li><li class="sidebar-sub-header"><a href="/blog/kube-scheduler-source-code.html#httpextender配置参数从哪来" class="sidebar-link">HTTPExtender配置参数从哪来</a></li><li class="sidebar-sub-header"><a href="/blog/kube-scheduler-source-code.html#scheduler-extender配置：" class="sidebar-link">scheduler extender配置：</a></li><li class="sidebar-sub-header"><a href="/blog/kube-scheduler-source-code.html#总结" class="sidebar-link">总结</a></li></ul></li><li><a href="/blog/kubeadm.html" class="sidebar-link">kubeadm杂谈</a></li><li><a href="/blog/kubeadm-dev.html" class="sidebar-link">修改kubeadm证书过期时间</a></li><li><a href="/blog/kubeadm-source.html" class="sidebar-link">kubeadm源码分析</a></li><li><a href="/blog/kubernetes-vm.html" class="sidebar-link">强隔离容器的那些事</a></li><li><a href="/blog/kustomize.html" class="sidebar-link">kustomize 颤抖吧helm!</a></li><li><a href="/blog/libra.html" class="sidebar-link">facebook libra尝鲜，没赶上比特币能不能上这趟车</a></li><li><a href="/blog/macvtap.html" class="sidebar-link">macvtap实践教程</a></li><li><a href="/blog/ovn-vni.html" class="sidebar-link">从CNI到ovn</a></li><li><a href="/blog/prometheus-operator-envoy.html" class="sidebar-link">使用prometheus operator监控envoy</a></li><li><a href="/blog/rook.html" class="sidebar-link">rook使用教程，快速编排ceph</a></li><li><a href="/blog/rpc-protobuf.html" class="sidebar-link">golang基于protobuf的rpc使用</a></li><li><a href="/blog/runc.html" class="sidebar-link">runc 架构</a></li><li><a href="/blog/scratch.html" class="sidebar-link">scratch镜像</a></li><li><a href="/blog/tektoncd-pipeline.html" class="sidebar-link">tektoncd pipeline教程 - kubernetes原生pipeline</a></li><li><a href="/blog/user-token.html" class="sidebar-link">kubernetes 用户token教程</a></li><li><a href="/blog/vim.html" class="sidebar-link">是时候表现一下我的vim了</a></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="kubernetes源码分析之kube-scheduler-从代码看原理"><a href="#kubernetes源码分析之kube-scheduler-从代码看原理" class="header-anchor">#</a> kubernetes源码分析之kube-scheduler - 从代码看原理</h1> <h2 id="关于源码编译"><a href="#关于源码编译" class="header-anchor">#</a> 关于源码编译</h2> <p>我嫌弃官方提供的编译脚本太麻烦，所以用了更简单粗暴的方式编译k8s代码，当然官方脚本在编译所有项目或者夸平台编译以及realse时还是挺有用的。</p> <p>在容器中编译：</p> <div class="language- extra-class"><pre class="language-text"><code>docker run -v /work/src/k8s.io/kubernetes:/go/src/k8s.io/kubernetes golang:1.11.2 bash
+</code></pre></div><p>在容器中可以保证环境干净</p> <p>进入bash后直接进入kube-scheduler的主目录编译即可
+</p> <div class="language- extra-class"><pre class="language-text"><code>cd cmd/kube-scheduler &amp;&amp; go build
+</code></pre></div><p>二进制就产生了。。。</p> <h3 id="源码编译接入ci-cd"><a href="#源码编译接入ci-cd" class="header-anchor">#</a> 源码编译接入CI/CD</h3> <p>作为高端玩家，自动化是必须的，因为服务器性能更好，用CI/CD编译更快，这里分享一下我的一些配置:</p> <ol><li>我把vendor打到编译的基础镜像里了，因为vendor大而且不经常更新</li></ol> <div class="language- extra-class"><pre class="language-text"><code>$ cat Dockerfile-build1.12.2
+FROM golang:1.11.2
+COPY vendor/ /vendor
+</code></pre></div><p>然后代码里的vendor就可以删了</p> <ol start="2"><li>.drone.yml</li></ol> <div class="language- extra-class"><pre class="language-text"><code>workspace:
+  base: /go/src/k8s.io
+  path: kubernetes
+
+pipeline:
+    build:
+        image: fanux/kubernetes-build:1.12.2-beta.3
+        commands:
+           - make all WHAT=cmd/kube-kubescheduler GOFLAGS=-v
+    publish:
+        image: plugins/docker
+        registry: xxx
+        username: xxx
+        password: xxx
+        email: xxx
+        repo: xxx/container/kube-scheduler
+        tags: ${DRONE_TAG=latest}
+        dockerfile: dockerfile/Dockerfile-kube-scheduler
+        insecure: true
+        when:
+            event: [push, tag]
+</code></pre></div><ol start="3"><li>Dockerfile 静态编译连基础镜像都省了</li></ol> <div class="language- extra-class"><pre class="language-text"><code>$ cat dockerfile/Dockerfile-kube-scheduler
+FROM scratch
+COPY  _output/local/bin/linux/amd64/kube-scheduler /
+CMD [&quot;/kube-scheduler&quot;]
+</code></pre></div><p>对于kubeadm这种二进制交付的，可直接编译然后传到nexus上, 通过drone deploy事件选择是不是要编译kubeadm：</p> <div class="language- extra-class"><pre class="language-text"><code>    build_kubeadm:
+        image: fanux/kubernetes-build:1.12.2-beta.3
+        commands:
+           - make all WHAT=cmd/kube-kubeadm GOFLAGS=-v
+           - curl -v -u container:container --upload-file kubeadm http://172.16.59.153:8081/repository/kubernetes/kubeadm/
+        when:
+            event: deployment
+            enviroment: kubeadm
+</code></pre></div><h3 id="直接go-build的大坑"><a href="#直接go-build的大坑" class="header-anchor">#</a> 直接go build的大坑</h3> <p>发现build完的kubeadm二进制并不能用，可能是build时选用的基础镜像的问题，也可能是没去生成一些代码导致的问题</p> <div class="language- extra-class"><pre class="language-text"><code>[signal SIGSEGV: segmentation violation code=0x1 addr=0x63 pc=0x7f2b7f5f057c]
+
+runtime stack:
+runtime.throw(0x17c74a8, 0x2a)
+	/usr/local/go/src/runtime/panic.go:608 +0x72
+runtime.sigpanic()
+	/usr/local/go/src/runtime/signal_unix.go:374 +0x2f2
+</code></pre></div><p>后面再补上CD的配置</p> <p>如此我编译scheduler代码大约40秒左右，如vendor可软连接还可节省十几秒</p> <h1 id="调度器cache"><a href="#调度器cache" class="header-anchor">#</a> 调度器cache</h1> <h2 id="cache状态机"><a href="#cache状态机" class="header-anchor">#</a> cache状态机</h2> <div class="language- extra-class"><pre class="language-text"><code>   +-------------------------------------------+  +----+
+   |                            Add            |  |    |
+   |                                           |  |    | Update
+   +      Assume                Add            v  v    |
+Initial +--------&gt; Assumed +------------+---&gt; Added &lt;--+
+   ^                +   +               |       +
+   |                |   |               |       |
+   |                |   |           Add |       | Remove
+   |                |   |               |       |
+   |                |   |               +       |
+   +----------------+   +-----------&gt; Expired   +----&gt; Deleted
+</code></pre></div><ul><li>Assume 尝试调度，会把node信息聚合到node上，如pod require多少CPU内存，那么加到node上，如果超时了需要重新减掉</li> <li>AddPod 会检测是不是已经尝试调度了该pod，校验是否过期,如果过期了会被重新添加</li> <li>Remove pod信息会在该节点上被清除掉</li> <li>cache其它接口如node相关的cache接口  ADD update等</li></ul> <h2 id="cache实现"><a href="#cache实现" class="header-anchor">#</a> cache实现</h2> <div class="language- extra-class"><pre class="language-text"><code>type schedulerCache struct {
+	stop   &lt;-chan struct{}
+	ttl    time.Duration
+	period time.Duration
+
+	// This mutex guards all fields within this cache struct.
+	mu sync.RWMutex
+	// a set of assumed pod keys.
+	// The key could further be used to get an entry in podStates.
+	assumedPods map[string]bool
+	// a map from pod key to podState.
+	podStates map[string]*podState
+	nodes     map[string]*NodeInfo
+	nodeTree  *NodeTree
+	pdbs      map[string]*policy.PodDisruptionBudget
+	// A map from image name to its imageState.
+	imageStates map[string]*imageState
+}
+</code></pre></div><p>这里存储了基本调度所需要的所有信息</p> <p>以AddPod接口为例，本质上就是把监听到的一个pod放到了cache的map里：</p> <div class="language- extra-class"><pre class="language-text"><code>cache.addPod(pod)
+ps := &amp;podState{
+	pod: pod,
+}
+cache.podStates[key] = ps
+</code></pre></div><p>node Tree
+节点信息有这样一个结构体保存：</p> <div class="language- extra-class"><pre class="language-text"><code>type NodeTree struct {
+	tree      map[string]*nodeArray // a map from zone (region-zone) to an array of nodes in the zone.
+	zones     []string              // a list of all the zones in the tree (keys)
+	zoneIndex int
+	NumNodes  int
+	mu        sync.RWMutex
+}
+</code></pre></div><p>cache 运行时会循环清理过期的assume pod</p> <div class="language- extra-class"><pre class="language-text"><code>func (cache *schedulerCache) run() {
+	go wait.Until(cache.cleanupExpiredAssumedPods, cache.period, cache.stop)
+}
+</code></pre></div><h1 id="scheduler"><a href="#scheduler" class="header-anchor">#</a> scheduler</h1> <p>scheduler里面最重要的两个东西：cache 和调度算法</p> <div class="language- extra-class"><pre class="language-text"><code>type Scheduler struct {
+	config *Config  -------&gt; SchedulerCache
+                       |
+                       +---&gt; Algorithm
+}
+</code></pre></div><p>等cache更新好了，调度器就是调度一个pod:</p> <div class="language- extra-class"><pre class="language-text"><code>func (sched *Scheduler) Run() {
+	if !sched.config.WaitForCacheSync() {
+		return
+	}
+
+	go wait.Until(sched.scheduleOne, 0, sched.config.StopEverything)
+}
+</code></pre></div><p>核心逻辑来了：</p> <div class="language- extra-class"><pre class="language-text"><code>   +-------------+
+   | 获取一个pod |
+   +-------------+
+          |
+   +-----------------------------------------------------------------------------------+
+   | 如果pod的DeletionTimestamp 存在就不用进行调度, kubelet发现这个字段会直接去删除pod |
+   +-----------------------------------------------------------------------------------+
+          |
+   +-----------------------------------------+
+   | 选一个suggestedHost，可理解为合适的节点 |
+   +-----------------------------------------+
+          |_____________选不到就进入强占的逻辑，与我当初写swarm调度器逻辑类似
+          |
+   +--------------------------------------------------------------------------------+
+   | 虽然还没真调度到node上，但是告诉cache pod已经被调度到node上了，变成assume pod  |
+   | 这里面会先检查volumes                                                          |
+   | 然后：err = sched.assume(assumedPod, suggestedHost) 假设pod被调度到node上了    |
+   +--------------------------------------------------------------------------------+
+          |
+   +---------------------------+
+   | 异步的bind这个pod到node上 |
+   | 先bind volume             |
+   | bind pod                  |
+   +---------------------------+
+          |
+   +----------------+
+   | 暴露一些metric |
+   +----------------+
+</code></pre></div><h2 id="bind动作："><a href="#bind动作：" class="header-anchor">#</a> bind动作：</h2> <div class="language- extra-class"><pre class="language-text"><code>err := sched.bind(assumedPod, &amp;v1.Binding{
+	ObjectMeta: metav1.ObjectMeta{Namespace: assumedPod.Namespace, Name: assumedPod.Name, UID: assumedPod.UID},
+	Target: v1.ObjectReference{
+		Kind: &quot;Node&quot;,
+		Name: suggestedHost,
+	},
+})
+</code></pre></div><p>先去bind pod，然后告诉cache bind结束</p> <div class="language- extra-class"><pre class="language-text"><code>err := sched.config.GetBinder(assumed).Bind(b)
+if err := sched.config.SchedulerCache.FinishBinding(assumed); 
+</code></pre></div><h3 id="bind-流程"><a href="#bind-流程" class="header-anchor">#</a> bind 流程</h3> <div class="language- extra-class"><pre class="language-text"><code>   +----------------+
+   | GetBinder.Bind
+   +----------------+
+       |
+   +-------------------------------------+
+   | 告诉cache bind完成 FinishBinding接口
+   +-------------------------------------+
+       |
+   +-----------------------------------------------------+
+   | 失败了就ForgetPod, 更新一下pod状态为 BindingRejected
+   +-----------------------------------------------------+
+</code></pre></div><h3 id="bind-实现"><a href="#bind-实现" class="header-anchor">#</a> bind 实现</h3> <p>最终就是调用了apiserver bind接口:</p> <div class="language- extra-class"><pre class="language-text"><code>func (b *binder) Bind(binding *v1.Binding) error {
+	glog.V(3).Infof(&quot;Attempting to bind %v to %v&quot;, binding.Name, binding.Target.Name)
+	return b.Client.CoreV1().Pods(binding.Namespace).Bind(binding)
+}
+</code></pre></div><h2 id="调度算法"><a href="#调度算法" class="header-anchor">#</a> 调度算法</h2> <div class="language- extra-class"><pre class="language-text"><code>▾ algorithm/
+  ▸ predicates/  预选
+  ▸ priorities/  优选
+</code></pre></div><p>现在最重要的就是选节点的实现</p> <div class="language- extra-class"><pre class="language-text"><code>suggestedHost, err := sched.schedule(pod)
+</code></pre></div><p>也就是调度算法的实现：</p> <div class="language- extra-class"><pre class="language-text"><code>type ScheduleAlgorithm interface {
+    // 传入pod 节点列表，返回一下合适的节点
+	Schedule(*v1.Pod, NodeLister) (selectedMachine string, err error)
+    // 资源抢占用的
+	Preempt(*v1.Pod, NodeLister, error) (selectedNode *v1.Node, preemptedPods []*v1.Pod, cleanupNominatedPods []*v1.Pod, err error)
+
+    // 预选函数集，
+	Predicates() map[string]FitPredicate
+                                |                              这一个节点适合不适合调度这个pod，不适合的话返回原因
+                                +-------type FitPredicate func(pod *v1.Pod, meta PredicateMetadata, nodeInfo *schedulercache.NodeInfo) (bool, []PredicateFailureReason, error)
+    // 返回优选配置,最重要两个函数 map 和 reduce
+	Prioritizers() []PriorityConfig
+                         |____________PriorityMapFunction 计算 节点的优先级
+                         |____________PriorityReduceFunction 根据map的结果计算所有node的最终得分
+                         |____________PriorityFunction 废弃
+}
+</code></pre></div><p>调度算法可以通过两种方式生成：</p> <ul><li>Provider 默认方式, 通用调度器</li> <li>Policy   策略方式, 特殊调度器</li></ul> <p>最终new了一个scheduler:</p> <div class="language- extra-class"><pre class="language-text"><code>priorityConfigs, err := c.GetPriorityFunctionConfigs(priorityKeys)
+priorityMetaProducer, err := c.GetPriorityMetadataProducer()
+predicateMetaProducer, err := c.GetPredicateMetadataProducer()
+                                              |
+algo := core.NewGenericScheduler(             |
+	c.schedulerCache,                         |
+	c.equivalencePodCache,                    V
+	c.podQueue,
+	predicateFuncs,   ============&gt; 这里面把预选优选函数都注入进来了
+	predicateMetaProducer,
+	priorityConfigs,
+	priorityMetaProducer,
+	extenders,
+	c.volumeBinder,
+	c.pVCLister,
+	c.alwaysCheckAllPredicates,
+	c.disablePreemption,
+	c.percentageOfNodesToScore,
+)
+
+
+type genericScheduler struct {
+	cache                    schedulercache.Cache
+	equivalenceCache         *equivalence.Cache
+	schedulingQueue          SchedulingQueue
+	predicates               map[string]algorithm.FitPredicate
+	priorityMetaProducer     algorithm.PriorityMetadataProducer
+	predicateMetaProducer    algorithm.PredicateMetadataProducer
+	prioritizers             []algorithm.PriorityConfig
+	extenders                []algorithm.SchedulerExtender
+	lastNodeIndex            uint64
+	alwaysCheckAllPredicates bool
+	cachedNodeInfoMap        map[string]*schedulercache.NodeInfo
+	volumeBinder             *volumebinder.VolumeBinder
+	pvcLister                corelisters.PersistentVolumeClaimLister
+	disablePreemption        bool
+	percentageOfNodesToScore int32
+}
+</code></pre></div><p>这个scheduler实现了ScheduleAlgorithm中定义的接口</p> <p>Schedule 流程：</p> <div class="language- extra-class"><pre class="language-text"><code>   +------------------------------------+
+   | trace记录一下，要开始调度哪个pod了 | 
+   +------------------------------------+
+          |
+   +-----------------------------------------------+
+   | pod基本检查，这里主要检查卷和delete timestamp |
+   +-----------------------------------------------+
+          |
+   +----------------------------------------+
+   | 获取node列表, 更新cache的node info map |
+   +----------------------------------------+
+          |
+   +----------------------------------------------+
+   | 预选，返回合适的节点列表和预选失败节点的原因 |
+   +----------------------------------------------+
+          |
+   +----------------------------------------------------------+
+   | 优选，                                                   |
+   | 如果预选结果只有一个节点，那么直接使用之，不需要进行优选 |
+   | 否则进行优选过程                                         |
+   +----------------------------------------------------------+
+          |
+   +------------------------------------+
+   | 在优选结果列表中选择得分最高的节点 |
+   +------------------------------------+
+</code></pre></div><h3 id="预选"><a href="#预选" class="header-anchor">#</a> 预选</h3> <p>主要分成两块</p> <ul><li>预选, 检查该节点符合不符合</li> <li>执行extender, 自定义调度器扩展，官方实现了HTTP extender 把预选结果发给用户，用户再去过滤</li></ul> <p>podFitOnNode: 判断这个节点是不是适合这个pod调度</p> <p>这里插播一个小知识，调度器里有个Ecache:</p> <p>Equivalence Class目前是用来在Kubernetes Scheduler加速Predicate，提升Scheduler的吞吐性能。
+Kubernetes scheduler及时维护着Equivalence Cache的数据，当某些情况发生时（比如delete node、bind pod等事件），
+需要立刻invalid相关的Equivalence Cache中的缓存数据。</p> <p>一个Equivalence Class是用来定义一组具有相同Requirements和Constraints的Pods的相关信息的集合，
+在Scheduler进行Predicate阶段时可以只需对Equivalence Class中一个Pod进行Predicate，并把Predicate的结果放到
+Equivalence Cache中以供该Equivalence Class中其他Pods（成为Equivalent Pods）重用该结果。只有当Equivalence Cache
+中没有可以重用的Predicate Result才会进行正常的Predicate流程。</p> <p>ecache这块后续可以深入讨论，本文更多关注核心架构与流程</p> <p>所以这块就比较简单了, 把所有的预选函数执行行一遍</p> <div class="language- extra-class"><pre class="language-text"><code>先排序 predicates.Ordering() 
+if predicate, exist := predicateFuncs[predicateKey]; exist {
+		fit, reasons, err = predicate(pod, metaToUse, nodeInfoToUse)
+</code></pre></div><p>顺序是这样的：</p> <div class="language- extra-class"><pre class="language-text"><code>	predicatesOrdering = []string{CheckNodeConditionPred, CheckNodeUnschedulablePred,
+		GeneralPred, HostNamePred, PodFitsHostPortsPred,
+		MatchNodeSelectorPred, PodFitsResourcesPred, NoDiskConflictPred,
+		PodToleratesNodeTaintsPred, PodToleratesNodeNoExecuteTaintsPred, CheckNodeLabelPresencePred,
+		CheckServiceAffinityPred, MaxEBSVolumeCountPred, MaxGCEPDVolumeCountPred, MaxCSIVolumeCountPred,
+		MaxAzureDiskVolumeCountPred, CheckVolumeBindingPred, NoVolumeZoneConflictPred,
+		CheckNodeMemoryPressurePred, CheckNodePIDPressurePred, CheckNodeDiskPressurePred, MatchInterPodAffinityPred}
+</code></pre></div><p>这些预选函数是存在一个map里的，key是一个string，value就是一个预选函数, 再回头去看注册map的逻辑</p> <div class="language- extra-class"><pre class="language-text"><code>predicateFuncs, err := c.GetPredicates(predicateKeys)
+</code></pre></div><p>pkg/scheduler/algorithmprovider/defaults/defaults.go 里面会对这些函数进行注册,如：</p> <div class="language- extra-class"><pre class="language-text"><code>factory.RegisterFitPredicate(predicates.NoDiskConflictPred, predicates.NoDiskConflict),
+factory.RegisterFitPredicate(predicates.GeneralPred, predicates.GeneralPredicates),
+factory.RegisterFitPredicate(predicates.CheckNodeMemoryPressurePred, predicates.CheckNodeMemoryPressurePredicate),
+factory.RegisterFitPredicate(predicates.CheckNodeDiskPressurePred, predicates.CheckNodeDiskPressurePredicate),
+factory.RegisterFitPredicate(predicates.CheckNodePIDPressurePred, predicates.CheckNodePIDPressurePredicate),
+</code></pre></div><p>然后直接在init函数里调用注册逻辑</p> <h3 id="优选"><a href="#优选" class="header-anchor">#</a> 优选</h3> <p>PrioritizeNodes 优选大概可分为三个步骤:</p> <ul><li>Map      计算单个节点,优先级</li> <li>Reduce   计算每个节点结果聚合,计算所有节点的最终得分</li> <li>Extender 与预选差不多</li></ul> <p>优选函数同理也是注册进去的, 不再赘述</p> <div class="language- extra-class"><pre class="language-text"><code>factory.RegisterPriorityFunction2(&quot;LeastRequestedPriority&quot;, priorities.LeastRequestedPriorityMap, nil, 1),
+// Prioritizes nodes to help achieve balanced resource usage
+factory.RegisterPriorityFunction2(&quot;BalancedResourceAllocation&quot;, priorities.BalancedResourceAllocationMap, nil, 1),
+</code></pre></div><p>这里注册时注册两个，一个map函数一个reduce函数，为了更好的理解mapreduce，去看一个实现</p> <div class="language- extra-class"><pre class="language-text"><code>factory.RegisterPriorityFunction2(&quot;NodeAffinityPriority&quot;, priorities.CalculateNodeAffinityPriorityMap, priorities.CalculateNodeAffinityPriorityReduce, 1)
+</code></pre></div><h3 id="node-affinity-map-reduce"><a href="#node-affinity-map-reduce" class="header-anchor">#</a> node Affinity map reduce</h3> <p>map 核心逻辑, 比较容易理解:</p> <div class="language- extra-class"><pre class="language-text"><code>如果满足节点亲和，积分加权重
+count += preferredSchedulingTerm.Weight
+
+return schedulerapi.HostPriority{
+	Host:  node.Name,
+	Score: int(count),  # 算出积分
+}, nil
+</code></pre></div><p>reduce:
+一个节点会走很多个map，每个map会产生一个分值，如node affinity产生一个，pod affinity再产生一个，所以node和分值是一对多的关系</p> <p>去掉reverse的逻辑（分值越高优先级越低）</p> <div class="language- extra-class"><pre class="language-text"><code>var maxCount int
+for i := range result {
+	if result[i].Score &gt; maxCount {
+		maxCount = result[i].Score  # 所有分值里的最大值
+	}
+}
+
+for i := range result {
+	score := result[i].Score
+	score = maxPriority * score / maxCount  # 分值乘以最大优先级是maxPriority = 10，除以最大值赋值给分值 这里是做了归一化处理;
+	result[i].Score = score
+}
+</code></pre></div><p>这里做了归一化处理后分值就变成[0,maxPriority]之间了</p> <div class="language- extra-class"><pre class="language-text"><code>for i := range priorityConfigs {
+	if priorityConfigs[i].Function != nil {
+		continue
+	}
+	results[i][index], err = priorityConfigs[i].Map(pod, meta, nodeInfo)
+	if err != nil {
+		appendError(err)
+		results[i][index].Host = nodes[index].Name
+	}
+}
+
+err := config.Reduce(pod, meta, nodeNameToInfo, results[index]); 
+</code></pre></div><p>看这里有个results,对理解很重要，是一个二维数组：</p> <table><thead><tr><th>xxx</th> <th>node1</th> <th>node2</th> <th>node3</th></tr></thead> <tbody><tr><td>nodeaffinity</td> <td>1分</td> <td>2分</td> <td>1分</td></tr> <tr><td>pod affinity</td> <td>1分</td> <td>3分</td> <td>6分</td></tr> <tr><td>...</td> <td>...</td> <td>...</td> <td>...</td></tr></tbody></table> <p>这样reduce时取一行，其实也就是处理所有节点的某项得分</p> <div class="language- extra-class"><pre class="language-text"><code>result[i].Score += results[j][i].Score * priorityConfigs[j].Weight  (二维变一维)
+
+</code></pre></div><p>reduce完最终这个节点的得分就等于这个节点各项得分乘以该项权重的和,最后排序选最高分 (一维变0纬)</p> <h1 id="调度队列-schedulingqueue"><a href="#调度队列-schedulingqueue" class="header-anchor">#</a> 调度队列 SchedulingQueue</h1> <p>scheduler配置里有一个<code>NextPod</code> 方法，获取一个pod，并进行调度：</p> <div class="language- extra-class"><pre class="language-text"><code>pod := sched.config.NextPod()
+</code></pre></div><p>配置文件在这里初始化：</p> <div class="language- extra-class"><pre class="language-text"><code>pkg/scheduler/factory/factory.go
+NextPod: func() *v1.Pod {
+	return c.getNextPod()
+},
+
+func (c *configFactory) getNextPod() *v1.Pod {
+	pod, err := c.podQueue.Pop()
+	if err == nil {
+		return pod
+	}
+...
+}
+</code></pre></div><p>队列接口：</p> <div class="language- extra-class"><pre class="language-text"><code>type SchedulingQueue interface {
+	Add(pod *v1.Pod) error
+	AddIfNotPresent(pod *v1.Pod) error
+	AddUnschedulableIfNotPresent(pod *v1.Pod) error
+	Pop() (*v1.Pod, error)
+	Update(oldPod, newPod *v1.Pod) error
+	Delete(pod *v1.Pod) error
+	MoveAllToActiveQueue()
+	AssignedPodAdded(pod *v1.Pod)
+	AssignedPodUpdated(pod *v1.Pod)
+	WaitingPodsForNode(nodeName string) []*v1.Pod
+	WaitingPods() []*v1.Pod
+}
+</code></pre></div><p>给了两种实现，优先级队列和FIFO ：</p> <div class="language- extra-class"><pre class="language-text"><code>func NewSchedulingQueue() SchedulingQueue {
+	if util.PodPriorityEnabled() {
+		return NewPriorityQueue()  # 基于堆排序实现，根据优先级排序
+	}
+	return NewFIFO() # 简单的先进先出
+}
+</code></pre></div><p>队列实现比较简单，不做深入分析, 更重要的是关注队列，调度器，cache之间的关系:</p> <div class="language- extra-class"><pre class="language-text"><code>AddFunc:    c.addPodToCache,
+UpdateFunc: c.updatePodInCache,
+DeleteFunc: c.deletePodFromCache,
+            | informer监听,了pod创建事件之后往cache和队列里都更新了
+            V 
+if err := c.schedulerCache.AddPod(pod); err != nil {
+	glog.Errorf(&quot;scheduler cache AddPod failed: %v&quot;, err)
+}
+
+c.podQueue.AssignedPodAdded(pod)
+</code></pre></div><div class="language- extra-class"><pre class="language-text"><code>+------------+ ADD   +-------------+   POP  +-----------+
+| informer   |------&gt;|  sche Queue |-------&gt;| scheduler |
++------------+   |   +-------------+        +----^------+
+                 +--&gt;+-------------+             |
+                     | sche cache  |&lt;------------+
+                     +-------------+
+</code></pre></div><h1 id="extender"><a href="#extender" class="header-anchor">#</a> Extender</h1> <h2 id="调度器扩展"><a href="#调度器扩展" class="header-anchor">#</a> 调度器扩展</h2> <p>定制化调度器有三种方式：</p> <ul><li>改scheduler代码重新编译 - 没啥可讨论</li> <li>重写调度器，调度时选择调度器 - 比较简单，问题是没法与默认调度器共同作用</li> <li>写调度器扩展（extender）让k8s调度完了 把符合的节点扔给你 你再去过滤和优选 - 重点讨论，新版本做了一些升级，老的方式可能都无用了 <a href="https://github.com/kubernetes/community/blob/master/contributors/design-proposals/scheduling/scheduler_extender.md" target="_blank" rel="noopener noreferrer">资料<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li> <li>这里有个调度器扩展<a href="https://github.com/everpeace/k8s-scheduler-extender-example" target="_blank" rel="noopener noreferrer">事例<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a></li></ul> <p>目前第三点资料非常少，很多细节需要在代码里找到答案，带着问题看代码效果更好。</p> <h2 id="extender接口"><a href="#extender接口" class="header-anchor">#</a> Extender接口</h2> <div class="language- extra-class"><pre class="language-text"><code>+----------------------------------+       +----------+
+| kube-scheduler -&gt; extender client|------&gt;| extender | (你需要开发的扩展，单独的进程)
++----------------------------------+       +----------+
+</code></pre></div><p>这个接口是kube-scheduler实现的，下面会介绍HTTPextender的实现</p> <div class="language- extra-class"><pre class="language-text"><code>type SchedulerExtender interface {
+    // 最重要的一个接口，输入pod和节点列表，输出是符合调度的节点的列表
+	Filter(pod *v1.Pod,
+		nodes []*v1.Node, nodeNameToInfo map[string]*schedulercache.NodeInfo,
+	) (filteredNodes []*v1.Node, failedNodesMap schedulerapi.FailedNodesMap, err error)
+
+    // 这个给节点打分的，优选时需要用的
+	Prioritize(pod *v1.Pod, nodes []*v1.Node) (hostPriorities *schedulerapi.HostPriorityList, weight int, err error)
+
+    // Bind接口主要是最终调度器选中节点哪个节点时通知extender
+	Bind(binding *v1.Binding) error
+
+	// IsBinder returns whether this extender is configured for the Bind method.
+	IsBinder() bool
+
+    // 可以过滤你感兴趣的pod 比如按照标签
+	IsInterested(pod *v1.Pod) bool
+
+	// ProcessPreemption returns nodes with their victim pods processed by extender based on
+	// given:
+	//   1. Pod to schedule
+	//   2. Candidate nodes and victim pods (nodeToVictims) generated by previous scheduling process.
+	//   3. nodeNameToInfo to restore v1.Node from node name if extender cache is enabled.
+	// The possible changes made by extender may include:
+	//   1. Subset of given candidate nodes after preemption phase of extender.
+	//   2. A different set of victim pod for every given candidate node after preemption phase of extender.
+    // 我猜是与亲和性相关的功能，不太清楚 TODO
+	ProcessPreemption(
+		pod *v1.Pod,
+		nodeToVictims map[*v1.Node]*schedulerapi.Victims,
+		nodeNameToInfo map[string]*schedulercache.NodeInfo,
+	) (map[*v1.Node]*schedulerapi.Victims, error)
+
+    // 优先级抢占特性，可不实现
+	SupportsPreemption() bool
+
+    // 当访问不到extender时怎么处理，返回真时extender获取不到时调度不能失败
+	IsIgnorable() bool
+}
+</code></pre></div><p>官方实现了HTTPextender，可以看下：</p> <div class="language- extra-class"><pre class="language-text"><code>type HTTPExtender struct {
+	extenderURL      string
+	preemptVerb      string
+	filterVerb       string  # 预选RUL
+	prioritizeVerb   string  # 优选RUL
+	bindVerb         string
+	weight           int
+	client           *http.Client
+	nodeCacheCapable bool
+	managedResources sets.String
+	ignorable        bool
+}
+</code></pre></div><p>看其预选和优选逻辑：</p> <div class="language- extra-class"><pre class="language-text"><code>args = &amp;schedulerapi.ExtenderArgs{  # 调度的是哪个pod，哪些节点符合调度条件, 返回的也是这个结构体
+	Pod:       pod,
+	Nodes:     nodeList,
+	NodeNames: nodeNames,
+}
+
+if err := h.send(h.filterVerb, args, &amp;result); err != nil { # 发了个http请求给extender(你要去实现的httpserver), 返回过滤后的结构
+	return nil, nil, err
+}
+</code></pre></div><h2 id="httpextender配置参数从哪来"><a href="#httpextender配置参数从哪来" class="header-anchor">#</a> HTTPExtender配置参数从哪来</h2> <h2 id="scheduler-extender配置："><a href="#scheduler-extender配置：" class="header-anchor">#</a> scheduler extender配置：</h2> <div class="language- extra-class"><pre class="language-text"><code>NamespaceSystem string = &quot;kube-system&quot;
+
+SchedulerDefaultLockObjectNamespace string = metav1.NamespaceSystem
+
+// SchedulerPolicyConfigMapKey defines the key of the element in the
+// scheduler's policy ConfigMap that contains scheduler's policy config.
+SchedulerPolicyConfigMapKey = &quot;policy.cfg&quot;
+</code></pre></div><h2 id="总结"><a href="#总结" class="header-anchor">#</a> 总结</h2> <p>调度器的代码写的还是挺不错的，相比较于kube-proxy好多了，可扩展性也还可以，不过目测调度器会面临一次大的重构，现阶段调度器对深度学习的批处理任务支持就不好
+而one by one调度的这种设定关系到整个项目的架构，要想优雅的支持更优秀的调度估计重构是跑不掉了</p></div> <footer class="page-edit"><!----> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
+      ←
+      <a href="/blog/kube-proxy-src.html" class="prev">kube-proxy源码解析</a></span> <span class="next"><a href="/blog/kubeadm.html">kubeadm杂谈</a>
+      →
+    </span></p></div> </main></div><div class="global-ui"></div></div>
+    <script src="/assets/js/app.23d3ef84.js" defer></script><script src="/assets/js/2.bc760f0a.js" defer></script><script src="/assets/js/39.b4e7f5f0.js" defer></script>
+  </body>
+</html>
