@@ -192,6 +192,12 @@ vim  /etc/kubernetes/manifests/kube-sealyun-lvscare-xxx
 ```
 ipvsadm -Ln 就可以在node上看到新的master已经代理上了
 
+## 自定义网络
+
+* podcidr 参数指定自定义pod网段 如 --podcidr 100.64.0.0/10
+* svccidr 参数指定clusterip网段 如 --svccidr 10.96.0.0/12
+* without-cni sealos自带calico网络，如果你想自己装CNI不用默认可加此参数， 如 sealos init --without-cni .....
+
 ## 使用自定义kubeadm配置文件
 比如我们需要在证书里加入 `sealyun.com`:
 

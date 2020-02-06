@@ -7,6 +7,8 @@
 
 [排查思路](https://github.com/fanux/sealos/issues/134#issuecomment-547217842)
 
+注意命令行中只能使用机器的IP而不能使用机器主机名
+
 ## 阿里云上无法解析外网DNS
 默认的pod网段 100.64与阿里nameserver冲突，更新podsubnet即可,见下文中如何修改calico网段
 
