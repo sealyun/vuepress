@@ -174,6 +174,7 @@ calico网卡发现 conf/net/calico.yaml文件：
 - name: IP_AUTODETECTION_METHOD
               value: "interface=eth.*"   # 如果你的网卡不是eth开头，换成自己的，在yaml文件里修改
 ```
+可以直接kubectl edit daemonset calico-node -n kube-system 去修改网卡名
 
 还有可能是/etc/resove.conf配置错误，如果里面配置了一些search可能会导致calico无法启动，
 解决方法是删除不需要的DNS配置,仅配置：
